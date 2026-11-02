@@ -39,8 +39,8 @@ class UdpDhcpTransport implements DhcpTransport {
     }, onError: _controller.addError, onDone: _controller.close);
   }
 
-  static Future<UdpDhcpTransport> bind(Ipv4 address, int port) async {
-    final socket = await RawDatagramSocket.bind(InternetAddress(address.toString()), port, reuseAddress: false);
+  static Future<UdpDhcpTransport> bind(Ipv4 address, int port, {bool reuseAddress = false}) async {
+    final socket = await RawDatagramSocket.bind(InternetAddress(address.toString()), port, reuseAddress: reuseAddress);
     socket.broadcastEnabled = true;
     return UdpDhcpTransport._(socket);
   }

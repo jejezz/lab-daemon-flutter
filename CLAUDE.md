@@ -13,3 +13,5 @@ DHCP, TFTP, FTP(이후 Syslog 등) 같은 랩용 네트워크 서비스를 한 �
 - 모든 UI·로그 문구는 ARB(ko 기준 + en). 패킷 원문과 파일 이름은 번역하지 않는다.
 - `window_manager ^0.5.2`, `screen_retriever ^0.2.2`로 고정한다 (공통 `window_placement.dart`가 이 버전 API에 맞춰져 있고, 최신판은 컴파일이 안 된다).
 - 테마·색 구성·언어는 앱 바 메뉴가 아니라 설정 창(`lib/settings/settings_dialog.dart`)의 "외형" 구역에서 바꾼다 (settings-screen.md). 앱 바 오른쪽은 `… | 설정 | 정보`, 단축키 `Ctrl+,`. 서비스별 설정 구역은 `SettingsSection`에 더한다.
+- 화면은 `lib/ui/`(홈 · 사이드바 · DHCP 본문 · Lease 표 · 로그 패널), 상태는 `lib/state/`(`LabDaemonController`, `DhcpSettings`)다. 서비스 로그는 번역하지 않은 ARB 키 + 인자로 내보내고 `lib/ui/log_format.dart`가 문구로 바꾼다. 새 `logDhcp…` 키를 서비스에 추가하면 포맷터와 ARB(ko/en)에도 더해야 한다 (`test/log_format_test.dart`가 빠진 키를 잡는다).
+- DHCP 서버를 켜기 전에 같은 망의 다른 DHCP 서버를 확인한다 (`lib/core/dhcp/detector.dart`). 위젯 테스트는 `testWidgets` 안에서 서버를 `await stop()`하면 FakeAsync에서 멈추므로 `tester.runAsync`로 감싼다.

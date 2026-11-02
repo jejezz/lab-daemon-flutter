@@ -79,7 +79,7 @@ abstract class NetService {
 | 정보 창 | `showAppAboutDialog`, 버전 `package_info_plus`, 추가 라이선스 | `common/lib/about/` 복사 |
 | 글꼴 | SeoulNamsan 400/700/800 + 고정폭 | 로그·MAC/IP는 고정폭 |
 | 아이콘 | `assets/icon/source_glyph.png` → `generate_icons.py` | Icons8 글리프 필요(없으면 임시 글리프 + 잔여 항목) |
-| 키보드 | 주요 기능 단축키, 우클릭 메뉴에 표기 | `Space` 선택 서비스 시작/중지, `Ctrl+R`, `Del`, `Ctrl+Shift+Del`, `Ctrl+F`(로그 찾기), `F1` |
+| 키보드 | 주요 기능 단축키, 우클릭 메뉴에 표기 | `Ctrl+Enter` 서비스 시작/중지(Space는 단추·입력칸과 겹쳐서 바꿨다), `Ctrl+R`/`F5` NIC 새로고침, `Del` 선택 Lease 해제, `Ctrl+Shift+Del` 전체 해제, `Ctrl+F` 로그 검색, `Ctrl+,` 설정, `F1`(도움말, 아직 없음) |
 | 오류/확인 | 스낵바+복사 액션, 되돌릴 수 없는 작업만 확인(기본 포커스 취소) | 포트 점유, 권한, 잘못된 입력 |
 | 업데이트 | `app_updater`(updater-v0.1.0), `APP_VERSION` define | `lib/update/` 복사 |
 | 버전/태그 | `pubspec.yaml` 원본, build +1, annotated 태그, `chore(release): vX.Y.Z`, 한국어 Conventional Commits | `scripts/bump-version.sh` |

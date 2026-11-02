@@ -7,9 +7,9 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -19,14 +19,15 @@ import 'about/extra_licenses.dart';
 import 'app_identity.dart';
 import 'l10n/app_localizations.dart';
 import 'settings/app_settings.dart';
-import 'settings/settings_dialog.dart';
+import 'state/controller.dart';
 import 'theme/app_theme.dart';
 import 'update/update_scope.dart';
 import 'update/update_service.dart';
-import 'window/focus_tint.dart';
+import 'ui/home_screen.dart';
 import 'window/window_placement.dart';
 
-final bool _isDesktop = Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+final bool _isDesktop =
+    Platform.isMacOS || Platform.isWindows || Platform.isLinux;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,10 +43,19 @@ Future<void> main() async {
   }
 
   final settings = await AppSettings.load();
+  final controller = LabDaemonController(
+    prefs: await SharedPreferences.getInstance(),
+  );
+  unawaited(controller.refreshNics());
   // 데스크톱이 아니거나 UPDATE_SERVER 가 비어 있으면 null — 업데이트 확인 없음.
   final updates = await UpdateService.create();
   // UpdateScope 는 MaterialApp 위에 둔다 — 정보 창이 이것을 읽어 "업데이트 확인" 단추를 붙인다.
-  runApp(UpdateScope(service: updates, child: App(settings: settings, updates: updates)));
+  runApp(
+    UpdateScope(
+      service: updates,
+      child: App(settings: settings, updates: updates, controller: controller),
+    ),
+  );
 
   if (showWindow != null) {
     final show = showWindow;
@@ -69,7 +79,10 @@ Future<Future<void> Function()> _prepareWindow() async {
   const size = Size(1200, 720);
   WindowPlacement? placement;
   if (WindowPlacement.enabled) {
-    placement = WindowPlacement(await SharedPreferences.getInstance(), defaultSize: size);
+    placement = WindowPlacement(
+      await SharedPreferences.getInstance(),
+      defaultSize: size,
+    );
   }
   final options = WindowOptions(
     size: size,
@@ -94,9 +107,15 @@ Future<Future<void> Function()> _prepareWindow() async {
 }
 
 class App extends StatefulWidget {
-  const App({super.key, required this.settings, this.updates});
+  const App({
+    super.key,
+    required this.settings,
+    required this.controller,
+    this.updates,
+  });
 
   final AppSettings settings;
+  final LabDaemonController controller;
   final UpdateService? updates;
 
   @override
@@ -122,6 +141,13 @@ class _AppState extends State<App> with WidgetsBindingObserver {
     super.dispose();
   }
 
+  // 앱을 끌 때 열려 있는 소켓을 닫는다.
+  @override
+  Future<ui.AppExitResponse> didRequestAppExit() async {
+    await widget.controller.dhcp.stop();
+    return ui.AppExitResponse.exit;
+  }
+
   // 앱에서 다크를 골라도 OS가 라이트면 제목 표시줄은 밝게 남는다 (theming.md §4).
   @override
   void didChangePlatformBrightness() => _syncWindowBrightness();
@@ -131,7 +157,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
     final brightness = switch (widget.settings.themeMode) {
       ThemeMode.light => Brightness.light,
       ThemeMode.dark => Brightness.dark,
-      ThemeMode.system => WidgetsBinding.instance.platformDispatcher.platformBrightness,
+      ThemeMode.system =>
+        WidgetsBinding.instance.platformDispatcher.platformBrightness,
     };
     windowManager.setBrightness(brightness);
   }
@@ -144,7 +171,9 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       context,
       tagline: l10n.aboutTagline,
       description: l10n.aboutDescription,
-      onCheckForUpdates: widget.updates == null ? null : () => widget.updates!.checkManually(context),
+      onCheckForUpdates: widget.updates == null
+          ? null
+          : () => widget.updates!.checkManually(context),
     );
   }
 
@@ -155,81 +184,32 @@ class _AppState extends State<App> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return AppSettingsScope(
-      settings: widget.settings,
-      child: ListenableBuilder(
-        listenable: widget.settings,
-        builder: (context, _) => MaterialApp(
-          navigatorKey: _navigatorKey,
-          title: AppIdentity.displayName,
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light(dense: _isDesktop),
-          darkTheme: AppTheme.dark(dense: _isDesktop),
-          themeMode: widget.settings.themeMode,
-          locale: widget.settings.locale,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          localeResolutionCallback: AppSettings.resolveLocale,
-          builder: (context, child) => AppMenuBar(
-            onAbout: _showAbout,
-            onCheckForUpdates: widget.updates == null ? null : _checkForUpdates,
-            child: child!,
+    return ControllerScope(
+      controller: widget.controller,
+      child: AppSettingsScope(
+        settings: widget.settings,
+        child: ListenableBuilder(
+          listenable: widget.settings,
+          builder: (context, _) => MaterialApp(
+            navigatorKey: _navigatorKey,
+            title: AppIdentity.displayName,
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light(dense: _isDesktop),
+            darkTheme: AppTheme.dark(dense: _isDesktop),
+            themeMode: widget.settings.themeMode,
+            locale: widget.settings.locale,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localeResolutionCallback: AppSettings.resolveLocale,
+            builder: (context, child) => AppMenuBar(
+              onAbout: _showAbout,
+              onCheckForUpdates: widget.updates == null
+                  ? null
+                  : _checkForUpdates,
+              child: child!,
+            ),
+            home: HomeScreen(onAbout: _showAbout),
           ),
-          home: HomeScreen(onAbout: _showAbout),
-        ),
-      ),
-    );
-  }
-}
-
-/// 기능이 들어오기 전의 자리 표시 화면 — 빈 상태 패턴 (ui-ux.md §6).
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, required this.onAbout});
-
-  final VoidCallback onAbout;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.comma, control: true): () => showSettingsDialog(context),
-      },
-      child: Focus(autofocus: true, child: _scaffold(context, l10n, theme)),
-    );
-  }
-
-  Widget _scaffold(BuildContext context, AppLocalizations l10n, ThemeData theme) {
-    return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: const FocusTint(),
-        title: const Text(AppIdentity.displayName),
-        actions: [
-          IconButton(
-            tooltip: l10n.settingsTooltip,
-            icon: const Icon(Icons.settings_rounded),
-            onPressed: () => showSettingsDialog(context),
-          ),
-          IconButton(
-            tooltip: l10n.aboutTooltip,
-            icon: const Icon(Icons.info_outline_rounded),
-            onPressed: onAbout,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(AppIdentity.iconAsset, width: 48, height: 48),
-            const SizedBox(height: AppSpacing.lg),
-            Text(l10n.homeEmptyTitle, style: theme.textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.lg),
-            // 기능이 생기면 주 행동을 연결한다. 그 전까지는 비활성.
-            FilledButton(onPressed: null, child: Text(l10n.homeEmptyAction)),
-          ],
         ),
       ),
     );

@@ -150,5 +150,476 @@
   },
   "updateQuitAndInstall": "종료하고 설치",
   "updateBusyTitle": "지금은 업데이트할 수 없습니다",
-  "updateBusyBody": "작업이 진행 중입니다. 끝난 뒤에 다시 시도해 주세요."
+  "updateBusyBody": "작업이 진행 중입니다. 끝난 뒤에 다시 시도해 주세요.",
+  "servicesTitle": "서비스",
+  "serviceDhcp": "DHCP",
+  "serviceStartTooltip": "서비스 시작",
+  "serviceStopTooltip": "서비스 중지",
+  "stateStopped": "중지됨",
+  "stateStarting": "시작 중",
+  "stateRunning": "실행 중",
+  "stateStopping": "중지 중",
+  "stateError": "오류",
+  "statusServer": "서버",
+  "statusPool": "범위",
+  "statusGateway": "게이트웨이",
+  "statusLeaseTime": "Lease Time",
+  "statusUsage": "사용 {used}/{total}",
+  "@statusUsage": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "statusUptime": "가동 {time}",
+  "@statusUptime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "statsLine": "Discover {discover} · Offer {offer} · Request {request} · ACK {ack} · NAK {nak}",
+  "@statsLine": {
+    "placeholders": {
+      "discover": {
+        "type": "int"
+      },
+      "offer": {
+        "type": "int"
+      },
+      "request": {
+        "type": "int"
+      },
+      "ack": {
+        "type": "int"
+      },
+      "nak": {
+        "type": "int"
+      }
+    }
+  },
+  "leaseColIp": "IP 주소",
+  "leaseColMac": "MAC 주소",
+  "leaseColHostname": "호스트 이름",
+  "leaseColState": "상태",
+  "leaseColRemaining": "남은 시간",
+  "leaseStateOffered": "제안됨",
+  "leaseStateBound": "사용 중",
+  "leaseUnlimited": "무제한",
+  "leaseRelease": "해제",
+  "leaseReleaseAll": "전체 해제",
+  "leaseReleaseAllConfirmTitle": "모든 Lease를 해제할까요?",
+  "leaseReleaseAllConfirmBody": "{count}개의 Lease를 해제해요. 장비는 다음 갱신 때 새 주소를 받아요.",
+  "@leaseReleaseAllConfirmBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "leaseReleasedSnack": "{ip}를 해제했어요",
+  "@leaseReleasedSnack": {
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      }
+    }
+  },
+  "leaseReleasedAllSnack": "Lease {count}개를 해제했어요",
+  "@leaseReleasedAllSnack": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "leaseEmptyTitle": "아직 Lease가 없어요",
+  "leaseEmptyHint": "장비가 DHCP로 주소를 요청하면 여기에 나타나요",
+  "startInvalidSettings": "DHCP 설정이 올바르지 않아요. 설정에서 확인해 주세요.",
+  "startFailed": "서비스를 시작하지 못했어요: {error}",
+  "@startFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorCopy": "복사",
+  "openSettings": "설정 열기",
+  "logTitle": "로그",
+  "logLevelDebug": "디버그",
+  "logLevelInfo": "정보",
+  "logLevelWarning": "경고",
+  "logLevelError": "오류",
+  "logSearchHint": "로그 검색",
+  "logPause": "일시정지",
+  "logResume": "계속",
+  "logClear": "지우기",
+  "logCopy": "복사",
+  "logCopied": "로그를 복사했어요",
+  "logEmpty": "표시할 로그가 없어요",
+  "logPausedBanner": "일시정지됨 · 새 로그 {count}개",
+  "@logPausedBanner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSectionDhcp": "DHCP",
+  "dhcpFieldServerIp": "서버 NIC",
+  "dhcpFieldRangeStart": "시작 주소",
+  "dhcpFieldRangeEnd": "끝 주소",
+  "dhcpFieldMask": "서브넷 마스크",
+  "dhcpFieldGateway": "게이트웨이",
+  "dhcpFieldDns": "DNS 서버",
+  "dhcpFieldLeaseTime": "Lease Time",
+  "dhcpFieldDomain": "도메인 이름",
+  "dhcpFieldTftp": "TFTP 서버",
+  "dhcpFieldBootFile": "부팅 파일",
+  "dhcpHintDns": "쉼표로 구분",
+  "dhcpHintLeaseTime": "예: 30s, 10m, 12h, 1d, infinite",
+  "dhcpHintOptional": "선택",
+  "dhcpDirectedBroadcast": "서브넷 브로드캐스트로 응답",
+  "dhcpDirectedBroadcastHint": "응답이 엉뚱한 NIC로 나갈 때만 켜세요",
+  "dhcpLogPackets": "패킷 16진수 덤프를 디버그 로그에 기록",
+  "dhcpRestartNote": "실행 중에는 Lease Time만 바로 적용돼요. 나머지는 서비스를 다시 시작하면 적용돼요.",
+  "dhcpNicNone": "NIC를 찾지 못했어요",
+  "dhcpNicRefresh": "NIC 새로고침",
+  "dhcpNicMissing": "{ip} (목록에 없음)",
+  "@dhcpNicMissing": {
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldErrRequired": "값이 필요해요",
+  "fieldErrInvalidIp": "올바른 IPv4 주소가 아니에요",
+  "fieldErrInvalidMask": "올바른 서브넷 마스크가 아니에요",
+  "fieldErrInvalidLeaseTime": "30s, 10m, 12h, 1d, infinite 중 하나여야 해요",
+  "fieldErrNotInSubnet": "서브넷 밖의 주소예요",
+  "fieldErrNotHost": "네트워크·브로드캐스트 주소는 쓸 수 없어요",
+  "fieldErrRangeReversed": "시작 주소보다 앞서요",
+  "fieldErrTooLong": "너무 길어요",
+  "nakReasonWrongNetwork": "다른 네트워크의 주소",
+  "nakReasonAddressUnavailable": "줄 수 없는 주소",
+  "logDhcpDiscover": "DISCOVER {mac} {hostname}",
+  "@logDhcpDiscover": {
+    "placeholders": {
+      "mac": {
+        "type": "String"
+      },
+      "hostname": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpOffer": "OFFER {ip} → {mac}",
+  "@logDhcpOffer": {
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      },
+      "mac": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpRequest": "REQUEST {ip} ← {mac} {hostname}",
+  "@logDhcpRequest": {
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      },
+      "mac": {
+        "type": "String"
+      },
+      "hostname": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpAck": "ACK {ip} → {mac} (Lease {lease})",
+  "@logDhcpAck": {
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      },
+      "mac": {
+        "type": "String"
+      },
+      "lease": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpNak": "NAK {ip} → {mac}: {reason}",
+  "@logDhcpNak": {
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      },
+      "mac": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpRelease": "RELEASE {ip} ← {mac}",
+  "@logDhcpRelease": {
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      },
+      "mac": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpDecline": "DECLINE {ip} ← {mac}: 클라이언트가 주소 충돌을 알렸어요",
+  "@logDhcpDecline": {
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      },
+      "mac": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpInform": "INFORM {ip} ← {mac}",
+  "@logDhcpInform": {
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      },
+      "mac": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpPoolExhausted": "{mac}에 줄 주소가 없어요 (풀이 가득 찼어요)",
+  "@logDhcpPoolExhausted": {
+    "placeholders": {
+      "mac": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpOtherServer": "{mac}이(가) 다른 서버 {server}를 골랐어요",
+  "@logDhcpOtherServer": {
+    "placeholders": {
+      "mac": {
+        "type": "String"
+      },
+      "server": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpIgnored": "무시한 패킷: {reason}",
+  "@logDhcpIgnored": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpMalformed": "{from}에서 온 잘못된 패킷: {error}",
+  "@logDhcpMalformed": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpStarted": "DHCP 서버 시작 {address} · {start} ~ {end} · {mask}",
+  "@logDhcpStarted": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "mask": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpStopped": "DHCP 서버를 중지했어요",
+  "logDhcpExpired": "Lease 만료 {ip} ({mac})",
+  "@logDhcpExpired": {
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      },
+      "mac": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpManualRelease": "Lease 해제 {ip} ({mac})",
+  "@logDhcpManualRelease": {
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      },
+      "mac": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpReserved": "예약 추가 {mac} = {ip}",
+  "@logDhcpReserved": {
+    "placeholders": {
+      "mac": {
+        "type": "String"
+      },
+      "ip": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpUnreserved": "예약 삭제 {mac}",
+  "@logDhcpUnreserved": {
+    "placeholders": {
+      "mac": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpPortInUse": "{address}:{port}를 다른 프로그램이 쓰고 있어요: {error}",
+  "@logDhcpPortInUse": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      },
+      "port": {
+        "type": "int"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpPermissionDenied": "{address}:{port}를 열 권한이 없어요: {error}",
+  "@logDhcpPermissionDenied": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      },
+      "port": {
+        "type": "int"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpBindFailed": "{address}:{port}를 열지 못했어요: {error}",
+  "@logDhcpBindFailed": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      },
+      "port": {
+        "type": "int"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpSendFailed": "{to}로 응답을 보내지 못했어요: {error}",
+  "@logDhcpSendFailed": {
+    "placeholders": {
+      "to": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpPacketIn": "수신 {from}",
+  "@logDhcpPacketIn": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpPacketOut": "송신 {to}:{port}",
+  "@logDhcpPacketOut": {
+    "placeholders": {
+      "to": {
+        "type": "String"
+      },
+      "port": {
+        "type": "int"
+      }
+    }
+  },
+  "commonCancel": "취소",
+  "stateChecking": "확인 중",
+  "probeConflictTitle": "같은 망에 다른 DHCP 서버가 있어요",
+  "probeConflictBody": "선택한 NIC에서 아래 서버가 응답했어요. 서버 두 대가 같은 망에서 주소를 나눠 주면 장비가 엉뚱한 주소를 받거나 연결이 불안정해질 수 있어요.",
+  "probeServerLine": "{server} (제안 {offered})",
+  "@probeServerLine": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      },
+      "offered": {
+        "type": "String"
+      }
+    }
+  },
+  "probeConflictAdvice": "장비를 이 PC에 직접 연결한 격리된 망이 맞는지 확인하세요. 회사나 집 공유기가 있는 망이라면 켜지 않는 것이 안전해요.",
+  "probeStartAnyway": "그래도 시작",
+  "dhcpDetectOthers": "시작하기 전에 다른 DHCP 서버 확인",
+  "dhcpDetectOthersHint": "같은 망에서 응답하는 서버가 있으면 경고해요 (약 3초)",
+  "logDhcpProbeStart": "다른 DHCP 서버 확인 중 ({address})",
+  "@logDhcpProbeStart": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpProbeFound": "다른 DHCP 서버 발견: {server} (제안 {ip})",
+  "@logDhcpProbeFound": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      },
+      "ip": {
+        "type": "String"
+      }
+    }
+  },
+  "logDhcpProbeNone": "다른 DHCP 서버의 응답이 없었어요",
+  "logDhcpProbeFailed": "다른 DHCP 서버를 확인하지 못했어요: {error}",
+  "@logDhcpProbeFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

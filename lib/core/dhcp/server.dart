@@ -76,6 +76,9 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
   StreamSubscription<DhcpDatagram>? _subscription;
   Timer? _timer;
 
+  /// 실행 중인 설정 (멈췄으면 null). 화면은 편집 중인 값이 아니라 이것을 보여 준다.
+  DhcpConfig? get config => _config;
+
   LeasePool? get pool => _pool;
   DhcpStats get stats => _engine?.stats ?? DhcpStats();
 

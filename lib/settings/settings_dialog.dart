@@ -8,10 +8,13 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import 'dhcp_settings_section.dart';
 import 'settings_menus.dart';
+import 'settings_widgets.dart';
 
 enum SettingsSection {
-  appearance(Icons.palette_outlined);
+  appearance(Icons.palette_outlined),
+  dhcp(Icons.dns_outlined);
 
   const SettingsSection(this.icon);
 
@@ -19,6 +22,7 @@ enum SettingsSection {
 
   String label(AppLocalizations l10n) => switch (this) {
         appearance => l10n.settingsSectionAppearance,
+        dhcp => l10n.settingsSectionDhcp,
       };
 }
 
@@ -53,6 +57,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       padding: EdgeInsets.only(left: wide ? 16 : 0, bottom: 16),
       child: switch (_section) {
         SettingsSection.appearance => const _AppearanceSection(),
+        SettingsSection.dhcp => const DhcpSettingsSection(),
       },
     );
 
@@ -116,19 +121,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 }
 
-class _Heading extends StatelessWidget {
-  const _Heading(this.text, {this.first = false});
-
-  final String text;
-  final bool first;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: EdgeInsets.only(top: first ? 4 : 16, bottom: 8),
-        child: Text(text, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-      );
-}
-
 /// 고른 구역은 배경을 채우는 대신 왼쪽에 굵은 선(3px, primary)을 그어 표시한다 — 고대비에서도 글자가 읽힌다.
 class _SectionTile extends StatelessWidget {
   const _SectionTile({required this.selected, required this.icon, required this.label, required this.onTap});
@@ -171,11 +163,11 @@ class _AppearanceSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _Heading(l10n.settingsMode, first: true),
+        SettingsHeading(l10n.settingsMode, first: true),
         const ModeSegmentedButton(),
-        _Heading(l10n.settingsPalette),
+        SettingsHeading(l10n.settingsPalette),
         const AccentPaletteChips(),
-        _Heading(l10n.settingsLanguage),
+        SettingsHeading(l10n.settingsLanguage),
         const LanguageSegmentedButton(),
       ],
     );
