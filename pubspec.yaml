@@ -1,0 +1,44 @@
+name: lab_daemon
+description: "DHCP, TFTP, FTP 같은 랩용 네트워크 서비스를 한 앱에서 켜고 실시간으로 모니터링하는 Windows 데스크톱 앱."
+publish_to: 'none'
+
+version: 0.1.0-rc.1+1
+
+environment:
+  sdk: ^3.13.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  app_updater:
+    git:
+      url: https://github.com/jejezz/application-release-templates
+      path: updater
+      ref: updater-v0.1.0
+  package_info_plus: ^10.2.2
+  url_launcher: ^6.3.3
+  shared_preferences: ^2.5.6
+  intl: any
+  window_manager: ^0.5.2
+  screen_retriever: ^0.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/icon/app_icon.png
+    - assets/licenses/
+  fonts:
+    - family: SeoulNamsan
+      fonts:
+        - { asset: assets/fonts/seoul_namsan_regular.ttf, weight: 400 }
+        - { asset: assets/fonts/seoul_namsan_bold.ttf, weight: 700 }
+        - { asset: assets/fonts/seoul_namsan_extra_bold.ttf, weight: 800 }
