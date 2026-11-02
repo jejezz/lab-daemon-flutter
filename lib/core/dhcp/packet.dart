@@ -225,6 +225,7 @@ class DhcpPacket {
     Ipv4 siaddr = Ipv4.any,
     String sname = '',
     String file = '',
+    int? flags,
     Map<int, Uint8List> options = const {},
   }) {
     return DhcpPacket(
@@ -232,7 +233,7 @@ class DhcpPacket {
       htype: request.htype,
       hlen: request.hlen,
       xid: request.xid,
-      flags: request.flags,
+      flags: flags ?? request.flags,
       giaddr: request.giaddr,
       yiaddr: yiaddr,
       siaddr: siaddr,

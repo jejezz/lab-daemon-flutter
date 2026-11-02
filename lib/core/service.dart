@@ -15,7 +15,7 @@ enum ServiceState { stopped, starting, running, stopping, error }
 
 enum LogLevel { debug, info, warning, error }
 
-sealed class ServiceEvent {
+abstract class ServiceEvent {
   ServiceEvent(this.service, {DateTime? time}) : time = time ?? DateTime.now();
 
   /// 이벤트를 낸 서비스의 [NetService.id].
