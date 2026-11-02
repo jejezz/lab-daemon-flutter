@@ -4,9 +4,7 @@
 // localization.md §4). 모두 설정 화면 "외형" 구역 안에만 둔다 — 앱 바에는
 // 테마/언어 아이콘 대신 설정 아이콘 하나(⌘,/Ctrl+,)만 둔다.
 //   ModeSegmentedButton / AccentPaletteChips / LanguageSegmentedButton:
-//     데스크톱·모바일 공통, 설정 화면 "외형" 구역에 이 순서로 넣는다.
-//   ThemeMenuButton / LanguageMenuButton: conventions-v1의 앱 바 팝업 메뉴.
-//     새 앱에는 쓰지 않는다 — 기존 앱이 옮겨 갈 때까지만 남겨 둔다.
+//     설정 창(settings_dialog.dart) "외형" 구역에 이 순서로 넣는다.
 
 import 'package:flutter/material.dart';
 
@@ -22,83 +20,6 @@ IconData _themeIcon(ThemeMode mode) => switch (mode) {
       ThemeMode.light => Icons.light_mode_rounded,
       ThemeMode.dark => Icons.dark_mode_rounded,
     };
-
-String _themeLabel(AppLocalizations l10n, ThemeMode mode) => switch (mode) {
-      ThemeMode.system => l10n.themeSystem,
-      ThemeMode.light => l10n.themeLight,
-      ThemeMode.dark => l10n.themeDark,
-    };
-
-class ThemeMenuButton extends StatelessWidget {
-  const ThemeMenuButton({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final settings = AppSettingsScope.of(context);
-    final l10n = AppLocalizations.of(context);
-    return PopupMenuButton<ThemeMode>(
-      tooltip: l10n.themeMenuTooltip,
-      icon: Icon(_themeIcon(settings.themeMode)),
-      initialValue: settings.themeMode,
-      onSelected: settings.setThemeMode,
-      itemBuilder: (_) => [
-        for (final mode in ThemeMode.values)
-          CheckedPopupMenuItem(
-            value: mode,
-            checked: mode == settings.themeMode,
-            child: Text(_themeLabel(l10n, mode)),
-          ),
-      ],
-    );
-  }
-}
-
-class LanguageMenuButton extends StatelessWidget {
-  const LanguageMenuButton({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final settings = AppSettingsScope.of(context);
-    final l10n = AppLocalizations.of(context);
-    // PopupMenuButton can't carry null as a value, so '' stands for "system".
-    final current = settings.locale?.languageCode ?? '';
-    return PopupMenuButton<String>(
-      tooltip: l10n.languageMenuTooltip,
-      icon: const Icon(Icons.language_rounded),
-      initialValue: current,
-      onSelected: (code) => settings.setLocale(code.isEmpty ? null : Locale(code)),
-      itemBuilder: (_) => [
-        CheckedPopupMenuItem(value: '', checked: current.isEmpty, child: Text(l10n.languageSystem)),
-        const PopupMenuDivider(),
-        for (final (locale, name) in _languages)
-          CheckedPopupMenuItem(
-            value: locale.languageCode,
-            checked: current == locale.languageCode,
-            child: Text(name),
-          ),
-      ],
-    );
-  }
-}
-
-/// 모바일 설정 화면용.
-class ThemeSegmentedButton extends StatelessWidget {
-  const ThemeSegmentedButton({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final settings = AppSettingsScope.of(context);
-    final l10n = AppLocalizations.of(context);
-    return SegmentedButton<ThemeMode>(
-      segments: [
-        for (final mode in ThemeMode.values)
-          ButtonSegment(value: mode, icon: Icon(_themeIcon(mode)), label: Text(_themeLabel(l10n, mode))),
-      ],
-      selected: {settings.themeMode},
-      onSelectionChanged: (s) => settings.setThemeMode(s.single),
-    );
-  }
-}
 
 /// 설정 화면 "외형" 구역의 모드(시스템/라이트/다크) 단추 (settings-screen.md §3).
 class ModeSegmentedButton extends StatelessWidget {

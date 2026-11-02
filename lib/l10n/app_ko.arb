@@ -23,16 +23,14 @@
       }
     }
   },
-  "themeMenuTooltip": "테마",
   "themeSystem": "시스템 설정 따르기",
   "themeLight": "라이트",
   "themeDark": "다크",
-  "languageMenuTooltip": "언어",
-  "languageSystem": "시스템 설정 따르기 / System",
   "languageSystemShort": "시스템",
   "settingsTooltip": "설정",
   "settingsTitle": "설정",
   "settingsSectionAppearance": "외형",
+  "settingsLanguage": "언어",
   "settingsMode": "모드",
   "settingsModeSystem": "시스템",
   "settingsPalette": "색 구성",

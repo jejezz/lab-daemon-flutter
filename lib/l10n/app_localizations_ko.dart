@@ -32,9 +32,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get themeMenuTooltip => '테마';
-
-  @override
   String get themeSystem => '시스템 설정 따르기';
 
   @override
@@ -42,12 +39,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get themeDark => '다크';
-
-  @override
-  String get languageMenuTooltip => '언어';
-
-  @override
-  String get languageSystem => '시스템 설정 따르기 / System';
 
   @override
   String get languageSystemShort => '시스템';
@@ -60,6 +51,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settingsSectionAppearance => '외형';
+
+  @override
+  String get settingsLanguage => '언어';
 
   @override
   String get settingsMode => '모드';

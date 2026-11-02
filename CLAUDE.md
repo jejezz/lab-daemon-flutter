@@ -12,3 +12,4 @@ DHCP, TFTP, FTP(이후 Syslog 등) 같은 랩용 네트워크 서비스를 한 �
 - 서비스(DHCP/TFTP/FTP)는 `lib/core/`의 순수 Dart `NetService` 구현으로 만들고, 각자 별도 Isolate에서 돌린다. 로그 버스는 공용이다. 계획서는 `PLAN.md`.
 - 모든 UI·로그 문구는 ARB(ko 기준 + en). 패킷 원문과 파일 이름은 번역하지 않는다.
 - `window_manager ^0.5.2`, `screen_retriever ^0.2.2`로 고정한다 (공통 `window_placement.dart`가 이 버전 API에 맞춰져 있고, 최신판은 컴파일이 안 된다).
+- 테마·색 구성·언어는 앱 바 메뉴가 아니라 설정 창(`lib/settings/settings_dialog.dart`)의 "외형" 구역에서 바꾼다 (settings-screen.md). 앱 바 오른쪽은 `… | 설정 | 정보`, 단축키 `Ctrl+,`. 서비스별 설정 구역은 `SettingsSection`에 더한다.

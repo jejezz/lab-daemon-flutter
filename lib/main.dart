@@ -2,13 +2,14 @@
 //
 // 새 앱의 시작점. 규약이 요구하는 연결을 한곳에 모았다:
 //   창 크기(window_manager) · 추가 라이선스 · 설정 로드 · 라이트/다크 ·
-//   언어 해석 · macOS 앱 메뉴 About · 앱 바 [테마 | 언어 | 정보] · 빈 상태.
+//   언어 해석 · macOS 앱 메뉴 About · 앱 바 [설정 | 정보] · 빈 상태.
 // 기존 앱에는 통째로 덮어쓰지 말고 필요한 부분만 옮긴다.
 
 import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -18,7 +19,7 @@ import 'about/extra_licenses.dart';
 import 'app_identity.dart';
 import 'l10n/app_localizations.dart';
 import 'settings/app_settings.dart';
-import 'settings/settings_menus.dart';
+import 'settings/settings_dialog.dart';
 import 'theme/app_theme.dart';
 import 'update/update_scope.dart';
 import 'update/update_service.dart';
@@ -191,13 +192,25 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.comma, control: true): () => showSettingsDialog(context),
+      },
+      child: Focus(autofocus: true, child: _scaffold(context, l10n, theme)),
+    );
+  }
+
+  Widget _scaffold(BuildContext context, AppLocalizations l10n, ThemeData theme) {
     return Scaffold(
       appBar: AppBar(
         flexibleSpace: const FocusTint(),
         title: const Text(AppIdentity.displayName),
         actions: [
-          const ThemeMenuButton(),
-          const LanguageMenuButton(),
+          IconButton(
+            tooltip: l10n.settingsTooltip,
+            icon: const Icon(Icons.settings_rounded),
+            onPressed: () => showSettingsDialog(context),
+          ),
           IconButton(
             tooltip: l10n.aboutTooltip,
             icon: const Icon(Icons.info_outline_rounded),

@@ -134,12 +134,6 @@ abstract class AppLocalizations {
   /// **'{appName} 정보'**
   String aboutMenuItem(String appName);
 
-  /// No description provided for @themeMenuTooltip.
-  ///
-  /// In ko, this message translates to:
-  /// **'테마'**
-  String get themeMenuTooltip;
-
   /// No description provided for @themeSystem.
   ///
   /// In ko, this message translates to:
@@ -157,18 +151,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'다크'**
   String get themeDark;
-
-  /// No description provided for @languageMenuTooltip.
-  ///
-  /// In ko, this message translates to:
-  /// **'언어'**
-  String get languageMenuTooltip;
-
-  /// No description provided for @languageSystem.
-  ///
-  /// In ko, this message translates to:
-  /// **'시스템 설정 따르기 / System'**
-  String get languageSystem;
 
   /// No description provided for @languageSystemShort.
   ///
@@ -193,6 +175,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'외형'**
   String get settingsSectionAppearance;
+
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In ko, this message translates to:
+  /// **'언어'**
+  String get settingsLanguage;
 
   /// No description provided for @settingsMode.
   ///
