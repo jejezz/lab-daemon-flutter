@@ -8,7 +8,7 @@ DHCP, TFTP, FTP(이후 Syslog 등) 같은 랩용 네트워크 서비스를 한 �
 
 - 식별자 `art.zoomon.labdaemon`, 표시 이름 `Lab Daemon`, 파일 이름 `LabDaemon`, 패키지 `lab_daemon`.
 - 플랫폼은 **Windows만**. 릴리스 워크플로에서 macOS/Linux 잡을 뺐고, 표시 이름 원본은 `windows/runner/Runner.rc`의 `ProductName`이다 (macos/ 폴더가 없다).
-- 실행 파일 매니페스트는 `requireAdministrator`다. 개발 중 `flutter run`은 관리자 권한 터미널에서 한다. 일반 권한으로 포트 67/69/21을 열 수 있는지 DHCP 서버 구현 단계(P2)에서 실제 장비로 검증한 뒤 이 방침을 확정한다.
+- 앱은 **일반 권한(asInvoker)** 으로 실행한다. UDP 67/69, TCP 21 바인딩은 관리자 권한이 필요 없다는 것을 확인했다 (2026-11-02). 방화벽 인바운드 규칙은 관리자 권한으로 도는 설치 프로그램(`installer/windows/app.iss`)이 추가·제거한다. DHCP 응답 동작(주소 없는 클라이언트에 대한 unicast 등)이 일반 권한에서 되는지는 P2에서 실제 장비로 검증하고, 승격이 필요한 기능이 확인되면 서비스 호스트를 별도 관리자 프로세스로 분리한다 (`ServiceHost` 인터페이스로 Isolate/프로세스를 바꿔 끼운다).
 - 서비스(DHCP/TFTP/FTP)는 `lib/core/`의 순수 Dart `NetService` 구현으로 만들고, 각자 별도 Isolate에서 돌린다. 로그 버스는 공용이다. 계획서는 `PLAN.md`.
 - 모든 UI·로그 문구는 ARB(ko 기준 + en). 패킷 원문과 파일 이름은 번역하지 않는다.
 - `window_manager ^0.5.2`, `screen_retriever ^0.2.2`로 고정한다 (공통 `window_placement.dart`가 이 버전 API에 맞춰져 있고, 최신판은 컴파일이 안 된다).

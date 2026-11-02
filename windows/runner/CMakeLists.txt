@@ -34,10 +34,6 @@ target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
 # dependencies here.
 target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
 target_link_libraries(${BINARY_NAME} PRIVATE "dwmapi.lib")
-
-# The administrator request lives in runner.exe.manifest. Without this the linker also
-# embeds its own asInvoker fragment and mt.exe fails with LNK1327 on the conflict.
-target_link_options(${BINARY_NAME} PRIVATE "/MANIFESTUAC:NO")
 target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 
 # Run the Flutter tool portions of the build. This must not be removed.
