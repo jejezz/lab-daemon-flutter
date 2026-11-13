@@ -8,6 +8,7 @@ import '../core/service.dart';
 import '../l10n/app_localizations.dart';
 import '../state/service_model.dart';
 import '../state/service_models.dart';
+import 'firewall_help.dart';
 import 'widgets/error_snackbar.dart';
 import 'widgets/status_pill.dart';
 
@@ -82,6 +83,21 @@ Future<void> startServiceWithFeedback(BuildContext context, ServiceModel model, 
   }
 }
 
+/// 방화벽 안내를 열고, 거기서 [방화벽 규칙 추가]를 고르면 규칙을 넣는다 (서비스 화면 위쪽 [방화벽 안내]).
+Future<void> openFirewallHelp(BuildContext context, ServiceModel model) async {
+  final issue = model.firewallIssue;
+  if (issue == null) return;
+  final l10n = AppLocalizations.of(context);
+  if (!await showFirewallHelp(context, issue: issue, program: model.programPath)) return;
+  final ok = await model.addFirewallRule();
+  if (!context.mounted) return;
+  if (ok) {
+    showInfoSnackBar(context, l10n.checkRuleAdded);
+  } else {
+    showErrorSnackBar(context, l10n.logCheckRuleFailed);
+  }
+}
+
 Future<void> toggleServiceWithFeedback(BuildContext context, ServiceModel model) async {
   if (model.running) {
     await model.stop();
@@ -126,8 +142,12 @@ Future<_Choice> _showIssues(BuildContext context, ServiceModel model) async {
           ),
         ),
         actions: blocking
-            ? [FilledButton(autofocus: true, onPressed: () => Navigator.pop(context, _Choice.cancel), child: Text(l10n.commonClose))]
+            ? [
+                if (firewall) _helpButton(context, model, l10n),
+                FilledButton(autofocus: true, onPressed: () => Navigator.pop(context, _Choice.cancel), child: Text(l10n.commonClose)),
+              ]
             : [
+                if (firewall) _helpButton(context, model, l10n),
                 TextButton(autofocus: true, onPressed: () => Navigator.pop(context, _Choice.cancel), child: Text(l10n.commonCancel)),
                 if (firewall) OutlinedButton(onPressed: () => Navigator.pop(context, _Choice.addRule), child: Text(l10n.checkAddRule)),
                 FilledButton(
@@ -140,6 +160,19 @@ Future<_Choice> _showIssues(BuildContext context, ServiceModel model) async {
     },
   );
   return result ?? _Choice.cancel;
+}
+
+/// 점검 대화상자의 [해결 방법]. 안내에서 [방화벽 규칙 추가]를 고르면 점검 대화상자도 그 선택으로 닫는다.
+Widget _helpButton(BuildContext context, ServiceModel model, AppLocalizations l10n) {
+  final issue = model.issues.firstWhere((i) => i.kind == IssueKind.firewallBlocked);
+  return TextButton.icon(
+    onPressed: () async {
+      final add = await showFirewallHelp(context, issue: issue, program: model.programPath);
+      if (add && context.mounted) Navigator.pop(context, _Choice.addRule);
+    },
+    icon: const Icon(Icons.help_outline_rounded, size: 18),
+    label: Text(l10n.firewallHelpButton),
+  );
 }
 
 Future<void> releaseLeaseWithFeedback(BuildContext context, DhcpModel model, Ipv4 ip) async {

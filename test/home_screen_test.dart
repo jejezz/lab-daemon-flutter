@@ -323,6 +323,53 @@ void main() {
       expect(find.text('Firewall rule added'), findsOneWidget);
     });
 
+    _testApp('점검 창의 [해결 방법]은 OS별 허용 단계와 복사할 명령을 보이고, 거기서 규칙을 넣을 수 있다', (tester, app) async {
+      app.checker.next = [_firewall()];
+      await _startDhcp(tester);
+      await tester.tap(find.text('How to Fix'));
+      await tester.pumpAndSettle();
+      expect(find.text('Allow through Windows Firewall'), findsOneWidget);
+      expect(find.textContaining('2. Allow it yourself (Windows'), findsOneWidget);
+      expect(find.textContaining('Allow an app through firewall'), findsOneWidget);
+      expect(find.text('Open Allowed Apps'), findsOneWidget);
+      expect(
+        find.text(r'netsh advfirewall firewall add rule name="Lab Daemon" dir=in action=allow program="C:\lab\lab_daemon.exe" enable=yes profile=any'),
+        findsOneWidget,
+      );
+
+      app.checker.next = [];
+      await tester.tap(find.widgetWithText(FilledButton, 'Add Firewall Rule'));
+      await tester.pumpAndSettle();
+      expect(find.text('Allow through Windows Firewall'), findsNothing);
+      expect(find.text('Check before starting'), findsNothing, reason: '점검 창도 같이 닫힌다');
+      expect(app.checker.ruleCalls, 1);
+      expect(app.dhcp.running, isTrue);
+    });
+
+    _testApp('그래도 시작한 뒤에도 화면 위쪽 [방화벽 안내]와 로그 안내가 남는다', (tester, app) async {
+      app.checker.next = [_firewall()];
+      await _startDhcp(tester);
+      await tester.tap(find.text('Start Anyway'));
+      await tester.pumpAndSettle();
+      expect(app.dhcp.running, isTrue);
+      await _settle(tester);
+      expect(find.textContaining('See [Firewall help] at the top'), findsWidgets, reason: '점검마다 경고 다음 줄에 안내가 붙는다');
+
+      await tester.tap(find.text('Firewall help'));
+      await tester.pumpAndSettle();
+      expect(find.text('Allow through Windows Firewall'), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilledButton, 'Add Firewall Rule'));
+      await tester.pumpAndSettle();
+      expect(app.checker.ruleCalls, 1);
+      expect(find.text('Firewall help'), findsNothing, reason: '규칙을 넣으면 안내 칩이 사라진다');
+    });
+
+    _testApp('방화벽 경고가 없으면 [방화벽 안내] 칩이 없다', (tester, app) async {
+      await _startDhcp(tester);
+      expect(app.dhcp.running, isTrue);
+      expect(find.text('Firewall help'), findsNothing);
+    });
+
     _testApp('포트를 다른 프로그램이 쓰면 시작할 수 없다는 창만 보인다 (그래도 시작 없음)', (tester, app) async {
       app.checker.next = [
         const PreStartIssue(IssueKind.portInUse, blocking: true, args: {'protocol': 'UDP', 'port': 67, 'pid': 1234, 'process': 'svchost.exe', 'address': '0.0.0.0'}),

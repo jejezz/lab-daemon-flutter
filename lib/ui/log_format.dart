@@ -30,6 +30,7 @@ String formatLog(AppLocalizations l, LogEvent e) {
     'logCheckPortsReserved' => l.logCheckPortsReserved(s('range'), s('reserved')),
     'logCheckRuleAdded' => l.logCheckRuleAdded,
     'logCheckRuleFailed' => l.logCheckRuleFailed,
+    'logCheckFirewallHint' => l.logCheckFirewallHint,
     // DHCP
     'logDhcpDiscover' => t(l.logDhcpDiscover(s('mac'), s('hostname'))),
     'logDhcpOffer' => l.logDhcpOffer(s('ip'), s('mac')),

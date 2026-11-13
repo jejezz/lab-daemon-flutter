@@ -49,6 +49,12 @@ abstract class ServiceModel extends ChangeNotifier {
   /// 마지막 시작 전 점검에서 찾은 문제.
   List<PreStartIssue> issues = const [];
 
+  /// 마지막 점검에서 나온 방화벽 경고. [그래도 시작]으로 넘어간 뒤에도 화면 위쪽 [방화벽 안내]가 이것을 연다.
+  PreStartIssue? firewallIssue;
+
+  /// 방화벽 규칙을 넣을 프로그램 경로.
+  String get programPath => checker.exePath;
+
   /// 시작이 거부된 뒤에는 빈 칸의 "필요" 오류도 보여 준다.
   bool showAllErrors = false;
 
@@ -112,6 +118,10 @@ abstract class ServiceModel extends ChangeNotifier {
     for (final issue in found) {
       logs.add(LogEvent(id, issue.blocking ? LogLevel.error : LogLevel.warning, 'logCheck${_kindKey(issue.kind)}', kind: 'CHECK', args: issue.args));
     }
+    firewallIssue = found.where((i) => i.kind == IssueKind.firewallBlocked).firstOrNull;
+    if (firewallIssue != null) {
+      logs.add(LogEvent(id, LogLevel.info, 'logCheckFirewallHint', kind: 'CHECK'));
+    }
     if (found.any((i) => i.blocking)) {
       issues = found;
       startError = 'blocked';
@@ -142,6 +152,7 @@ abstract class ServiceModel extends ChangeNotifier {
   /// 이 프로그램의 방화벽 허용 규칙을 추가한다 (UAC). 성공하면 true.
   Future<bool> addFirewallRule() async {
     final ok = await checker.requestFirewallRule();
+    if (ok) firewallIssue = null;
     logs.add(LogEvent(id, ok ? LogLevel.info : LogLevel.warning, ok ? 'logCheckRuleAdded' : 'logCheckRuleFailed'));
     notifyNow();
     return ok;

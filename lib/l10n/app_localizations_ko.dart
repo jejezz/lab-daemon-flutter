@@ -1161,4 +1161,62 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get logLevelTooltip => '표시할 최소 수준';
+
+  @override
+  String get firewallHelpButton => '해결 방법';
+
+  @override
+  String get firewallHintChip => '방화벽 안내';
+
+  @override
+  String get firewallHelpTitle => '방화벽에서 허용하는 방법';
+
+  @override
+  String firewallHelpWhy(String ports, String profiles) {
+    return '이 프로그램이 $ports로 들어오는 연결을 받으려면 Windows 방화벽의 허용이 필요해요. 지금은 $profiles 프로필에 허용 규칙이 없어요.';
+  }
+
+  @override
+  String get firewallHelpProgram => '프로그램';
+
+  @override
+  String get firewallHelpAutoTitle => '1. 자동으로 추가 (권장)';
+
+  @override
+  String get firewallHelpAutoBody =>
+      '단추를 누르면 Windows가 관리자 확인 창을 띄워요. 확인하면 이 프로그램을 모든 네트워크 프로필에서 허용하는 규칙이 추가돼요.';
+
+  @override
+  String firewallHelpManualTitle(String os) {
+    return '2. 직접 허용 ($os)';
+  }
+
+  @override
+  String get firewallStepsWin11 =>
+      '시작 → 설정 → 개인 정보 및 보안 → Windows 보안 → 방화벽 및 네트워크 보호\n[방화벽에서 앱 허용] → [설정 변경] → [다른 앱 허용…]\n[찾아보기…]로 위의 프로그램을 고르고 [추가]\n목록의 Lab Daemon에서 [개인]과 [공용]을 모두 체크하고 [확인]';
+
+  @override
+  String get firewallStepsWin10 =>
+      '시작 → 설정 → 업데이트 및 보안 → Windows 보안 → 방화벽 및 네트워크 보호\n[방화벽을 통해 앱 허용] → [설정 변경] → [다른 앱 허용…]\n[찾아보기…]로 위의 프로그램을 고르고 [추가]\n목록의 Lab Daemon에서 [개인]과 [공용]을 모두 체크하고 [확인]';
+
+  @override
+  String get firewallOpenAllowedApps => '허용된 앱 창 열기';
+
+  @override
+  String get firewallHelpCommandTitle =>
+      '3. 명령으로 추가 (관리자 권한 PowerShell 또는 명령 프롬프트)';
+
+  @override
+  String get firewallHelpInstallerNote =>
+      '설치 프로그램으로 설치한 Lab Daemon은 설치할 때 이 규칙이 자동으로 들어가요. 다른 위치에서 실행한 프로그램(개발 빌드 등)은 경로가 달라서 따로 허용해야 해요.';
+
+  @override
+  String get firewallHelpPolicyNote =>
+      '회사 PC는 관리자 정책으로 규칙 추가가 막혀 있을 수 있어요. 그때는 IT 담당자에게 위 프로그램과 포트의 허용을 요청하세요.';
+
+  @override
+  String get commandCopied => '명령을 복사했어요';
+
+  @override
+  String get logCheckFirewallHint => '해결 방법은 서비스 화면 위쪽의 [방화벽 안내]에서 볼 수 있어요';
 }

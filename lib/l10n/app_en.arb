@@ -387,5 +387,21 @@
       }
     }
   },
-  "logLevelTooltip": "Minimum level"
+  "logLevelTooltip": "Minimum level",
+  "firewallHelpButton": "How to Fix",
+  "firewallHintChip": "Firewall help",
+  "firewallHelpTitle": "Allow through Windows Firewall",
+  "firewallHelpWhy": "This program needs a Windows Firewall exception to receive {ports}. There is no allow rule on the {profiles} profile.",
+  "firewallHelpProgram": "Program",
+  "firewallHelpAutoTitle": "1. Add automatically (recommended)",
+  "firewallHelpAutoBody": "Windows asks for administrator approval. When you approve, a rule allowing this program on every network profile is added.",
+  "firewallHelpManualTitle": "2. Allow it yourself ({os})",
+  "firewallStepsWin11": "Start → Settings → Privacy & security → Windows Security → Firewall & network protection\n[Allow an app through firewall] → [Change settings] → [Allow another app…]\n[Browse…] to the program above, then [Add]\nTick both [Private] and [Public] for Lab Daemon and press [OK]",
+  "firewallStepsWin10": "Start → Settings → Update & Security → Windows Security → Firewall & network protection\n[Allow an app through firewall] → [Change settings] → [Allow another app…]\n[Browse…] to the program above, then [Add]\nTick both [Private] and [Public] for Lab Daemon and press [OK]",
+  "firewallOpenAllowedApps": "Open Allowed Apps",
+  "firewallHelpCommandTitle": "3. Add with a command (PowerShell or Command Prompt as administrator)",
+  "firewallHelpInstallerNote": "Lab Daemon installed with the installer gets this rule automatically. A copy run from another place (such as a development build) has a different path and needs its own rule.",
+  "firewallHelpPolicyNote": "On managed PCs, policy may block adding rules. Ask your IT administrator to allow the program and ports above.",
+  "commandCopied": "Command copied",
+  "logCheckFirewallHint": "See [Firewall help] at the top of the service view for how to fix this"
 }

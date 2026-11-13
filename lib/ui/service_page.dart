@@ -249,6 +249,15 @@ class _Header extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             _Uptime(since: model.startedAt!),
           ],
+          if (model.firewallIssue != null) ...[
+            const SizedBox(width: AppSpacing.md),
+            ActionChip(
+              avatar: Icon(Icons.shield_outlined, size: 16, color: theme.colorScheme.error),
+              label: Text(l10n.firewallHintChip),
+              visualDensity: VisualDensity.compact,
+              onPressed: () => openFirewallHelp(context, model),
+            ),
+          ],
           const SizedBox(width: AppSpacing.lg),
           Expanded(child: Text(summary, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall)),
           const SizedBox(width: AppSpacing.md),

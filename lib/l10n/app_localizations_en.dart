@@ -1179,4 +1179,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logLevelTooltip => 'Minimum level';
+
+  @override
+  String get firewallHelpButton => 'How to Fix';
+
+  @override
+  String get firewallHintChip => 'Firewall help';
+
+  @override
+  String get firewallHelpTitle => 'Allow through Windows Firewall';
+
+  @override
+  String firewallHelpWhy(String ports, String profiles) {
+    return 'This program needs a Windows Firewall exception to receive $ports. There is no allow rule on the $profiles profile.';
+  }
+
+  @override
+  String get firewallHelpProgram => 'Program';
+
+  @override
+  String get firewallHelpAutoTitle => '1. Add automatically (recommended)';
+
+  @override
+  String get firewallHelpAutoBody =>
+      'Windows asks for administrator approval. When you approve, a rule allowing this program on every network profile is added.';
+
+  @override
+  String firewallHelpManualTitle(String os) {
+    return '2. Allow it yourself ($os)';
+  }
+
+  @override
+  String get firewallStepsWin11 =>
+      'Start → Settings → Privacy & security → Windows Security → Firewall & network protection\n[Allow an app through firewall] → [Change settings] → [Allow another app…]\n[Browse…] to the program above, then [Add]\nTick both [Private] and [Public] for Lab Daemon and press [OK]';
+
+  @override
+  String get firewallStepsWin10 =>
+      'Start → Settings → Update & Security → Windows Security → Firewall & network protection\n[Allow an app through firewall] → [Change settings] → [Allow another app…]\n[Browse…] to the program above, then [Add]\nTick both [Private] and [Public] for Lab Daemon and press [OK]';
+
+  @override
+  String get firewallOpenAllowedApps => 'Open Allowed Apps';
+
+  @override
+  String get firewallHelpCommandTitle =>
+      '3. Add with a command (PowerShell or Command Prompt as administrator)';
+
+  @override
+  String get firewallHelpInstallerNote =>
+      'Lab Daemon installed with the installer gets this rule automatically. A copy run from another place (such as a development build) has a different path and needs its own rule.';
+
+  @override
+  String get firewallHelpPolicyNote =>
+      'On managed PCs, policy may block adding rules. Ask your IT administrator to allow the program and ports above.';
+
+  @override
+  String get commandCopied => 'Command copied';
+
+  @override
+  String get logCheckFirewallHint =>
+      'See [Firewall help] at the top of the service view for how to fix this';
 }

@@ -340,12 +340,18 @@ class PreStartChecker {
     return issues;
   }
 
+  /// netsh에 넘길 규칙 추가 인자 (설치 프로그램이 넣는 규칙과 같다).
+  static String ruleArgs(String program) =>
+      'advfirewall firewall add rule name="Lab Daemon" dir=in action=allow program="$program" enable=yes profile=any';
+
+  /// 관리자 터미널에 붙여 넣을 명령.
+  static String ruleCommand(String program) => 'netsh ${ruleArgs(program)}';
+
   /// 이 프로그램을 모든 프로필에서 허용하는 규칙을 추가한다. 관리자 권한이 필요해서 Windows가 UAC 창을 띄우고,
   /// 사용자가 거부하면 false다. 설치 프로그램이 같은 규칙을 넣으므로 설치본에서는 보통 필요 없다.
   Future<bool> requestFirewallRule() async {
     if (!_isWindows) return false;
-    const ruleName = 'Lab Daemon';
-    final args = 'advfirewall firewall add rule name="$ruleName" dir=in action=allow program="$exePath" enable=yes profile=any';
+    final args = ruleArgs(exePath);
     try {
       final result = await Process.run('powershell', [
         '-NoProfile',
