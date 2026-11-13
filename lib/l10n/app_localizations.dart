@@ -2071,6 +2071,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'해결 방법은 서비스 화면 위쪽의 [방화벽 안내]에서 볼 수 있어요'**
   String get logCheckFirewallHint;
+
+  /// No description provided for @openRootFolder.
+  ///
+  /// In ko, this message translates to:
+  /// **'탐색기로 루트 폴더 열기'**
+  String get openRootFolder;
 }
 
 class _AppLocalizationsDelegate

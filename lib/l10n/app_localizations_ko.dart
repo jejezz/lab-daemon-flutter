@@ -1219,4 +1219,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get logCheckFirewallHint => '해결 방법은 서비스 화면 위쪽의 [방화벽 안내]에서 볼 수 있어요';
+
+  @override
+  String get openRootFolder => '탐색기로 루트 폴더 열기';
 }

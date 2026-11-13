@@ -1238,4 +1238,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get logCheckFirewallHint =>
       'See [Firewall help] at the top of the service view for how to fix this';
+
+  @override
+  String get openRootFolder => 'Open root folder in Explorer';
 }

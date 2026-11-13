@@ -3,6 +3,7 @@
 // 단축키: Ctrl+Enter 시작/중지 · Ctrl+F 로그 검색 · (DHCP) Del 선택 Lease 해제, Ctrl+Shift+Del 전체 해제.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -159,6 +160,7 @@ class _ServicePageState extends State<ServicePage> {
         final transfers = m.transfers?.transfers ?? const [];
         return Column(children: [
           _Toolbar(children: [
+            _openRootButton(l10n, m.settings.rootDir),
             TextButton.icon(
               onPressed: transfers.any((t) => t.endedAt != null) ? m.clearRecent : null,
               icon: const Icon(Icons.clear_all_rounded, size: 18),
@@ -168,11 +170,21 @@ class _ServicePageState extends State<ServicePage> {
           Expanded(child: TftpTransferTable(transfers: transfers, onAbort: m.abort)),
         ]);
       case FtpModel():
-        return FtpSessionTable(sessions: m.sessions?.sessions ?? const [], onDisconnect: m.disconnect);
+        return Column(children: [
+          _Toolbar(children: [_openRootButton(l10n, m.settings.rootDir)]),
+          Expanded(child: FtpSessionTable(sessions: m.sessions?.sessions ?? const [], onDisconnect: m.disconnect)),
+        ]);
     }
     return const SizedBox.shrink();
   }
 }
+
+/// 서비스가 켜져 있는 동안 루트 폴더를 탐색기로 열어 어떤 파일이 있는지 본다.
+Widget _openRootButton(AppLocalizations l10n, String dir) => TextButton.icon(
+      onPressed: dir.isEmpty ? null : () => Process.start('explorer.exe', [dir.replaceAll('/', r'\')], mode: ProcessStartMode.detached).ignore(),
+      icon: const Icon(Icons.folder_open_outlined, size: 18),
+      label: Text(l10n.openRootFolder),
+    );
 
 class _Toolbar extends StatelessWidget {
   const _Toolbar({required this.children});
