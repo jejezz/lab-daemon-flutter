@@ -249,7 +249,6 @@
   "logDhcpProbeFailed": "Could not check for other DHCP servers: {error}",
   "serviceTftp": "TFTP",
   "serviceFtp": "FTP",
-  "panelToggleTooltip": "Show or hide settings",
   "panelTitle": "{service} settings",
   "runningLockedNote": "Settings are locked while the service runs. Stop it to make changes.",
   "fieldBindNic": "Interface",
@@ -407,5 +406,8 @@
   "openRootFolder": "Open root folder in Explorer",
   "logCapacityTooltip": "Log lines to keep",
   "logCapacityLines": "{count} lines",
-  "fieldPortDefault": "Port (default {port})"
+  "fieldPortDefault": "Port (default {port})",
+  "panelCollapseTooltip": "Collapse settings (Ctrl+B)",
+  "panelExpandTooltip": "Expand settings (Ctrl+B)",
+  "panelRailLabel": "Settings"
 }

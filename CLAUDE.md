@@ -17,7 +17,7 @@ DHCP, TFTP, FTP(이후 Syslog 등) 같은 랩용 네트워크 서비스를 한 �
 ## 구조
 - **코어 `lib/core/`** (순수 Dart): `NetService`/`BaseNetService`(service.dart), 서비스별 `dhcp/`·`tftp/`·`ftp/`. 각 서비스는 **자기 Isolate**에서 돈다(`IsolateHost`, host.dart). 시험은 `InProcessHost`로 같은 Isolate에서 돌린다. 설정은 `toJson`/`fromJson`으로 Isolate 경계를 건넌다.
 - **상태 `lib/state/`**: 서비스마다 모델(`DhcpModel`·`TftpModel`·`FtpModel`, service_models.dart)이 설정·상태·**그 서비스만의 로그**(`LogBus`, 보관 줄 수는 서비스마다 선택, 기본 1000줄)·클라이언트 스냅샷을 가진다. 서비스 설정 값은 입력 문자열 그대로 `<서비스>_<이름>` 키로 저장한다.
-- **화면 `lib/ui/`**: 앱 바에는 켜진 서비스의 접속 주소(`IP[:포트]`, 기본 포트는 생략, DHCP는 IP만)가 나온다. 사이드바(서비스 목록) + 서비스별 화면(`service_page.dart`: 왼쪽 **그 서비스의 설정 패널**, 오른쪽 클라이언트 표, 아래 그 서비스의 로그). 서비스 설정은 서비스마다 따로 두고 하나의 화면에 섞지 않는다. 앱 설정 창(`lib/settings/settings_dialog.dart`)에는 "외형"만 있다.
+- **화면 `lib/ui/`**: 설정 패널은 접고 펼 수 있고(가운데 띠 또는 Ctrl+B, 서비스마다 기억) 앱 바에는 켜진 서비스의 접속 주소(`IP[:포트]`, 기본 포트는 생략, DHCP는 IP만)가 나온다. 사이드바(서비스 목록) + 서비스별 화면(`service_page.dart`: 왼쪽 **그 서비스의 설정 패널**, 오른쪽 클라이언트 표, 아래 그 서비스의 로그). 서비스 설정은 서비스마다 따로 두고 하나의 화면에 섞지 않는다. 앱 설정 창(`lib/settings/settings_dialog.dart`)에는 "외형"만 있다.
 - 서비스 로그는 번역하지 않은 ARB 키 + 인자로 내보내고 `lib/ui/log_format.dart`가 문구로 바꾼다. 새 `logDhcp…`/`logTftp…`/`logFtp…`/`logCheck…` 키를 추가하면 포맷터와 ARB(ko/en)에도 더한다 (`test/log_format_test.dart`가 빠진 키와 안 쓰는 키를 잡는다).
 
 ## 성능 (3CDaemon의 약점을 피한다)

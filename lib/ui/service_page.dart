@@ -1,6 +1,6 @@
 // 서비스 한 화면: 머리(이름·상태·요약·시작/중지) + 왼쪽 설정 패널 + 오른쪽 클라이언트 표 + 아래 그 서비스의 로그.
 // 서비스마다 화면이 따로고(설정도 서비스마다 따로), 한 서비스의 갱신은 그 서비스 화면만 다시 그린다.
-// 단축키: Ctrl+Enter 시작/중지 · Ctrl+F 로그 검색 · (DHCP) Del 선택 Lease 해제, Ctrl+Shift+Del 전체 해제.
+// 단축키: Ctrl+Enter 시작/중지 · Ctrl+B 설정 패널 접기/펴기 · Ctrl+F 로그 검색 · (DHCP) Del 선택 Lease 해제, Ctrl+Shift+Del 전체 해제.
 
 import 'dart:async';
 import 'dart:io';
@@ -35,11 +35,12 @@ class _ServicePageState extends State<ServicePage> {
   double _logHeight = 240;
   double _dragStartY = 0;
   double _dragStartHeight = 240;
-  bool _panelOpen = true;
+  late bool _panelOpen = widget.model.prefs.getBool('${widget.model.id}_panel_open') ?? true;
   Ipv4? _selectedLease;
 
   static const _minBody = 160.0;
   static const _minLog = 120.0;
+  static const _panelWidth = 340.0;
 
   ServiceModel get model => widget.model;
 
@@ -47,6 +48,12 @@ class _ServicePageState extends State<ServicePage> {
   void dispose() {
     _searchFocus.dispose();
     super.dispose();
+  }
+
+  /// 설정 패널을 접고 펴고, 서비스마다 기억한다.
+  void _togglePanel() {
+    setState(() => _panelOpen = !_panelOpen);
+    unawaited(model.prefs.setBool('${model.id}_panel_open', _panelOpen));
   }
 
   void _releaseSelected() {
@@ -63,6 +70,7 @@ class _ServicePageState extends State<ServicePage> {
       bindings: {
         const SingleActivator(LogicalKeyboardKey.enter, control: true): () => toggleServiceWithFeedback(context, m),
         const SingleActivator(LogicalKeyboardKey.keyF, control: true): _searchFocus.requestFocus,
+        const SingleActivator(LogicalKeyboardKey.keyB, control: true): _togglePanel,
         if (m is DhcpModel) ...{
           const SingleActivator(LogicalKeyboardKey.delete): _releaseSelected,
           const SingleActivator(LogicalKeyboardKey.delete, control: true, shift: true): () => confirmReleaseAll(context, m),
@@ -75,31 +83,44 @@ class _ServicePageState extends State<ServicePage> {
           children: [
             ListenableBuilder(
               listenable: m,
-              builder: (context, _) => _Header(model: m, panelOpen: _panelOpen, onTogglePanel: () => setState(() => _panelOpen = !_panelOpen)),
+              builder: (context, _) => _Header(model: m),
             ),
             const Divider(height: 1),
             Expanded(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (_panelOpen) ...[
-                    SizedBox(
-                      width: 340,
-                      child: ListenableBuilder(
-                        listenable: m,
-                        builder: (context, _) => SingleChildScrollView(
-                          padding: const EdgeInsets.all(AppSpacing.lg),
-                          child: switch (m) {
-                            DhcpModel() => DhcpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
-                            TftpModel() => TftpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
-                            FtpModel() => FtpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
-                            _ => const SizedBox.shrink(),
-                          },
-                        ),
-                      ),
-                    ),
-                    const VerticalDivider(width: 1),
-                  ],
+                  // 접히는 설정 패널: 너비 340 <-> 0으로 부드럽게 바뀌고, 완전히 접히면 트리에서 빠진다 (숨은 칸에 포커스가 가지 않는다).
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(end: _panelOpen ? _panelWidth : 0),
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, width, _) => width < 1
+                        ? const SizedBox.shrink()
+                        : SizedBox(
+                            width: width,
+                            child: ClipRect(
+                              child: OverflowBox(
+                                alignment: Alignment.centerLeft,
+                                minWidth: _panelWidth,
+                                maxWidth: _panelWidth,
+                                child: ListenableBuilder(
+                                  listenable: m,
+                                  builder: (context, _) => SingleChildScrollView(
+                                    padding: const EdgeInsets.all(AppSpacing.lg),
+                                    child: switch (m) {
+                                      DhcpModel() => DhcpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
+                                      TftpModel() => TftpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
+                                      FtpModel() => FtpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
+                                      _ => const SizedBox.shrink(),
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                  ),
+                  _PanelRail(open: _panelOpen, onToggle: _togglePanel),
                   Expanded(
                     child: LayoutBuilder(builder: (context, constraints) {
                       final maxLog = (constraints.maxHeight - _minBody).clamp(_minLog, double.infinity);
@@ -239,11 +260,9 @@ class _Stopped extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.model, required this.panelOpen, required this.onTogglePanel});
+  const _Header({required this.model});
 
   final ServiceModel model;
-  final bool panelOpen;
-  final VoidCallback onTogglePanel;
 
   @override
   Widget build(BuildContext context) {
@@ -255,12 +274,6 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
       child: Row(
         children: [
-          IconButton(
-            tooltip: l10n.panelToggleTooltip,
-            icon: Icon(panelOpen ? Icons.view_sidebar_outlined : Icons.view_sidebar_rounded),
-            onPressed: onTogglePanel,
-          ),
-          const SizedBox(width: AppSpacing.sm),
           Text(serviceName(l10n, model.id), style: theme.textTheme.titleLarge),
           const SizedBox(width: AppSpacing.md),
           StatusPill(label: serviceStatusLabel(l10n, model), tone: serviceStatusTone(model)),
@@ -314,6 +327,40 @@ class _Header extends StatelessWidget {
             '${l10n.ftpSummary(f?.openCount ?? 0, f?.totalConnections ?? 0, formatBytes(f?.bytesIn ?? 0), formatBytes(f?.bytesOut ?? 0))}';
     }
     return '';
+  }
+}
+
+/// 설정 패널과 클라이언트 영역 사이의 얇은 띠: 누르면 패널을 접고 편다. 접혀 있으면 세로 글씨 "설정"이 보인다.
+class _PanelRail extends StatelessWidget {
+  const _PanelRail({required this.open, required this.onToggle});
+
+  final bool open;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Row(children: [
+      Tooltip(
+        message: open ? l10n.panelCollapseTooltip : l10n.panelExpandTooltip,
+        child: InkWell(
+          onTap: onToggle,
+          child: SizedBox(
+            width: 26,
+            child: Column(children: [
+              const SizedBox(height: AppSpacing.sm),
+              Icon(open ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, size: 20, color: theme.colorScheme.onSurfaceVariant),
+              if (!open) ...[
+                const SizedBox(height: AppSpacing.md),
+                RotatedBox(quarterTurns: 1, child: Text(l10n.panelRailLabel, style: theme.textTheme.labelMedium)),
+              ],
+            ]),
+          ),
+        ),
+      ),
+      const VerticalDivider(width: 1),
+    ]);
   }
 }
 

@@ -646,9 +646,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get serviceFtp => 'FTP';
 
   @override
-  String get panelToggleTooltip => 'Show or hide settings';
-
-  @override
   String panelTitle(String service) {
     return '$service settings';
   }
@@ -1254,4 +1251,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String fieldPortDefault(int port) {
     return 'Port (default $port)';
   }
+
+  @override
+  String get panelCollapseTooltip => 'Collapse settings (Ctrl+B)';
+
+  @override
+  String get panelExpandTooltip => 'Expand settings (Ctrl+B)';
+
+  @override
+  String get panelRailLabel => 'Settings';
 }

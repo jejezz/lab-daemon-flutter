@@ -610,7 +610,6 @@
   },
   "serviceTftp": "TFTP",
   "serviceFtp": "FTP",
-  "panelToggleTooltip": "설정 패널 보이기/숨기기",
   "panelTitle": "{service} 설정",
   "@panelTitle": {
     "placeholders": {
@@ -1366,5 +1365,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "panelCollapseTooltip": "설정 패널 접기 (Ctrl+B)",
+  "panelExpandTooltip": "설정 패널 펴기 (Ctrl+B)",
+  "panelRailLabel": "설정"
 }

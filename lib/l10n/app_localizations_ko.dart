@@ -641,9 +641,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get serviceFtp => 'FTP';
 
   @override
-  String get panelToggleTooltip => '설정 패널 보이기/숨기기';
-
-  @override
   String panelTitle(String service) {
     return '$service 설정';
   }
@@ -1235,4 +1232,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String fieldPortDefault(int port) {
     return '포트 (기본 $port)';
   }
+
+  @override
+  String get panelCollapseTooltip => '설정 패널 접기 (Ctrl+B)';
+
+  @override
+  String get panelExpandTooltip => '설정 패널 펴기 (Ctrl+B)';
+
+  @override
+  String get panelRailLabel => '설정';
 }

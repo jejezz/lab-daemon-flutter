@@ -201,13 +201,26 @@ void main() {
       expect(find.text('Range start'), findsNWidgets(1), reason: '뒤에 있는 DHCP 패널의 것 하나뿐');
     });
 
-    _testApp('설정 패널을 숨기고 다시 보일 수 있다', (tester, app) async {
-      await tester.tap(find.byTooltip('Show or hide settings'));
+    _testApp('설정 패널을 접고 펼 수 있고, 접힌 상태는 서비스마다 기억한다', (tester, app) async {
+      await tester.tap(find.byTooltip('Collapse settings (Ctrl+B)'));
       await tester.pumpAndSettle();
       expect(find.text('Range start'), findsNothing);
-      await tester.tap(find.byTooltip('Show or hide settings'));
+      expect(find.text('Settings'), findsOneWidget, reason: '접히면 띠에 세로 글씨가 남는다');
+      expect(app.controller.prefs.getBool('dhcp_panel_open'), isFalse);
+
+      await tester.tap(find.text('TFTP').first);
       await tester.pumpAndSettle();
-      expect(find.text('Range start'), findsOneWidget);
+      expect(find.text('Root folder'), findsOneWidget, reason: '다른 서비스의 패널은 그대로 펴져 있다');
+
+      await tester.tap(find.text('DHCP').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Range start'), findsNothing, reason: '돌아와도 DHCP는 접혀 있다');
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+      await tester.pumpAndSettle();
+      expect(find.text('Range start'), findsOneWidget, reason: 'Ctrl+B로 다시 편다');
+      expect(app.controller.prefs.getBool('dhcp_panel_open'), isTrue);
     });
   });
 

@@ -1160,12 +1160,6 @@ abstract class AppLocalizations {
   /// **'FTP'**
   String get serviceFtp;
 
-  /// No description provided for @panelToggleTooltip.
-  ///
-  /// In ko, this message translates to:
-  /// **'설정 패널 보이기/숨기기'**
-  String get panelToggleTooltip;
-
   /// No description provided for @panelTitle.
   ///
   /// In ko, this message translates to:
@@ -2095,6 +2089,24 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'포트 (기본 {port})'**
   String fieldPortDefault(int port);
+
+  /// No description provided for @panelCollapseTooltip.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 패널 접기 (Ctrl+B)'**
+  String get panelCollapseTooltip;
+
+  /// No description provided for @panelExpandTooltip.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 패널 펴기 (Ctrl+B)'**
+  String get panelExpandTooltip;
+
+  /// No description provided for @panelRailLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정'**
+  String get panelRailLabel;
 }
 
 class _AppLocalizationsDelegate
