@@ -143,7 +143,7 @@ class _ServicePageState extends State<ServicePage> {
                                   builder: (context, _) => SingleChildScrollView(
                                     padding: const EdgeInsets.all(AppSpacing.lg),
                                     child: switch (m) {
-                                      DhcpModel() => DhcpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
+                                      DhcpModel() => DhcpPanel(model: m, tftp: controller.tftp, nics: controller.nics, onRefreshNics: controller.refreshNics),
                                       TftpModel() => TftpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
                                       FtpModel() => FtpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
                                       _ => const SizedBox.shrink(),

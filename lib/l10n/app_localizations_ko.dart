@@ -1330,4 +1330,32 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get logOpenFolder => '로그 폴더 열기';
+
+  @override
+  String get dhcpUseTftpAddress => 'TFTP 서비스 주소로 채우기';
+
+  @override
+  String get dhcpPickBootFile => 'TFTP 루트 폴더에서 고르기';
+
+  @override
+  String get dhcpBootPickTitle => '부팅 파일 고르기';
+
+  @override
+  String get dhcpBootPickSearch => '파일 이름 검색';
+
+  @override
+  String get dhcpBootPickEmpty => '찾는 파일이 없어요';
+
+  @override
+  String get dhcpBootPickNoRoot => 'TFTP 서비스의 루트 폴더를 먼저 정해 주세요';
+
+  @override
+  String dhcpBootPickMore(int count) {
+    return '처음 $count개만 보여요. 검색으로 줄여 보세요';
+  }
+
+  @override
+  String dhcpTftpPortNote(String port) {
+    return 'TFTP 서비스가 $port번 포트를 써서 보드가 찾지 못할 수 있어요 (보통 69번)';
+  }
 }

@@ -1,6 +1,8 @@
 // 서비스별 설정 패널. 설정이 곧 서버의 전부라서 별도 설정 창이 아니라 각 서비스 화면의 왼쪽에 둔다.
 // 바꾼 값은 확인 단추 없이 바로 저장된다. 실행 중에는 잠그고(DHCP의 Lease Time만 즉시 적용 가능) 안내를 보인다.
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../core/ipv4.dart';
@@ -12,6 +14,7 @@ import '../../state/service_model.dart';
 import '../../state/service_models.dart';
 import '../../state/tftp_settings.dart';
 import '../../theme/app_theme.dart';
+import '../boot_file_picker.dart';
 import '../open_folder.dart';
 import '../widgets/error_snackbar.dart';
 import '../widgets/fields.dart';
@@ -43,9 +46,12 @@ class _LockedNote extends StatelessWidget {
 }
 
 class DhcpPanel extends StatelessWidget {
-  const DhcpPanel({super.key, required this.model, required this.nics, required this.onRefreshNics});
+  const DhcpPanel({super.key, required this.model, required this.tftp, required this.nics, required this.onRefreshNics});
 
   final DhcpModel model;
+
+  /// option 66/67을 TFTP 서비스의 설정(주소·루트 폴더)에서 채우는 데 쓴다.
+  final TftpModel tftp;
   final List<NicInfo> nics;
   final VoidCallback onRefreshNics;
 
@@ -59,6 +65,10 @@ class DhcpPanel extends StatelessWidget {
     void set(DhcpField f, String v) => model.update(model.settings.withValue(f, v));
     Widget text(DhcpField f, String label, {String? hint, bool live = false}) =>
         SettingsTextField(label: label, value: s.valueOf(f), hint: hint, error: e(f), enabled: !locked || live, onChanged: (v) => set(f, v));
+    // 보드가 부팅 서버로 찾을 TFTP 서비스의 주소: 그 서비스가 묶은 주소, 모든 NIC에 열었으면 이 DHCP 서버의 주소.
+    String tftpAddress() => tftp.settings.bindIp.trim().isNotEmpty ? tftp.settings.bindIp.trim() : model.settings.serverIp;
+    final tftpPort = tftp.settings.port.trim();
+    final tftpPortNote = tftpPort.isEmpty || tftpPort == '69' ? null : l10n.dhcpTftpPortNote(tftpPort);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -87,7 +97,44 @@ class DhcpPanel extends StatelessWidget {
         fieldGap,
         text(DhcpField.leaseTime, l10n.dhcpFieldLeaseTime, hint: l10n.dhcpHintLeaseTime, live: true),
         PanelHeading(l10n.dhcpFieldTftp),
-        FieldPair(text(DhcpField.tftpServer, l10n.dhcpFieldTftp, hint: l10n.dhcpHintOptional), text(DhcpField.bootFile, l10n.dhcpFieldBootFile, hint: l10n.dhcpHintOptional)),
+        SettingsTextField(
+          label: l10n.dhcpFieldTftp,
+          value: s.tftpServer,
+          hint: l10n.dhcpHintOptional,
+          helper: tftpPortNote,
+          error: e(DhcpField.tftpServer),
+          enabled: !locked,
+          onChanged: (v) => set(DhcpField.tftpServer, v),
+          suffix: IconButton(
+            tooltip: l10n.dhcpUseTftpAddress,
+            icon: const Icon(Icons.dns_outlined, size: 20),
+            onPressed: locked ? null : () => set(DhcpField.tftpServer, tftpAddress()),
+          ),
+        ),
+        fieldGap,
+        SettingsTextField(
+          label: l10n.dhcpFieldBootFile,
+          value: s.bootFile,
+          hint: l10n.dhcpHintOptional,
+          error: e(DhcpField.bootFile),
+          enabled: !locked,
+          onChanged: (v) => set(DhcpField.bootFile, v),
+          suffix: IconButton(
+            tooltip: l10n.dhcpPickBootFile,
+            icon: const Icon(Icons.folder_open_outlined, size: 20),
+            onPressed: locked
+                ? null
+                : () async {
+                    final root = tftp.settings.rootDir.trim();
+                    if (root.isEmpty || !Directory(root).existsSync()) {
+                      showErrorSnackBar(context, l10n.dhcpBootPickNoRoot);
+                      return;
+                    }
+                    final picked = await pickBootFile(context, root);
+                    if (picked != null) set(DhcpField.bootFile, picked);
+                  },
+          ),
+        ),
         fieldGap,
         text(DhcpField.domain, l10n.dhcpFieldDomain, hint: l10n.dhcpHintOptional),
         PanelHeading(l10n.dhcpReservations),

@@ -1351,4 +1351,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logOpenFolder => 'Open log folder';
+
+  @override
+  String get dhcpUseTftpAddress => 'Fill in the TFTP service address';
+
+  @override
+  String get dhcpPickBootFile => 'Choose from the TFTP root folder';
+
+  @override
+  String get dhcpBootPickTitle => 'Choose a boot file';
+
+  @override
+  String get dhcpBootPickSearch => 'Search file names';
+
+  @override
+  String get dhcpBootPickEmpty => 'No matching files';
+
+  @override
+  String get dhcpBootPickNoRoot => 'Set the TFTP service root folder first';
+
+  @override
+  String dhcpBootPickMore(int count) {
+    return 'Showing the first $count. Narrow it down with the search';
+  }
+
+  @override
+  String dhcpTftpPortNote(String port) {
+    return 'The TFTP service uses port $port, so boards may not find it (usually 69)';
+  }
 }

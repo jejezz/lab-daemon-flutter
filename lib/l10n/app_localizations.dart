@@ -2257,6 +2257,54 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'로그 폴더 열기'**
   String get logOpenFolder;
+
+  /// No description provided for @dhcpUseTftpAddress.
+  ///
+  /// In ko, this message translates to:
+  /// **'TFTP 서비스 주소로 채우기'**
+  String get dhcpUseTftpAddress;
+
+  /// No description provided for @dhcpPickBootFile.
+  ///
+  /// In ko, this message translates to:
+  /// **'TFTP 루트 폴더에서 고르기'**
+  String get dhcpPickBootFile;
+
+  /// No description provided for @dhcpBootPickTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'부팅 파일 고르기'**
+  String get dhcpBootPickTitle;
+
+  /// No description provided for @dhcpBootPickSearch.
+  ///
+  /// In ko, this message translates to:
+  /// **'파일 이름 검색'**
+  String get dhcpBootPickSearch;
+
+  /// No description provided for @dhcpBootPickEmpty.
+  ///
+  /// In ko, this message translates to:
+  /// **'찾는 파일이 없어요'**
+  String get dhcpBootPickEmpty;
+
+  /// No description provided for @dhcpBootPickNoRoot.
+  ///
+  /// In ko, this message translates to:
+  /// **'TFTP 서비스의 루트 폴더를 먼저 정해 주세요'**
+  String get dhcpBootPickNoRoot;
+
+  /// No description provided for @dhcpBootPickMore.
+  ///
+  /// In ko, this message translates to:
+  /// **'처음 {count}개만 보여요. 검색으로 줄여 보세요'**
+  String dhcpBootPickMore(int count);
+
+  /// No description provided for @dhcpTftpPortNote.
+  ///
+  /// In ko, this message translates to:
+  /// **'TFTP 서비스가 {port}번 포트를 써서 보드가 찾지 못할 수 있어요 (보통 69번)'**
+  String dhcpTftpPortNote(String port);
 }
 
 class _AppLocalizationsDelegate

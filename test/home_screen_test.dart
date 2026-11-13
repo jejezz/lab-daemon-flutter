@@ -316,6 +316,62 @@ void main() {
       expect(find.textContaining('Could not reserve'), findsOneWidget);
     });
 
+    _testApp('option 66/67: TFTP 서비스 주소로 채우고, TFTP 루트 폴더에서 부팅 파일을 고른다', (tester, app) async {
+      await tester.runAsync(() async {
+        File('${app.root.path}/u-boot.bin').writeAsBytesSync(List.filled(2048, 1));
+        Directory('${app.root.path}/rk3566').createSync();
+        File('${app.root.path}/rk3566/Image').writeAsBytesSync(List.filled(4096, 1));
+      });
+      app.tftp.update(app.tftp.settings.copyWith(rootDir: app.root.path, bindIp: '192.168.50.7', port: '6969'));
+      // 설정은 서비스 화면마다 따로라서, TFTP를 고친 뒤 DHCP 화면으로 돌아온 상황이다.
+      await tester.tap(find.text('TFTP').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('DHCP').first);
+      await tester.pumpAndSettle();
+
+      // TFTP가 69번이 아니면 보드가 못 찾을 수 있다는 안내가 나온다.
+      await tester.ensureVisible(find.byTooltip('Fill in the TFTP service address'));
+      expect(find.textContaining('uses port 6969'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Fill in the TFTP service address'));
+      await tester.pump();
+      expect(app.dhcp.settings.tftpServer, '192.168.50.7', reason: 'TFTP 서비스가 묶은 주소');
+
+      app.tftp.update(app.tftp.settings.copyWith(bindIp: ''));
+      await tester.pump();
+      await tester.tap(find.byTooltip('Fill in the TFTP service address'));
+      await tester.pump();
+      expect(app.dhcp.settings.tftpServer, '192.168.50.1', reason: '모든 NIC에 열었으면 이 DHCP 서버의 주소');
+
+      await tester.ensureVisible(find.byTooltip('Choose from the TFTP root folder'));
+      await tester.tap(find.byTooltip('Choose from the TFTP root folder'));
+      await tester.pump(); // 대화상자가 열리며 파일 목록 읽기를 시작한다
+      // 목록 읽기는 실제 파일 I/O라서, 끝날 때까지 실제 시간으로 기다리며 화면을 한 번씩 그린다 (진행 표시가 계속 돌아서 pumpAndSettle은 못 쓴다).
+      for (var i = 0; i < 20 && find.text('rk3566/Image').evaluate().isEmpty; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+        await tester.pump();
+      }
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text('Choose a boot file'), findsOneWidget);
+      expect(find.text('rk3566/Image'), findsOneWidget);
+      expect(find.text('u-boot.bin'), findsOneWidget);
+
+      await tester.enterText(find.widgetWithText(TextField, 'Search file names'), 'rk35');
+      await tester.pumpAndSettle();
+      expect(find.text('u-boot.bin'), findsNothing);
+      await tester.tap(find.text('rk3566/Image'));
+      await tester.pumpAndSettle();
+      expect(app.dhcp.settings.bootFile, 'rk3566/Image');
+    });
+
+    _testApp('TFTP 루트 폴더를 정하지 않았으면 고르기 대신 안내한다', (tester, app) async {
+      await tester.ensureVisible(find.byTooltip('Choose from the TFTP root folder'));
+      await tester.tap(find.byTooltip('Choose from the TFTP root folder'));
+      await tester.pumpAndSettle();
+      expect(find.text('Set the TFTP service root folder first'), findsOneWidget);
+      expect(find.text('Choose a boot file'), findsNothing);
+    });
+
     _testApp('줄 끝 단추로 해제하고, 전체 해제는 확인을 받는다', (tester, app) async {
       await _startDhcp(tester);
       app.transport.dora(mac(1));
