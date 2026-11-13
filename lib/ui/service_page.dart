@@ -90,37 +90,6 @@ class _ServicePageState extends State<ServicePage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 접히는 설정 패널: 너비 340 <-> 0으로 부드럽게 바뀌고, 완전히 접히면 트리에서 빠진다 (숨은 칸에 포커스가 가지 않는다).
-                  TweenAnimationBuilder<double>(
-                    tween: Tween(end: _panelOpen ? _panelWidth : 0),
-                    duration: const Duration(milliseconds: 180),
-                    curve: Curves.easeOutCubic,
-                    builder: (context, width, _) => width < 1
-                        ? const SizedBox.shrink()
-                        : SizedBox(
-                            width: width,
-                            child: ClipRect(
-                              child: OverflowBox(
-                                alignment: Alignment.centerLeft,
-                                minWidth: _panelWidth,
-                                maxWidth: _panelWidth,
-                                child: ListenableBuilder(
-                                  listenable: m,
-                                  builder: (context, _) => SingleChildScrollView(
-                                    padding: const EdgeInsets.all(AppSpacing.lg),
-                                    child: switch (m) {
-                                      DhcpModel() => DhcpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
-                                      TftpModel() => TftpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
-                                      FtpModel() => FtpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
-                                      _ => const SizedBox.shrink(),
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                  ),
-                  _PanelRail(open: _panelOpen, onToggle: _togglePanel),
                   Expanded(
                     child: LayoutBuilder(builder: (context, constraints) {
                       final maxLog = (constraints.maxHeight - _minBody).clamp(_minLog, double.infinity);
@@ -146,6 +115,37 @@ class _ServicePageState extends State<ServicePage> {
                         ],
                       );
                     }),
+                  ),
+                  _PanelRail(open: _panelOpen, onToggle: _togglePanel),
+                  // 접히는 설정 패널(오른쪽 dock): 너비 340 <-> 0으로 부드럽게 바뀌고, 완전히 접히면 트리에서 빠진다 (숨은 칸에 포커스가 가지 않는다).
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(end: _panelOpen ? _panelWidth : 0),
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, width, _) => width < 1
+                        ? const SizedBox.shrink()
+                        : SizedBox(
+                            width: width,
+                            child: ClipRect(
+                              child: OverflowBox(
+                                alignment: Alignment.centerRight,
+                                minWidth: _panelWidth,
+                                maxWidth: _panelWidth,
+                                child: ListenableBuilder(
+                                  listenable: m,
+                                  builder: (context, _) => SingleChildScrollView(
+                                    padding: const EdgeInsets.all(AppSpacing.lg),
+                                    child: switch (m) {
+                                      DhcpModel() => DhcpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
+                                      TftpModel() => TftpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
+                                      FtpModel() => FtpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
+                                      _ => const SizedBox.shrink(),
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                   ),
                 ],
               ),
@@ -330,7 +330,7 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// 설정 패널과 클라이언트 영역 사이의 얇은 띠: 누르면 패널을 접고 편다. 접혀 있으면 세로 글씨 "설정"이 보인다.
+/// 클라이언트 영역과 (오른쪽에 붙은) 설정 패널 사이의 얇은 띠: 누르면 패널을 접고 편다. 접혀 있으면 창 오른쪽 끝에 남고 세로 글씨 "설정"이 보인다.
 class _PanelRail extends StatelessWidget {
   const _PanelRail({required this.open, required this.onToggle});
 
@@ -342,6 +342,7 @@ class _PanelRail extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Row(children: [
+      const VerticalDivider(width: 1),
       Tooltip(
         message: open ? l10n.panelCollapseTooltip : l10n.panelExpandTooltip,
         child: InkWell(
@@ -350,7 +351,8 @@ class _PanelRail extends StatelessWidget {
             width: 28,
             child: Column(children: [
               const SizedBox(height: AppSpacing.sm),
-              Icon(open ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, size: 20, color: theme.colorScheme.onSurfaceVariant),
+              // 오른쪽에 붙은 패널: 접을 때는 오른쪽(>), 펼 때는 왼쪽(<)으로 향한다.
+              Icon(open ? Icons.chevron_right_rounded : Icons.chevron_left_rounded, size: 20, color: theme.colorScheme.onSurfaceVariant),
               if (!open) ...[
                 const SizedBox(height: AppSpacing.md),
                 RotatedBox(quarterTurns: 1, child: Text(l10n.panelRailLabel, style: theme.textTheme.titleSmall)),
@@ -359,7 +361,7 @@ class _PanelRail extends StatelessWidget {
           ),
         ),
       ),
-      const VerticalDivider(width: 1),
+      if (open) const VerticalDivider(width: 1),
     ]);
   }
 }
