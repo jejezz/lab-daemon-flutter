@@ -61,7 +61,7 @@ DhcpPacket _client(int type, MacAddress m, {Map<int, Uint8List> options = const 
       options: {DhcpOpt.messageType: DhcpValue.u8(type), ...options},
     );
 
-DhcpConfig _config({bool logPackets = false, String? leaseFile}) => DhcpConfig(
+DhcpConfig _config({bool logPackets = false, String? leaseFile, bool conflictCheck = false}) => DhcpConfig(
       serverIp: ip('192.168.50.1'),
       rangeStart: ip('192.168.50.100'),
       rangeEnd: ip('192.168.50.110'),
@@ -70,6 +70,7 @@ DhcpConfig _config({bool logPackets = false, String? leaseFile}) => DhcpConfig(
       leaseTime: const Duration(minutes: 10),
       logPackets: logPackets,
       leaseFile: leaseFile,
+      conflictCheck: conflictCheck,
     );
 
 /// 서비스가 내는 로그를 [bus]에 모은다 (실제 앱에서는 화면 쪽 호스트가 하는 일).
@@ -115,6 +116,81 @@ void main() {
       DhcpOpt.serverId: DhcpValue.ip(ip('192.168.50.1')),
     }));
   }
+
+  group('주소 충돌 검사 (ping)', () {
+    Future<void> settle() => Future<void>.delayed(const Duration(milliseconds: 20));
+
+    /// [inUse]에 있는 주소는 응답이 있는 것으로 보는 서버. 확인한 주소를 [probed]에 모은다.
+    Future<(DhcpServer, _FakeTransport, LogBus, List<Ipv4>)> make(Set<String> inUse) async {
+      final t = _FakeTransport();
+      final b = LogBus();
+      final probed = <Ipv4>[];
+      final s = DhcpServer(
+        clock: () => now,
+        transportFactory: (a, p) async => t,
+        prober: (address) async {
+          probed.add(address);
+          return inUse.contains('$address');
+        },
+        snapshotInterval: Duration.zero,
+      );
+      s.events.listen((e) {
+        if (e is LogEvent) b.add(e);
+      });
+      await s.start(_config(conflictCheck: true));
+      addTearDown(() async {
+        await s.dispose();
+        await b.dispose();
+      });
+      return (s, t, b, probed);
+    }
+
+    test('응답이 없는 주소는 그대로 제안한다', () async {
+      final (_, t, _, probed) = await make({});
+      t.receive(_client(DhcpMessageType.discover, mac(1)));
+      await settle();
+      expect(t.sent.single.packet.messageType, DhcpMessageType.offer);
+      expect(t.sent.single.packet.yiaddr, ip('192.168.50.100'));
+      expect(probed, [ip('192.168.50.100')]);
+    });
+
+    test('응답이 있는 주소는 건너뛰고 다음 주소를 제안하며, 로그에 남긴다', () async {
+      final (s, t, b, probed) = await make({'192.168.50.100', '192.168.50.101'});
+      t.receive(_client(DhcpMessageType.discover, mac(1)));
+      await settle();
+      expect(t.sent.single.packet.yiaddr, ip('192.168.50.102'));
+      expect(probed.map((i) => '$i'), ['192.168.50.100', '192.168.50.101', '192.168.50.102']);
+      final conflicts = b.history.where((e) => e.key == 'logDhcpConflict').toList();
+      expect(conflicts.map((e) => e.args['ip']), ['192.168.50.100', '192.168.50.101']);
+      expect(conflicts.first.args['mac'], '${mac(1)}');
+      expect(s.pool!.leaseOfMac(mac(1))!.ip, ip('192.168.50.102'));
+    });
+
+    test('이미 Lease가 있는 장비가 다시 DISCOVER해도 다시 확인하지 않는다', () async {
+      final (_, t, _, probed) = await make({});
+      t.receive(_client(DhcpMessageType.discover, mac(1)));
+      await settle();
+      t.receive(_client(DhcpMessageType.discover, mac(1)));
+      await settle();
+      expect(t.sent, hasLength(2));
+      expect(probed, hasLength(1));
+    });
+
+    test('줄 주소가 모두 쓰이는 중이면 제안하지 않고 로그를 남긴다', () async {
+      final all = {for (var i = 100; i <= 110; i++) '192.168.50.$i'};
+      final (_, t, b, _) = await make(all);
+      t.receive(_client(DhcpMessageType.discover, mac(1)));
+      await settle();
+      expect(t.sent, isEmpty);
+      expect(b.history.map((e) => e.key), contains('logDhcpPoolExhausted'));
+    });
+
+    test('확인이 꺼져 있으면 바로(동기로) 제안한다', () async {
+      await server.start(_config());
+      transport.receive(_client(DhcpMessageType.discover, mac(1)));
+      expect(transport.sent.single.packet.messageType, DhcpMessageType.offer);
+    });
+  });
 
   group('Lease 영속화', () {
     late Directory dir;

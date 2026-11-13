@@ -99,6 +99,13 @@ class DhcpPanel extends StatelessWidget {
           onChanged: (v) => model.update(model.settings.copyWith(persistLeases: v)),
         ),
         SwitchRow(
+          title: l10n.dhcpConflictCheck,
+          subtitle: l10n.dhcpConflictCheckHint,
+          value: s.conflictCheck,
+          enabled: !locked,
+          onChanged: (v) => model.update(model.settings.copyWith(conflictCheck: v)),
+        ),
+        SwitchRow(
           title: l10n.dhcpDetectOthers,
           subtitle: l10n.dhcpDetectOthersHint,
           value: s.detectOtherServers,

@@ -138,10 +138,7 @@ class LeasePool {
       }
       return existing;
     }
-    final reserved = _reservations[mac];
-    final ip = (reserved != null && _isFree(reserved, mac) ? reserved : null) ??
-        (requested != null && _isFree(requested, mac) ? requested : null) ??
-        _firstFree(mac);
+    final ip = _pick(mac, requested);
     if (ip == null) return null;
     return _put(Lease(
       mac: mac,
@@ -151,6 +148,20 @@ class LeasePool {
       expiresAt: now.add(offerHold),
       hostname: hostname,
     ));
+  }
+
+  /// [offer]가 지금 고를 주소 (아무것도 바꾸지 않는다). 충돌 검사가 미리 그 주소를 확인하는 데 쓴다.
+  /// 이미 Lease가 있으면 그 주소, 줄 주소가 없으면 null.
+  Ipv4? candidateFor(MacAddress mac, {Ipv4? requested}) {
+    expire();
+    return _byMac[mac]?.ip ?? _pick(mac, requested);
+  }
+
+  Ipv4? _pick(MacAddress mac, Ipv4? requested) {
+    final reserved = _reservations[mac];
+    return (reserved != null && _isFree(reserved, mac) ? reserved : null) ??
+        (requested != null && _isFree(requested, mac) ? requested : null) ??
+        _firstFree(mac);
   }
 
   /// REQUEST(선택, 갱신, 재바인딩, INIT-REBOOT)에 대한 확정. 줄 수 없으면 null (NAK).

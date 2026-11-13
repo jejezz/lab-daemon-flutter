@@ -31,6 +31,7 @@ class DhcpSettings {
     this.logPackets = false,
     this.detectOtherServers = true,
     this.persistLeases = true,
+    this.conflictCheck = true,
     this.reservations = const [],
   });
 
@@ -55,6 +56,9 @@ class DhcpSettings {
   /// 서비스를 껐다 켜도 Lease를 이어 쓴다 (파일에 저장).
   final bool persistLeases;
 
+  /// 제안하기 전에 그 주소를 ping으로 확인한다.
+  final bool conflictCheck;
+
   /// 고정 주소 예약 (MAC, IP) — 입력한 글자 그대로.
   final List<(String, String)> reservations;
 
@@ -74,6 +78,7 @@ class DhcpSettings {
   static const _logPacketsKey = 'dhcp_log_packets';
   static const _detectKey = 'dhcp_detect_other_servers';
   static const _persistKey = 'dhcp_persist_leases';
+  static const _conflictKey = 'dhcp_conflict_check';
   static const _reservationsKey = 'dhcp_reservations';
 
   factory DhcpSettings.load(SharedPreferences prefs) {
@@ -102,6 +107,7 @@ class DhcpSettings {
       logPackets: prefs.getBool(_logPacketsKey) ?? false,
       detectOtherServers: prefs.getBool(_detectKey) ?? true,
       persistLeases: prefs.getBool(_persistKey) ?? true,
+      conflictCheck: prefs.getBool(_conflictKey) ?? true,
       reservations: reservations,
     );
   }
@@ -115,6 +121,7 @@ class DhcpSettings {
     await prefs.setBool(_logPacketsKey, logPackets);
     await prefs.setBool(_detectKey, detectOtherServers);
     await prefs.setBool(_persistKey, persistLeases);
+    await prefs.setBool(_conflictKey, conflictCheck);
   }
 
   String valueOf(DhcpField f) => switch (f) {
@@ -159,6 +166,7 @@ class DhcpSettings {
     bool? logPackets,
     bool? detectOtherServers,
     bool? persistLeases,
+    bool? conflictCheck,
     List<(String, String)>? reservations,
   }) =>
       DhcpSettings(
@@ -176,6 +184,7 @@ class DhcpSettings {
         logPackets: logPackets ?? this.logPackets,
         detectOtherServers: detectOtherServers ?? this.detectOtherServers,
         persistLeases: persistLeases ?? this.persistLeases,
+        conflictCheck: conflictCheck ?? this.conflictCheck,
         reservations: reservations ?? this.reservations,
       );
 
@@ -326,6 +335,7 @@ class DhcpSettings {
       bootFile: bootFile.trim().isEmpty ? null : bootFile.trim(),
       directedBroadcast: directedBroadcast,
       logPackets: logPackets,
+      conflictCheck: conflictCheck,
       reservations: {for (final (mac, ip) in parsedReservations) mac: ip},
     );
   }

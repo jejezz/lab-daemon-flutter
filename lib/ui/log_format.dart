@@ -61,6 +61,7 @@ String formatLog(AppLocalizations l, LogEvent e) {
     'logDhcpProbeFailed' => l.logDhcpProbeFailed(s('error')),
     'logDhcpLeasesLoaded' => l.logDhcpLeasesLoaded(n('count'), n('skipped')),
     'logDhcpLeaseFileFailed' => l.logDhcpLeaseFileFailed(s('error')),
+    'logDhcpConflict' => l.logDhcpConflict(s('ip'), s('mac'), n('minutes')),
     // TFTP
     'logTftpStarted' => l.logTftpStarted(s('address'), n('port'), s('root')),
     'logTftpStopped' => l.logTftpStopped,

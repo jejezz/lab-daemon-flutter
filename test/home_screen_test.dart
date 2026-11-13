@@ -36,6 +36,9 @@ const _dhcpPrefs = <String, Object>{
   'dhcp_mask': '255.255.255.0',
   'dhcp_gateway': '192.168.50.1',
   'dhcp_lease_time': '1h',
+  // 가짜 전송 계층의 dora()가 응답을 바로(동기로) 읽으므로 ping 확인은 끈다.
+  'dhcp_conflict_check': false,
+  'dhcp_persist_leases': false,
 };
 
 MacAddress mac(int n) => MacAddress([0xaa, 0xbb, 0xcc, 0, 0, n]);

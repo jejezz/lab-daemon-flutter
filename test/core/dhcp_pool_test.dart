@@ -256,4 +256,18 @@ void main() {
       expect(pool.offer(mac(2))!.ip, isNot(ip('192.168.50.20')));
     });
   });
+  group('제안할 주소 미리 보기', () {
+    test('candidateFor는 offer가 고를 주소를 바꾸지 않고 알려 준다', () {
+      final clock = _Clock();
+      final pool = _pool(clock);
+      expect(pool.candidateFor(mac(1)), ip('192.168.50.100'));
+      expect(pool.leases, isEmpty, reason: '아무것도 바꾸지 않는다');
+      expect(pool.candidateFor(mac(1), requested: ip('192.168.50.102')), ip('192.168.50.102'));
+      pool.reserve(mac(1), ip('192.168.50.20'));
+      expect(pool.candidateFor(mac(1)), ip('192.168.50.20'), reason: '예약이 먼저');
+      final offered = pool.offer(mac(1))!;
+      expect(offered.ip, ip('192.168.50.20'));
+      expect(pool.candidateFor(mac(1)), ip('192.168.50.20'), reason: '이미 Lease가 있으면 그 주소');
+    });
+  });
 }

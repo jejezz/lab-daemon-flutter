@@ -55,6 +55,12 @@ void main() {
       expect(bad.validate()[DhcpField.reservations], FieldError.notInSubnet, reason: '서브넷을 바꿔서 어긋난 예약은 시작을 막는다');
     });
 
+    test('충돌 검사는 설정에서 기본으로 켜 있고 서비스 설정으로 넘어간다 (서비스 코어 기본은 꺼짐)', () {
+      expect(base.conflictCheck, isTrue);
+      expect(base.toConfig().conflictCheck, isTrue);
+      expect(base.copyWith(conflictCheck: false).toConfig().conflictCheck, isFalse);
+    });
+
     test('예약은 JSON으로 저장하고 다시 읽는다 (깨진 값은 빈 목록)', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();

@@ -12,6 +12,7 @@ import '../ipv4.dart';
 import '../lease_time.dart';
 import '../service.dart';
 import 'config.dart';
+import 'conflict.dart';
 import 'engine.dart';
 import 'lease_store.dart';
 import 'packet.dart';
@@ -70,11 +71,13 @@ final class DhcpStatsEvent extends ServiceEvent {
 NetService<ServiceConfig> createDhcpService() => DhcpServer();
 
 class DhcpServer extends BaseNetService<DhcpConfig> {
-  DhcpServer({DhcpTransportFactory? transportFactory, this.clock, super.snapshotInterval})
+  DhcpServer({DhcpTransportFactory? transportFactory, this.clock, IpProbe? prober, super.snapshotInterval})
       : _transportFactory = transportFactory ?? UdpDhcpTransport.bind,
+        _prober = prober ?? pingIsUsed,
         super('dhcp');
 
   final DhcpTransportFactory _transportFactory;
+  final IpProbe _prober;
 
   /// 테스트에서 시간을 주입한다. null이면 실제 시계.
   final DateTime Function()? clock;
@@ -297,6 +300,39 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
       log(LogLevel.debug, 'logDhcpPacketIn', kind: DhcpMessageType.name(request.messageType),
           args: {'from': '${datagram.from}'}, detail: DhcpPacket.hexDump(datagram.data));
     }
+    // DISCOVER는 제안하기 전에 그 주소가 이미 쓰이는지 확인한다 (응답이 늦어지므로 비동기로 이어 간다).
+    if ((_config?.conflictCheck ?? false) && request.messageType == DhcpMessageType.discover) {
+      unawaited(_probeThenHandle(request));
+      return;
+    }
+    _handle(request);
+  }
+
+  /// 제안할 주소로 ping을 보내 응답이 있으면 그 주소를 한동안 건너뛰고 다음 주소를 고른다 (최대 5번).
+  /// 5번 모두 쓰이는 주소였으면 제안하지 않는다 (이미 쓰이는 주소를 나눠 주느니 응답을 미룬다).
+  Future<void> _probeThenHandle(DhcpPacket request) async {
+    final mac = request.clientMac;
+    for (var attempt = 0; attempt < 5; attempt++) {
+      final pool = _pool;
+      if (pool == null) return;
+      final ip = pool.candidateFor(mac, requested: request.ipOption(DhcpOpt.requestedIp));
+      // 줄 주소가 없거나, 이미 이 장비의 Lease(제안·확정)가 있는 주소면 확인하지 않는다.
+      if (ip == null || pool.leaseOfMac(mac)?.ip == ip || !await _prober(ip)) {
+        _handle(request);
+        return;
+      }
+      if (_pool == null) return;
+      pool.decline(ip);
+      log(LogLevel.warning, 'logDhcpConflict', kind: 'PROBE', args: {'mac': '$mac', 'ip': '$ip', 'minutes': pool.declineQuarantine.inMinutes});
+    }
+    log(LogLevel.warning, 'logDhcpPoolExhausted', kind: 'OFFER', args: {'mac': '$mac'});
+  }
+
+  void _handle(DhcpPacket request) {
+    final engine = _engine;
+    final transport = _transport;
+    if (engine == null || transport == null) return;
+    final logPackets = _config?.logPackets ?? false;
     final reply = engine.handle(request);
     if (reply != null) {
       final Uint8List bytes = reply.packet.toBytes();

@@ -1329,4 +1329,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String reserveFailed(String error) {
     return 'Could not reserve: $error';
   }
+
+  @override
+  String logDhcpConflict(String ip, String mac, int minutes) {
+    return 'Got a reply from $ip, so it was not offered (asked by $mac) — skipping it for $minutes min';
+  }
+
+  @override
+  String get dhcpConflictCheck => 'Check an address before offering it (ping)';
+
+  @override
+  String get dhcpConflictCheckHint =>
+      'Pings the address before handing it out so it never collides with a device using a fixed IP. An unused address waits about 0.3 s for a reply. Devices that block ICMP are not found.';
 }

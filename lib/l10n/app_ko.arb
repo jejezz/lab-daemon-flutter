@@ -1421,5 +1421,21 @@
         "type": "String"
       }
     }
-  }
+  },
+  "logDhcpConflict": "{ip}에서 응답이 있어서 제안하지 않았어요 (요청한 MAC {mac}) — {minutes}분 동안 건너뜁니다",
+  "@logDhcpConflict": {
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      },
+      "mac": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "dhcpConflictCheck": "제안 전에 주소 사용 확인 (ping)",
+  "dhcpConflictCheckHint": "나눠 주기 전에 그 주소로 ping을 보내, 고정 IP를 쓰는 장비와 겹치지 않게 합니다. 쓰이지 않는 주소는 응답을 약 0.3초 기다립니다. ICMP를 막는 장비는 찾지 못해요."
 }
