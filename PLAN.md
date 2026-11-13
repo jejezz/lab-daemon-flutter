@@ -154,7 +154,7 @@ lab-daemon-flutter/
 | P5 TFTP | 구현·loopback 시험 완료 (RFC 1350/2347~2349/7440, netascii, 샌드박스, 동시 전송). 실장비 시험 남음 |
 | P6 FTP | 구현·loopback 시험 완료 (계정 하나 + 익명 + 쓰기 허용, PASV/EPSV/PORT, 샌드박스). 실장비 시험 남음 |
 | 구조 | 서비스별 Isolate, 묶음 이벤트·스냅샷 제한(성능), 서비스 시작 시 포트·방화벽·예약 포트 점검 |
-| P4 DHCP 확장 | 남음 (예약 UI, Lease 영속화, IP 충돌 검사, 로그 파일, DHCP option 66/67 ← TFTP 설정 연동) |
+| P4 DHCP 확장 | 구현·시험 완료 (2026-11-13): 예약 UI, Lease 영속화, IP 충돌 검사(ping), 서비스 로그 파일, option 66/67 ← TFTP 설정 연동. 실장비 시험은 말미 |
 
 ## 11. 남은 결정
 1. 1차 릴리스(`v0.1.0`) 범위: DHCP만 / DHCP+TFTP / 3개 모두?

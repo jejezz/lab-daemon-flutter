@@ -29,7 +29,7 @@
 
 ## Features
 
-- **DHCP server** — hands out addresses from a range you set (subnet, gateway, DNS, lease time) with DISCOVER/OFFER/REQUEST/ACK, NAK, RELEASE, DECLINE and INFORM; tells boards where to boot from (options 66/67); a lease table with one-click release. Before starting it probes for another DHCP server on the network and warns you.
+- **DHCP server** — hands out addresses from a range you set (subnet, gateway, DNS, lease time) with DISCOVER/OFFER/REQUEST/ACK, NAK, RELEASE, DECLINE and INFORM; tells boards where to boot from (options 66/67); a lease table with one-click release, fixed-address reservations, leases that survive a restart, and a ping check so it never hands out an address that is already in use. Before starting it probes for another DHCP server on the network and warns you.
 - **TFTP server** — RFC 1350 with block size, timeout and transfer size options (RFC 2347–2349) and window size (RFC 7440), netascii, optional uploads; about 13–20 MB/s on loopback with a 20 MB image.
 - **FTP server** — one account plus optional anonymous login (no per-user permission matrix), passive (PASV/EPSV) and active (PORT/EPRT) modes, resume, listings for FileZilla and friends; passwords are kept only as salted hashes.
 - **A live view of every client** — each service has its own settings, client table (leases, transfers, sessions with speeds) and log (100–5000 lines), and the title bar shows the address clients should connect to. The log and tables stay light even under a flood of requests.
