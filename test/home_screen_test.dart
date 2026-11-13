@@ -365,6 +365,34 @@ void main() {
     });
   });
 
+  group('설정 칸', () {
+    _testApp('루트 폴더 칸에 포커스가 있어도 찾아보기로 고른 폴더가 바로 보인다', (tester, app) async {
+      await tester.tap(find.text('TFTP').first);
+      await tester.pumpAndSettle();
+      final field = find.widgetWithText(TextField, 'Root folder');
+      // 칸을 한 번 누른 뒤 [찾아보기]를 쓰면, 폴더 선택 창이 닫힐 때 포커스가 이 칸으로 돌아온다.
+      await tester.tap(field);
+      await tester.pump();
+      expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
+
+      // FolderField가 폴더를 고른 뒤 하는 일과 같다.
+      app.tftp.update(app.tftp.settings.copyWith(rootDir: app.root.path));
+      await tester.pump();
+      expect(tester.widget<TextField>(field).controller!.text, app.root.path);
+      expect(find.text('Folder does not exist'), findsNothing);
+    });
+
+    _testApp('직접 입력할 때는 앞뒤 공백을 떼어 저장해도 입력 중인 글자를 덮어쓰지 않는다', (tester, app) async {
+      await tester.tap(find.text('TFTP').first);
+      await tester.pumpAndSettle();
+      final field = find.widgetWithText(TextField, 'Port');
+      await tester.enterText(field, ' 6969 ');
+      await tester.pump();
+      expect(app.tftp.settings.port, '6969');
+      expect(tester.widget<TextField>(field).controller!.text, ' 6969 ');
+    });
+  });
+
   group('FTP', () {
     _testApp('계정 하나를 정하면 비밀번호는 해시로만 저장되고, 접속한 클라이언트가 세션 표에 나온다', (tester, app) async {
       final port = (await tester.runAsync(() => _freePort(tcp: true)))!;

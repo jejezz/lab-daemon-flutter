@@ -72,10 +72,18 @@ class _SettingsTextFieldState extends State<SettingsTextField> {
   late final _controller = TextEditingController(text: widget.value);
   final _focus = FocusNode();
 
+  /// 이 칸에서 마지막으로 입력해 보낸 값. 돌아온 값이 이것과 같으면 내가 친 글자이므로 덮어쓰지 않는다.
+  String? _typed;
+
   @override
   void didUpdateWidget(SettingsTextField old) {
     super.didUpdateWidget(old);
-    if (!_focus.hasFocus && widget.value != _controller.text) _controller.text = widget.value;
+    if (widget.value == old.value || widget.value == _controller.text) return;
+    // 포커스가 있어도 바깥에서 바뀐 값(찾아보기로 고른 폴더, NIC를 골라 채운 범위)은 보여 준다.
+    // 폴더 선택 창이 닫히면 포커스가 이 칸으로 돌아오므로 포커스 여부로 판단하면 안 된다.
+    if (widget.value != _typed) {
+      _controller.value = TextEditingValue(text: widget.value, selection: TextSelection.collapsed(offset: widget.value.length));
+    }
   }
 
   @override
@@ -92,7 +100,11 @@ class _SettingsTextFieldState extends State<SettingsTextField> {
         enabled: widget.enabled,
         obscureText: widget.obscure,
         decoration: _decoration(label: widget.label, hint: widget.hint, error: widget.error, helper: widget.helper, suffix: widget.suffix),
-        onChanged: (v) => widget.onChanged(widget.obscure ? v : v.trim()),
+        onChanged: (v) {
+          final sent = widget.obscure ? v : v.trim();
+          _typed = sent;
+          widget.onChanged(sent);
+        },
       );
 }
 
