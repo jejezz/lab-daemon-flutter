@@ -16,14 +16,14 @@ DHCP, TFTP, FTP(이후 Syslog 등) 같은 랩용 네트워크 서비스를 한 �
 
 ## 구조
 - **코어 `lib/core/`** (순수 Dart): `NetService`/`BaseNetService`(service.dart), 서비스별 `dhcp/`·`tftp/`·`ftp/`. 각 서비스는 **자기 Isolate**에서 돈다(`IsolateHost`, host.dart). 시험은 `InProcessHost`로 같은 Isolate에서 돌린다. 설정은 `toJson`/`fromJson`으로 Isolate 경계를 건넌다.
-- **상태 `lib/state/`**: 서비스마다 모델(`DhcpModel`·`TftpModel`·`FtpModel`, service_models.dart)이 설정·상태·**그 서비스만의 로그**(`LogBus` 5000줄)·클라이언트 스냅샷을 가진다. 서비스 설정 값은 입력 문자열 그대로 `<서비스>_<이름>` 키로 저장한다.
+- **상태 `lib/state/`**: 서비스마다 모델(`DhcpModel`·`TftpModel`·`FtpModel`, service_models.dart)이 설정·상태·**그 서비스만의 로그**(`LogBus`, 보관 줄 수는 서비스마다 선택, 기본 1000줄)·클라이언트 스냅샷을 가진다. 서비스 설정 값은 입력 문자열 그대로 `<서비스>_<이름>` 키로 저장한다.
 - **화면 `lib/ui/`**: 사이드바(서비스 목록) + 서비스별 화면(`service_page.dart`: 왼쪽 **그 서비스의 설정 패널**, 오른쪽 클라이언트 표, 아래 그 서비스의 로그). 서비스 설정은 서비스마다 따로 두고 하나의 화면에 섞지 않는다. 앱 설정 창(`lib/settings/settings_dialog.dart`)에는 "외형"만 있다.
 - 서비스 로그는 번역하지 않은 ARB 키 + 인자로 내보내고 `lib/ui/log_format.dart`가 문구로 바꾼다. 새 `logDhcp…`/`logTftp…`/`logFtp…`/`logCheck…` 키를 추가하면 포맷터와 ARB(ko/en)에도 더한다 (`test/log_format_test.dart`가 빠진 키와 안 쓰는 키를 잡는다).
 
 ## 성능 (3CDaemon의 약점을 피한다)
 - 패킷 처리 경로에서는 로그·표를 만들지 않는다: 표 스냅샷은 `scheduleSnapshot`이 최대 200~250ms에 한 번 만들고, 로그는 사건(요청·완료·실패)에만 남긴다.
 - 서비스 Isolate → 화면 이벤트는 `EventBatcher`가 100ms마다 묶는다. 같은 종류의 스냅샷은 최신 것만, 로그는 묶음마다 400줄까지(넘치면 "N건 건너뜀").
-- 로그 보관 줄 수는 서비스마다 고르며(100/500/1000/5000, 기본 1000) 로그 패널은 보이는 줄만 그리고, 번역 문구를 줄마다 한 번만 만들며(Expando), 필터는 새 줄에만 적용한다.
+- 로그 보관 줄 수는 100/500/1000/5000 중에서 고른다. 로그 패널은 보이는 줄만 그리고, 번역 문구를 줄마다 한 번만 만들며(Expando), 필터는 새 줄에만 적용한다.
 - **Windows의 `RawDatagramSocket.send`는 OS 버퍼가 차면 0을 돌려주고 패킷을 버린다** (연달아 보내면 흔함). UDP를 보낼 때는 항상 `UdpSendQueue`(udp_queue.dart)를 거친다.
 
 ## 서비스별 결정
