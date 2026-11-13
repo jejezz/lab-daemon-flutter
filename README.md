@@ -8,7 +8,7 @@
 <h1 align="center">Lab Daemon</h1>
 
 <p align="center">
-  A <b>lab network service launcher for Windows</b> — run DHCP, TFTP and FTP servers side by side and watch every lease, transfer and log line live.
+  A <b>lab network service launcher for Windows</b> — run DHCP, TFTP, FTP and HTTP servers side by side and watch every lease, transfer and log line live.
 </p>
 
 <p align="center">
@@ -32,6 +32,7 @@
 - **DHCP server** — hands out addresses from a range you set (subnet, gateway, DNS, lease time) with DISCOVER/OFFER/REQUEST/ACK, NAK, RELEASE, DECLINE and INFORM; tells boards where to boot from (options 66/67); a lease table with one-click release, fixed-address reservations, leases that survive a restart, and a ping check so it never hands out an address that is already in use. Before starting it probes for another DHCP server on the network and warns you.
 - **TFTP server** — RFC 1350 with block size, timeout and transfer size options (RFC 2347–2349) and window size (RFC 7440), netascii, optional uploads; about 13–20 MB/s on loopback with a 20 MB image.
 - **FTP server** — one account plus optional anonymous login (no per-user permission matrix), passive (PASV/EPSV) and active (PORT/EPRT) modes, resume, listings for FileZilla and friends; passwords are kept only as salted hashes.
+- **HTTP file server** — serves the root folder to `wget`, `curl` and OTA updaters: resumable downloads (`Range`, `ETag`, `If-Modified-Since`), a folder listing or `index.html`, and optional uploads with `curl -T` (temp file, then rename). It cannot leave the root folder, and about 200 MB/s on loopback.
 - **A live view of every client** — each service has its own settings, client table (leases, transfers, sessions with speeds) and log (100–5000 lines), and the title bar shows the address clients should connect to. The log and tables stay light even under a flood of requests.
 - **Checks when you press Start, not before** — port conflicts, a missing Windows Firewall rule (with step-by-step help for your Windows version, a copyable `netsh` command and a one-click add), and ports Windows has reserved.
 - **Light & dark, color schemes, English & 한국어** — follows the system, or pick them (and the text size) in Settings
@@ -53,7 +54,7 @@ Download from [**Releases**](https://github.com/jejezz/lab-daemon-flutter/releas
 
 The app runs as a normal user — no administrator rights are needed to listen on UDP 67/69 or TCP 21. The installer (which does run as administrator) adds an inbound Windows Firewall rule for it; a copy run from another folder gets a how-to-fix hint and a one-click rule instead.
 
-**Quick start:** pick a service in the sidebar, set its folder (TFTP, FTP) or address range (DHCP) in the settings panel on the right, and press **Start service**. Clients connect to the address shown in the title bar; the port is shown only when it isn't the protocol default (TFTP 69, FTP 21).
+**Quick start:** pick a service in the sidebar, set its folder (TFTP, FTP) or address range (DHCP) in the settings panel on the right, and press **Start service**. Clients connect to the address shown in the title bar; the port is shown only when it isn't the protocol default (TFTP 69, FTP 21, HTTP 80).
 
 > **DHCP:** run it only on a network you own. A second DHCP server can disturb the first — Lab Daemon checks for one before starting, but a lab bench with its own switch is the safe place.
 

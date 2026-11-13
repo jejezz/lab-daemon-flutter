@@ -1,10 +1,11 @@
-// 서비스별 화면 모델: DHCP(Lease 표), TFTP(전송 목록), FTP(세션 목록).
+// 서비스별 화면 모델: DHCP(Lease 표), TFTP(전송 목록), FTP(세션 목록), HTTP(요청 목록).
 
 import 'dart:async';
 
 import '../core/dhcp/detector.dart';
 import '../core/dhcp/server.dart';
 import '../core/ftp/server.dart';
+import '../core/http/server.dart';
 import '../core/ipv4.dart';
 import '../core/netutil.dart';
 import '../core/netcheck.dart';
@@ -12,6 +13,7 @@ import '../core/service.dart';
 import '../core/tftp/server.dart';
 import 'dhcp_settings.dart';
 import 'ftp_settings.dart';
+import 'http_settings.dart';
 import 'service_model.dart';
 import 'settings_common.dart';
 import 'tftp_settings.dart';
@@ -231,4 +233,53 @@ class FtpModel extends ServiceModel {
   }
 
   Future<bool> disconnect(int id) async => running && (await command('disconnect', {'id': id})) == true;
+}
+
+class HttpModel extends ServiceModel {
+  HttpModel({required super.host, required super.prefs, required super.checker, super.logSink, super.notifyDelay}) : super(id: 'http') {
+    settings = HttpSettings.load(prefs);
+  }
+
+  late HttpSettings settings;
+  HttpRequestsEvent? requests;
+
+  Map<HttpField, FieldError> get errors => settings.validate();
+
+  @override
+  bool get settingsValid => errors.isEmpty;
+
+  @override
+  Map<String, Object?> buildConfig() => settings.toConfig().toJson();
+
+  @override
+  Ipv4 get checkAddress => Ipv4.tryParse(settings.bindIp) ?? Ipv4.any;
+
+  @override
+  List<PreStartPort> get checkPorts => [PreStartPort('TCP', int.tryParse(settings.port) ?? 80)];
+
+  @override
+  List<String> endpoints(List<NicInfo> nics) => connectEndpoints(settings.bindIp, settings.port, 80, nics);
+
+  /// 클라이언트가 열 주소(`http://IP[:포트]/`). 모든 NIC에 열었으면 NIC마다 하나씩.
+  List<String> urls(List<NicInfo> nics) => [for (final e in endpoints(nics)) 'http://$e/'];
+
+  @override
+  void handleEvent(ServiceEvent event) {
+    if (event is HttpRequestsEvent) requests = event;
+  }
+
+  @override
+  void clearClients() => requests = null;
+
+  void update(HttpSettings next) {
+    settings = next;
+    unawaited(next.save(prefs));
+    notifyNow();
+  }
+
+  Future<bool> abort(int id) async => running && (await command('abort', {'id': id})) == true;
+
+  Future<void> clearRecent() async {
+    if (running) await command('clearRecent');
+  }
 }

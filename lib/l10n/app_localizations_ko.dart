@@ -1361,4 +1361,150 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get fieldRootDirDropHint => '폴더를 이 칸으로 끌어다 놓을 수도 있어요';
+
+  @override
+  String get serviceHttp => 'HTTP';
+
+  @override
+  String get httpAllowListing => '폴더 목록 보이기';
+
+  @override
+  String get httpAllowListingHint =>
+      '폴더 주소를 열면 파일 목록을 보여 줍니다 (끄면 index.html이 있을 때만 내줌)';
+
+  @override
+  String get httpAllowWrite => '올리기(PUT) 허용';
+
+  @override
+  String get httpAllowWriteHint => 'curl -T 파일 http://주소/이름 으로 루트 폴더에 올릴 수 있어요';
+
+  @override
+  String get httpAllowOverwrite => '이미 있는 파일 덮어쓰기 허용';
+
+  @override
+  String get httpMaxConnections => '최대 동시 요청';
+
+  @override
+  String get httpIdleTimeout => '유휴 연결 끊기 (초)';
+
+  @override
+  String get httpColClient => '클라이언트';
+
+  @override
+  String get httpColRequest => '요청';
+
+  @override
+  String get httpColStatus => '응답';
+
+  @override
+  String get httpColProgress => '진행';
+
+  @override
+  String get httpColRate => '속도';
+
+  @override
+  String get httpColState => '상태';
+
+  @override
+  String get httpEmptyTitle => '아직 요청이 없어요';
+
+  @override
+  String get httpEmptyHint => '장비가 HTTP로 파일을 요청하면 여기에 나타나요';
+
+  @override
+  String httpSummary(
+    int active,
+    int completed,
+    int failed,
+    String sent,
+    String received,
+  ) {
+    return '진행 $active · 성공 $completed · 실패 $failed · 보냄 $sent · 받음 $received';
+  }
+
+  @override
+  String get httpCopyAddress => '주소 복사';
+
+  @override
+  String httpAddressCopied(String url) {
+    return '$url 복사했어요';
+  }
+
+  @override
+  String get httpReasonAborted => '연결이 끊겼거나 중단했어요';
+
+  @override
+  String get httpReasonIo => '파일을 읽거나 쓰지 못했어요';
+
+  @override
+  String get httpReasonDiskFull => '디스크 공간이 부족해요';
+
+  @override
+  String get httpReasonBlocked => '루트 폴더 밖이거나 허용하지 않는 경로예요';
+
+  @override
+  String httpReasonStatus(int status) {
+    return '응답 코드 $status';
+  }
+
+  @override
+  String logHttpStarted(String address, int port, String root) {
+    return 'HTTP 서버를 $address:$port에서 시작했어요 · $root';
+  }
+
+  @override
+  String get logHttpStopped => 'HTTP 서버를 멈췄어요';
+
+  @override
+  String logHttpRequest(
+    String method,
+    String path,
+    int status,
+    String client,
+    String bytes,
+    String seconds,
+    String rate,
+  ) {
+    return '$method $path → $status ($client) · $bytes · $seconds초 · $rate';
+  }
+
+  @override
+  String logHttpAborted(
+    String method,
+    String path,
+    String client,
+    String bytes,
+  ) {
+    return '$method $path 중단됨 ($client) · $bytes까지 보냈어요';
+  }
+
+  @override
+  String logHttpBlocked(String path, String client, String reason) {
+    return '허용하지 않는 경로를 막았어요: $path ($client, $reason)';
+  }
+
+  @override
+  String logHttpBusy(String client, int limit) {
+    return '동시 요청이 너무 많아서 거절했어요 ($client, 최대 $limit개)';
+  }
+
+  @override
+  String logHttpConnectionError(String error) {
+    return '연결 오류: $error';
+  }
+
+  @override
+  String logHttpPortInUse(String address, int port, String error) {
+    return '$address:$port는 이미 다른 프로그램이 쓰고 있어요: $error';
+  }
+
+  @override
+  String logHttpPermissionDenied(String address, int port, String error) {
+    return '$address:$port를 열 권한이 없어요: $error';
+  }
+
+  @override
+  String logHttpBindFailed(String address, int port, String error) {
+    return '$address:$port를 열지 못했어요: $error';
+  }
 }

@@ -19,6 +19,7 @@ String serviceName(AppLocalizations l10n, String id) => switch (id) {
       'dhcp' => l10n.serviceDhcp,
       'tftp' => l10n.serviceTftp,
       'ftp' => l10n.serviceFtp,
+      'http' => l10n.serviceHttp,
       _ => id,
     };
 

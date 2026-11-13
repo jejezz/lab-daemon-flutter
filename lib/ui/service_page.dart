@@ -17,6 +17,7 @@ import 'actions.dart';
 import 'clients/client_tables.dart';
 import 'format.dart';
 import 'open_folder.dart';
+import 'widgets/error_snackbar.dart';
 import 'log_panel.dart';
 import 'panels/service_panels.dart';
 import 'widgets/status_pill.dart';
@@ -146,6 +147,7 @@ class _ServicePageState extends State<ServicePage> {
                                       DhcpModel() => DhcpPanel(model: m, tftp: controller.tftp, nics: controller.nics, onRefreshNics: controller.refreshNics),
                                       TftpModel() => TftpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
                                       FtpModel() => FtpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
+                                      HttpModel() => HttpPanel(model: m, nics: controller.nics, onRefreshNics: controller.refreshNics),
                                       _ => const SizedBox.shrink(),
                                     },
                                   ),
@@ -215,6 +217,30 @@ class _ServicePageState extends State<ServicePage> {
         return Column(children: [
           _Toolbar(children: [_openRootButton(l10n, m.settings.rootDir)]),
           Expanded(child: FtpSessionTable(sessions: m.sessions?.sessions ?? const [], onDisconnect: m.disconnect)),
+        ]);
+      case HttpModel():
+        final requests = m.requests?.requests ?? const [];
+        final urls = m.urls(ControllerScope.read(context).nics);
+        return Column(children: [
+          _Toolbar(children: [
+            _openRootButton(l10n, m.settings.rootDir),
+            TextButton.icon(
+              onPressed: urls.isEmpty
+                  ? null
+                  : () async {
+                      await Clipboard.setData(ClipboardData(text: urls.first));
+                      if (context.mounted) showInfoSnackBar(context, l10n.httpAddressCopied(urls.first));
+                    },
+              icon: const Icon(Icons.link_rounded, size: 18),
+              label: Text(l10n.httpCopyAddress),
+            ),
+            TextButton.icon(
+              onPressed: requests.any((r) => r.endedAt != null) ? m.clearRecent : null,
+              icon: const Icon(Icons.clear_all_rounded, size: 18),
+              label: Text(l10n.tftpClearRecent),
+            ),
+          ]),
+          Expanded(child: HttpRequestTable(requests: requests, onAbort: m.abort)),
         ]);
     }
     return const SizedBox.shrink();
@@ -340,6 +366,10 @@ class _Header extends StatelessWidget {
         final f = m.sessions;
         return '${m.settings.bindIp.isEmpty ? '0.0.0.0' : m.settings.bindIp}:${m.settings.port} · '
             '${l10n.ftpSummary(f?.openCount ?? 0, f?.totalConnections ?? 0, formatBytes(f?.bytesIn ?? 0), formatBytes(f?.bytesOut ?? 0))}';
+      case HttpModel():
+        final h = m.requests;
+        return '${m.settings.bindIp.isEmpty ? '0.0.0.0' : m.settings.bindIp}:${m.settings.port} · '
+            '${l10n.httpSummary(h?.activeCount ?? 0, h?.completed ?? 0, h?.failed ?? 0, formatBytes(h?.bytesSent ?? 0), formatBytes(h?.bytesReceived ?? 0))}';
     }
     return '';
   }

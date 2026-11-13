@@ -29,6 +29,7 @@ lib/
 | DHCP | `core/dhcp/` | `engine`(순수 로직: DORA·NAK·RELEASE·DECLINE·INFORM), `pool`(주소 풀·Lease), `transport`(UDP 67), `detector`(다른 DHCP 서버 찾기) |
 | TFTP | `core/tftp/` | `packet`(파서), `transfer`(전송 하나: 윈도 크기·재전송), `server`(UDP 69, 전송마다 소켓), `netascii` |
 | FTP | `core/ftp/` | `session`(제어 연결 하나), `server`(수락·패시브 포트 관리), `config`(계정 하나 + 익명) |
+| HTTP | `core/http/` | `server`(dart:io `HttpServer`: GET/HEAD·Range·ETag·폴더 목록·PUT 올리기), `config`. 요청 하나가 요청 목록의 한 줄 |
 
 공통 도구: `fs_sandbox.dart`(TFTP·FTP가 루트 폴더 밖으로 나가지 못하게), `udp_queue.dart`(Windows에서 `send`가 0을 돌려주고 패킷을 버리는 문제를 막는 전송 큐), `socket_errors.dart`(바인딩 오류를 "포트 사용 중"·"권한 없음"으로 구분).
 

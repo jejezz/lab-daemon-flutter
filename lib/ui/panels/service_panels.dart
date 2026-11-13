@@ -10,6 +10,7 @@ import '../../core/netutil.dart';
 import '../../l10n/app_localizations.dart';
 import '../../state/dhcp_settings.dart';
 import '../../state/ftp_settings.dart';
+import '../../state/http_settings.dart';
 import '../../state/service_model.dart';
 import '../../state/service_models.dart';
 import '../../state/tftp_settings.dart';
@@ -314,6 +315,81 @@ class _ReservationsSectionState extends State<_ReservationsSection> {
           const SizedBox(width: AppSpacing.sm),
           FilledButton(onPressed: _add, child: Text(l10n.dhcpReserveAdd)),
         ]),
+      ],
+    );
+  }
+}
+
+class HttpPanel extends StatelessWidget {
+  const HttpPanel({super.key, required this.model, required this.nics, required this.onRefreshNics});
+
+  final HttpModel model;
+  final List<NicInfo> nics;
+  final VoidCallback onRefreshNics;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final s = model.settings;
+    final errors = model.errors;
+    final locked = model.running || model.busy;
+    String? e(HttpField f) => fieldErrorText(l10n, visibleError(errors[f], showRequired: model.showAllErrors));
+    Widget text(HttpField f, String label, {String? hint}) => SettingsTextField(
+          label: label,
+          value: s.valueOf(f),
+          hint: hint,
+          error: e(f),
+          enabled: !locked,
+          onChanged: (v) => model.update(model.settings.withValue(f, v)),
+        );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (locked) _LockedNote(l10n.runningLockedNote),
+        PanelHeading(l10n.statusServer, first: true),
+        NicDropdown(
+          value: s.bindIp,
+          nics: nics,
+          allowAll: true,
+          error: e(HttpField.bindIp),
+          enabled: !locked,
+          onRefresh: onRefreshNics,
+          onChanged: (ip) => model.update(model.settings.copyWith(bindIp: ip)),
+        ),
+        fieldGap,
+        text(HttpField.port, l10n.fieldPortDefault(80)),
+        fieldGap,
+        FolderField(
+          value: s.rootDir,
+          error: e(HttpField.rootDir),
+          enabled: !locked,
+          onChanged: (v) => model.update(model.settings.copyWith(rootDir: v)),
+        ),
+        fieldGap,
+        SwitchRow(
+          title: l10n.httpAllowListing,
+          subtitle: l10n.httpAllowListingHint,
+          value: s.allowListing,
+          enabled: !locked,
+          onChanged: (v) => model.update(model.settings.copyWith(allowListing: v)),
+        ),
+        SwitchRow(
+          title: l10n.httpAllowWrite,
+          subtitle: l10n.httpAllowWriteHint,
+          value: s.allowWrite,
+          enabled: !locked,
+          onChanged: (v) => model.update(model.settings.copyWith(allowWrite: v)),
+        ),
+        SwitchRow(
+          title: l10n.httpAllowOverwrite,
+          value: s.allowOverwrite,
+          enabled: !locked && s.allowWrite,
+          onChanged: (v) => model.update(model.settings.copyWith(allowOverwrite: v)),
+        ),
+        PanelHeading(l10n.sectionAdvanced),
+        _LogFileRow(model: model),
+        FieldPair(text(HttpField.maxConnections, l10n.httpMaxConnections), text(HttpField.idleTimeout, l10n.httpIdleTimeout)),
       ],
     );
   }

@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/dhcp/server.dart';
 import '../core/ftp/server.dart';
 import '../core/host.dart';
+import '../core/http/server.dart';
 import '../core/netcheck.dart';
 import '../core/netutil.dart';
 import '../core/tftp/server.dart';
@@ -25,6 +26,7 @@ class LabDaemonController extends ChangeNotifier {
     required this.dhcp,
     required this.tftp,
     required this.ftp,
+    required this.http,
     Future<List<NicInfo>> Function()? nicLister,
   }) : _nicLister = nicLister ?? listNics {
     selectedId = prefs.getString(_selectedKey) ?? 'dhcp';
@@ -47,6 +49,7 @@ class LabDaemonController extends ChangeNotifier {
       dhcp: DhcpModel(host: IsolateHost('dhcp', createDhcpService), prefs: prefs, checker: checker, leaseFile: _dataFile('dhcp_leases.json'), logSink: sink('dhcp')),
       tftp: TftpModel(host: IsolateHost('tftp', createTftpService), prefs: prefs, checker: checker, logSink: sink('tftp')),
       ftp: FtpModel(host: IsolateHost('ftp', createFtpService), prefs: prefs, checker: checker, logSink: sink('ftp')),
+      http: HttpModel(host: IsolateHost('http', createHttpService), prefs: prefs, checker: checker, logSink: sink('http')),
     );
   }
 
@@ -61,12 +64,13 @@ class LabDaemonController extends ChangeNotifier {
   final DhcpModel dhcp;
   final TftpModel tftp;
   final FtpModel ftp;
+  final HttpModel http;
   final Future<List<NicInfo>> Function() _nicLister;
 
   late String selectedId;
   List<NicInfo> nics = const [];
 
-  List<ServiceModel> get services => [dhcp, tftp, ftp];
+  List<ServiceModel> get services => [dhcp, tftp, ftp, http];
 
   ServiceModel get selected => services.firstWhere((s) => s.id == selectedId);
 

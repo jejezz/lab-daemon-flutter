@@ -1383,4 +1383,153 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get fieldRootDirDropHint =>
       'You can also drag a folder onto this field';
+
+  @override
+  String get serviceHttp => 'HTTP';
+
+  @override
+  String get httpAllowListing => 'Show folder listings';
+
+  @override
+  String get httpAllowListingHint =>
+      'Opening a folder address lists its files (when off, only an index.html is served)';
+
+  @override
+  String get httpAllowWrite => 'Allow uploads (PUT)';
+
+  @override
+  String get httpAllowWriteHint =>
+      'Clients can upload into the root folder with curl -T file http://address/name';
+
+  @override
+  String get httpAllowOverwrite => 'Allow overwriting existing files';
+
+  @override
+  String get httpMaxConnections => 'Max concurrent requests';
+
+  @override
+  String get httpIdleTimeout => 'Idle connection timeout (s)';
+
+  @override
+  String get httpColClient => 'Client';
+
+  @override
+  String get httpColRequest => 'Request';
+
+  @override
+  String get httpColStatus => 'Reply';
+
+  @override
+  String get httpColProgress => 'Progress';
+
+  @override
+  String get httpColRate => 'Rate';
+
+  @override
+  String get httpColState => 'State';
+
+  @override
+  String get httpEmptyTitle => 'No requests yet';
+
+  @override
+  String get httpEmptyHint =>
+      'Devices show up here when they request a file over HTTP';
+
+  @override
+  String httpSummary(
+    int active,
+    int completed,
+    int failed,
+    String sent,
+    String received,
+  ) {
+    return 'Active $active · OK $completed · Failed $failed · Sent $sent · Received $received';
+  }
+
+  @override
+  String get httpCopyAddress => 'Copy address';
+
+  @override
+  String httpAddressCopied(String url) {
+    return 'Copied $url';
+  }
+
+  @override
+  String get httpReasonAborted => 'The connection was dropped or aborted';
+
+  @override
+  String get httpReasonIo => 'Could not read or write the file';
+
+  @override
+  String get httpReasonDiskFull => 'The disk is full';
+
+  @override
+  String get httpReasonBlocked =>
+      'The path is outside the root folder or not allowed';
+
+  @override
+  String httpReasonStatus(int status) {
+    return 'Reply code $status';
+  }
+
+  @override
+  String logHttpStarted(String address, int port, String root) {
+    return 'HTTP server started on $address:$port · $root';
+  }
+
+  @override
+  String get logHttpStopped => 'HTTP server stopped';
+
+  @override
+  String logHttpRequest(
+    String method,
+    String path,
+    int status,
+    String client,
+    String bytes,
+    String seconds,
+    String rate,
+  ) {
+    return '$method $path → $status ($client) · $bytes · ${seconds}s · $rate';
+  }
+
+  @override
+  String logHttpAborted(
+    String method,
+    String path,
+    String client,
+    String bytes,
+  ) {
+    return '$method $path aborted ($client) · sent $bytes';
+  }
+
+  @override
+  String logHttpBlocked(String path, String client, String reason) {
+    return 'Blocked a path that is not allowed: $path ($client, $reason)';
+  }
+
+  @override
+  String logHttpBusy(String client, int limit) {
+    return 'Too many concurrent requests, refused ($client, max $limit)';
+  }
+
+  @override
+  String logHttpConnectionError(String error) {
+    return 'Connection error: $error';
+  }
+
+  @override
+  String logHttpPortInUse(String address, int port, String error) {
+    return '$address:$port is already used by another program: $error';
+  }
+
+  @override
+  String logHttpPermissionDenied(String address, int port, String error) {
+    return 'No permission to open $address:$port: $error';
+  }
+
+  @override
+  String logHttpBindFailed(String address, int port, String error) {
+    return 'Could not open $address:$port: $error';
+  }
 }

@@ -1463,5 +1463,195 @@
       }
     }
   },
-  "fieldRootDirDropHint": "폴더를 이 칸으로 끌어다 놓을 수도 있어요"
+  "fieldRootDirDropHint": "폴더를 이 칸으로 끌어다 놓을 수도 있어요",
+  "serviceHttp": "HTTP",
+  "httpAllowListing": "폴더 목록 보이기",
+  "httpAllowListingHint": "폴더 주소를 열면 파일 목록을 보여 줍니다 (끄면 index.html이 있을 때만 내줌)",
+  "httpAllowWrite": "올리기(PUT) 허용",
+  "httpAllowWriteHint": "curl -T 파일 http://주소/이름 으로 루트 폴더에 올릴 수 있어요",
+  "httpAllowOverwrite": "이미 있는 파일 덮어쓰기 허용",
+  "httpMaxConnections": "최대 동시 요청",
+  "httpIdleTimeout": "유휴 연결 끊기 (초)",
+  "httpColClient": "클라이언트",
+  "httpColRequest": "요청",
+  "httpColStatus": "응답",
+  "httpColProgress": "진행",
+  "httpColRate": "속도",
+  "httpColState": "상태",
+  "httpEmptyTitle": "아직 요청이 없어요",
+  "httpEmptyHint": "장비가 HTTP로 파일을 요청하면 여기에 나타나요",
+  "httpSummary": "진행 {active} · 성공 {completed} · 실패 {failed} · 보냄 {sent} · 받음 {received}",
+  "@httpSummary": {
+    "placeholders": {
+      "active": {
+        "type": "int"
+      },
+      "completed": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "sent": {
+        "type": "String"
+      },
+      "received": {
+        "type": "String"
+      }
+    }
+  },
+  "httpCopyAddress": "주소 복사",
+  "httpAddressCopied": "{url} 복사했어요",
+  "@httpAddressCopied": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "httpReasonAborted": "연결이 끊겼거나 중단했어요",
+  "httpReasonIo": "파일을 읽거나 쓰지 못했어요",
+  "httpReasonDiskFull": "디스크 공간이 부족해요",
+  "httpReasonBlocked": "루트 폴더 밖이거나 허용하지 않는 경로예요",
+  "httpReasonStatus": "응답 코드 {status}",
+  "@httpReasonStatus": {
+    "placeholders": {
+      "status": {
+        "type": "int"
+      }
+    }
+  },
+  "logHttpStarted": "HTTP 서버를 {address}:{port}에서 시작했어요 · {root}",
+  "@logHttpStarted": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      },
+      "port": {
+        "type": "int"
+      },
+      "root": {
+        "type": "String"
+      }
+    }
+  },
+  "logHttpStopped": "HTTP 서버를 멈췄어요",
+  "logHttpRequest": "{method} {path} → {status} ({client}) · {bytes} · {seconds}초 · {rate}",
+  "@logHttpRequest": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      },
+      "status": {
+        "type": "int"
+      },
+      "client": {
+        "type": "String"
+      },
+      "bytes": {
+        "type": "String"
+      },
+      "seconds": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "logHttpAborted": "{method} {path} 중단됨 ({client}) · {bytes}까지 보냈어요",
+  "@logHttpAborted": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      },
+      "client": {
+        "type": "String"
+      },
+      "bytes": {
+        "type": "String"
+      }
+    }
+  },
+  "logHttpBlocked": "허용하지 않는 경로를 막았어요: {path} ({client}, {reason})",
+  "@logHttpBlocked": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "client": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "logHttpBusy": "동시 요청이 너무 많아서 거절했어요 ({client}, 최대 {limit}개)",
+  "@logHttpBusy": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "logHttpConnectionError": "연결 오류: {error}",
+  "@logHttpConnectionError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "logHttpPortInUse": "{address}:{port}는 이미 다른 프로그램이 쓰고 있어요: {error}",
+  "@logHttpPortInUse": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      },
+      "port": {
+        "type": "int"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "logHttpPermissionDenied": "{address}:{port}를 열 권한이 없어요: {error}",
+  "@logHttpPermissionDenied": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      },
+      "port": {
+        "type": "int"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "logHttpBindFailed": "{address}:{port}를 열지 못했어요: {error}",
+  "@logHttpBindFailed": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      },
+      "port": {
+        "type": "int"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

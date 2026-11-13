@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../core/dhcp/pool.dart';
 import '../../core/dhcp/server.dart';
 import '../../core/ftp/server.dart';
+import '../../core/http/server.dart';
 import '../../core/ipv4.dart';
 import '../../core/tftp/server.dart';
 import '../../core/tftp/transfer.dart';
@@ -335,6 +336,121 @@ String tftpRateText(TftpTransferInfo t, bool active) {
   if (end == null || t.bytes <= 0) return '';
   final ms = end.difference(t.startedAt).inMilliseconds;
   return ms <= 0 ? '' : formatRate(t.bytes * 1000 / ms);
+}
+
+// ---- HTTP -------------------------------------------------------------------------------------
+
+/// 전송 중에는 지금 속도, 끝난 요청은 평균 속도. 보낸 바이트가 없으면 비운다.
+String httpRateText(HttpRequestInfo r, bool active) {
+  if (active) return formatRate(r.rate);
+  final end = r.endedAt;
+  if (end == null || r.bytes <= 0) return '';
+  final ms = end.difference(r.startedAt).inMilliseconds;
+  return ms <= 0 ? '' : formatRate(r.bytes * 1000 / ms);
+}
+
+class HttpRequestTable extends StatelessWidget {
+  const HttpRequestTable({super.key, required this.requests, required this.onAbort});
+
+  final List<HttpRequestInfo> requests;
+  final ValueChanged<int> onAbort;
+
+  String _reason(AppLocalizations l10n, HttpRequestInfo r) => switch (r.failure) {
+        'aborted' => l10n.httpReasonAborted,
+        'io' => l10n.httpReasonIo,
+        'diskFull' => l10n.httpReasonDiskFull,
+        'blocked' => l10n.httpReasonBlocked,
+        _ => r.status == null ? '' : l10n.httpReasonStatus(r.status!),
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final mono = _mono(context);
+    const flex = [5, 6, 2, 4, 3, 3];
+    return _Table(
+      headers: [l10n.httpColClient, l10n.httpColRequest, l10n.httpColStatus, l10n.httpColProgress, l10n.httpColRate, l10n.httpColState],
+      flex: flex,
+      cols: const [Col.left, Col.left, Col.center, Col.right, Col.right, Col.center],
+      rowCount: requests.length,
+      emptyIcon: Icons.public_rounded,
+      emptyTitle: l10n.httpEmptyTitle,
+      emptyHint: l10n.httpEmptyHint,
+      rowBuilder: (context, i) {
+        final r = requests[i];
+        final active = r.state == HttpRequestState.active;
+        final (label, tone) = switch (r.state) {
+          HttpRequestState.active => (l10n.tftpStateActive, PillTone.warning),
+          HttpRequestState.done => (l10n.tftpStateDone, PillTone.success),
+          HttpRequestState.failed => (l10n.tftpStateFailed, PillTone.danger),
+        };
+        final status = r.status;
+        final statusColor = status == null ? null : (status >= 500 ? theme.colorScheme.error : (status >= 400 ? const Color(0xFFF59E0B) : null));
+        final size = r.size;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          child: Row(children: [
+            _cell(flex[0], Col.left, Text(r.client, style: mono.copyWith(fontSize: 13), overflow: TextOverflow.ellipsis)),
+            _cell(
+              flex[1],
+              Col.left,
+              Tooltip(
+                message: '${r.method} ${r.path}',
+                child: Text.rich(
+                  TextSpan(children: [
+                    TextSpan(text: '${r.method}  ', style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700, color: r.upload ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant)),
+                    TextSpan(text: r.path, style: AppFonts.userContent),
+                  ]),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            _cell(flex[2], Col.center, Text(status == null ? '' : '$status', style: mono.copyWith(fontSize: 13, color: statusColor))),
+            _cell(
+              flex[3],
+              Col.right,
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    size == null ? formatBytes(r.bytes) : '${formatBytes(r.bytes)} / ${formatBytes(size)}',
+                    style: theme.textTheme.bodySmall,
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (active) LinearProgressIndicator(value: r.progress, minHeight: 3),
+                ],
+              ),
+            ),
+            _cell(flex[4], Col.right, Text(httpRateText(r, active), style: theme.textTheme.bodySmall, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis)),
+            _cell(
+              flex[5],
+              Col.center,
+              Tooltip(
+                message: r.state == HttpRequestState.failed ? _reason(l10n, r) : '',
+                child: StatusPill(label: label, tone: tone),
+              ),
+            ),
+            SizedBox(
+              width: 44,
+              child: active
+                  ? IconButton(
+                      tooltip: l10n.tftpAbort,
+                      iconSize: 18,
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => onAbort(r.id),
+                    )
+                  : null,
+            ),
+          ]),
+        );
+      },
+    );
+  }
 }
 
 // ---- FTP --------------------------------------------------------------------------------------

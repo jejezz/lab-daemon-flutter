@@ -12,6 +12,7 @@ import 'package:lab_daemon/core/dhcp/packet.dart';
 import 'package:lab_daemon/core/dhcp/server.dart';
 import 'package:lab_daemon/core/ftp/server.dart';
 import 'package:lab_daemon/core/host.dart';
+import 'package:lab_daemon/core/http/server.dart';
 import 'package:lab_daemon/core/ipv4.dart';
 import 'package:lab_daemon/core/netcheck.dart';
 import 'package:lab_daemon/core/netutil.dart';
@@ -22,6 +23,7 @@ import 'package:lab_daemon/state/controller.dart';
 import 'package:lab_daemon/state/service_models.dart';
 import 'package:lab_daemon/theme/app_theme.dart';
 import 'package:lab_daemon/ui/log_panel.dart';
+import 'package:lab_daemon/ui/clients/client_tables.dart';
 import 'package:lab_daemon/ui/home_screen.dart';
 import 'package:lab_daemon/ui/widgets/fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -78,6 +80,7 @@ class _App {
   DhcpModel get dhcp => controller.dhcp;
   TftpModel get tftp => controller.tftp;
   FtpModel get ftp => controller.ftp;
+  HttpModel get http => controller.http;
 
   Future<void> shutdown(WidgetTester tester) async {
     await tester.pumpWidget(const SizedBox());
@@ -90,6 +93,9 @@ class _App {
     controller.dispose();
   }
 }
+
+/// TCP 포트 하나 (HTTP 서버용).
+Future<int> _freePort2() => _freePort(tcp: true);
 
 Future<int> _freePort({bool tcp = false}) async {
   if (tcp) {
@@ -125,6 +131,7 @@ void _testApp(String name, Future<void> Function(WidgetTester tester, _App app) 
       ),
       tftp: TftpModel(host: InProcessHost(TftpServer(snapshotInterval: Duration.zero)), prefs: sp, checker: checker, notifyDelay: Duration.zero),
       ftp: FtpModel(host: InProcessHost(FtpServer(snapshotInterval: Duration.zero)), prefs: sp, checker: checker, notifyDelay: Duration.zero),
+      http: HttpModel(host: InProcessHost(HttpFileServer(snapshotInterval: Duration.zero)), prefs: sp, checker: checker, notifyDelay: Duration.zero),
       nicLister: () async => [NicInfo('Ethernet 2', Ipv4.parse('192.168.50.1')), NicInfo('Loopback', Ipv4.parse('127.0.0.1'))],
     );
     app = _App(controller, transport, checker, root);
@@ -175,8 +182,8 @@ PreStartIssue _firewall() => const PreStartIssue(IssueKind.firewallBlocked, bloc
 
 void main() {
   group('서비스별 화면', () {
-    _testApp('사이드바에 서비스 세 개가 있고, 서비스마다 자기 설정 패널을 보인다', (tester, app) async {
-      for (final name in ['DHCP', 'TFTP', 'FTP']) {
+    _testApp('사이드바에 서비스 네 개가 있고, 서비스마다 자기 설정 패널을 보인다', (tester, app) async {
+      for (final name in ['DHCP', 'TFTP', 'FTP', 'HTTP']) {
         expect(find.text(name), findsWidgets);
       }
       expect(find.text('Range start'), findsOneWidget, reason: 'DHCP 화면의 설정');
@@ -195,6 +202,16 @@ void main() {
       expect(find.text('Username'), findsOneWidget, reason: 'Ctrl+3 → FTP');
       expect(find.text('Allow anonymous login'), findsOneWidget);
       expect(app.controller.selectedId, 'ftp');
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit4);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+      await tester.pumpAndSettle();
+      expect(find.text('Port (default 80)'), findsOneWidget, reason: 'Ctrl+4 → HTTP, 포트 칸에 프로토콜 기본 포트');
+      expect(find.text('Show folder listings'), findsOneWidget);
+      expect(find.text('Allow uploads (PUT)'), findsOneWidget);
+      expect(find.text('Username'), findsNothing, reason: 'FTP 설정은 섞이지 않는다');
+      expect(app.controller.selectedId, 'http');
     });
 
     _testApp('앱 설정 창에는 외형만 있다 (서비스 설정은 각 서비스 화면에)', (tester, app) async {
@@ -232,7 +249,7 @@ void main() {
     await _startDhcp(tester);
     app.transport.dora(mac(1), hostname: 'a-very-long-hostname-for-the-table');
     await _settle(tester);
-    for (final name in ['TFTP', 'FTP', 'DHCP']) {
+    for (final name in ['TFTP', 'FTP', 'HTTP', 'DHCP']) {
       await tester.tap(find.text(name).first);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull, reason: name);
@@ -609,6 +626,85 @@ void main() {
 
       await dropOn(tester, find.byType(FolderField), [other.path]);
       expect(app.tftp.settings.rootDir, app.root.path);
+    });
+  });
+
+  group('HTTP', () {
+    _testApp('파일을 받으면 요청 표·요약·앱 바 주소·HTTP 로그에 나타나고, 주소를 복사할 수 있다', (tester, app) async {
+      HttpOverrides.global = null; // flutter_test는 모든 HTTP 요청에 400을 돌려주는 가짜 클라이언트를 끼워 둔다: 실제 loopback을 쓰려면 끈다
+      final port = (await tester.runAsync(_freePort2))!;
+      final content = Uint8List.fromList(List.generate(20000, (i) => i % 251));
+      await tester.runAsync(() async => File('${app.root.path}/boot.bin').writeAsBytesSync(content));
+      app.http.update(app.http.settings.copyWith(bindIp: '127.0.0.1', port: '$port', rootDir: app.root.path));
+
+      await tester.tap(find.text('HTTP').first);
+      await tester.pumpAndSettle();
+      expect(find.text('No requests yet'), findsNothing, reason: '꺼져 있으면 시작 화면');
+      await tester.runAsync(() async {
+        await app.http.start();
+      });
+      await tester.pump();
+      expect(app.http.running, isTrue);
+      expect(find.text('No requests yet'), findsOneWidget);
+      expect(find.descendant(of: find.byType(AppBar), matching: find.textContaining('HTTP  127.0.0.1:$port')), findsOneWidget, reason: '기본 포트(80)가 아니면 포트를 쓴다');
+
+      final received = await tester.runAsync(() async {
+        final client = HttpClient();
+        final res = await (await client.getUrl(Uri.parse('http://127.0.0.1:$port/boot.bin'))).close();
+        final bytes = <int>[];
+        await for (final c in res) {
+          bytes.addAll(c);
+        }
+        client.close();
+        return (res.statusCode, bytes);
+      });
+      expect(received!.$1, 200);
+      expect(received.$2, content);
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 150)));
+      await _settle(tester);
+
+      expect(find.descendant(of: find.byType(HttpRequestTable), matching: find.textContaining('/boot.bin', findRichText: true)), findsOneWidget);
+      expect(find.text('200'), findsOneWidget);
+      expect(find.text('Done'), findsOneWidget);
+      expect(find.textContaining('OK 1'), findsOneWidget);
+      expect(find.textContaining('GET /boot.bin → 200'), findsOneWidget);
+
+      // [주소 복사]는 클라이언트가 열 URL을 클립보드에 넣는다.
+      String? copied;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') copied = (call.arguments as Map)['text'] as String?;
+        return null;
+      });
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+      await tester.tap(find.widgetWithText(TextButton, 'Copy address'));
+      await tester.pumpAndSettle();
+      expect(copied, 'http://127.0.0.1:$port/');
+      expect(find.text('Copied http://127.0.0.1:$port/'), findsOneWidget);
+    });
+
+    _testApp('실패한 요청은 응답 코드와 함께 실패로 보이고, 끝난 요청 지우기로 목록을 비운다', (tester, app) async {
+      HttpOverrides.global = null;
+      final port = (await tester.runAsync(_freePort2))!;
+      app.http.update(app.http.settings.copyWith(bindIp: '127.0.0.1', port: '$port', rootDir: app.root.path));
+      await tester.tap(find.text('HTTP').first);
+      await tester.pumpAndSettle();
+      await tester.runAsync(() async {
+        await app.http.start();
+        final client = HttpClient();
+        final res = await (await client.getUrl(Uri.parse('http://127.0.0.1:$port/없는-파일'))).close();
+        await res.drain<void>();
+        client.close();
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+      });
+      await _settle(tester);
+      expect(find.text('404'), findsOneWidget);
+      expect(find.text('Failed'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(TextButton, 'Clear finished'));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+      await _settle(tester);
+      expect(find.text('404'), findsNothing);
+      expect(find.text('No requests yet'), findsOneWidget);
     });
   });
 

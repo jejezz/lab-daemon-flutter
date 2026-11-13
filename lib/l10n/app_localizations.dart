@@ -2311,6 +2311,229 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'폴더를 이 칸으로 끌어다 놓을 수도 있어요'**
   String get fieldRootDirDropHint;
+
+  /// No description provided for @serviceHttp.
+  ///
+  /// In ko, this message translates to:
+  /// **'HTTP'**
+  String get serviceHttp;
+
+  /// No description provided for @httpAllowListing.
+  ///
+  /// In ko, this message translates to:
+  /// **'폴더 목록 보이기'**
+  String get httpAllowListing;
+
+  /// No description provided for @httpAllowListingHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'폴더 주소를 열면 파일 목록을 보여 줍니다 (끄면 index.html이 있을 때만 내줌)'**
+  String get httpAllowListingHint;
+
+  /// No description provided for @httpAllowWrite.
+  ///
+  /// In ko, this message translates to:
+  /// **'올리기(PUT) 허용'**
+  String get httpAllowWrite;
+
+  /// No description provided for @httpAllowWriteHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'curl -T 파일 http://주소/이름 으로 루트 폴더에 올릴 수 있어요'**
+  String get httpAllowWriteHint;
+
+  /// No description provided for @httpAllowOverwrite.
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 있는 파일 덮어쓰기 허용'**
+  String get httpAllowOverwrite;
+
+  /// No description provided for @httpMaxConnections.
+  ///
+  /// In ko, this message translates to:
+  /// **'최대 동시 요청'**
+  String get httpMaxConnections;
+
+  /// No description provided for @httpIdleTimeout.
+  ///
+  /// In ko, this message translates to:
+  /// **'유휴 연결 끊기 (초)'**
+  String get httpIdleTimeout;
+
+  /// No description provided for @httpColClient.
+  ///
+  /// In ko, this message translates to:
+  /// **'클라이언트'**
+  String get httpColClient;
+
+  /// No description provided for @httpColRequest.
+  ///
+  /// In ko, this message translates to:
+  /// **'요청'**
+  String get httpColRequest;
+
+  /// No description provided for @httpColStatus.
+  ///
+  /// In ko, this message translates to:
+  /// **'응답'**
+  String get httpColStatus;
+
+  /// No description provided for @httpColProgress.
+  ///
+  /// In ko, this message translates to:
+  /// **'진행'**
+  String get httpColProgress;
+
+  /// No description provided for @httpColRate.
+  ///
+  /// In ko, this message translates to:
+  /// **'속도'**
+  String get httpColRate;
+
+  /// No description provided for @httpColState.
+  ///
+  /// In ko, this message translates to:
+  /// **'상태'**
+  String get httpColState;
+
+  /// No description provided for @httpEmptyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 요청이 없어요'**
+  String get httpEmptyTitle;
+
+  /// No description provided for @httpEmptyHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'장비가 HTTP로 파일을 요청하면 여기에 나타나요'**
+  String get httpEmptyHint;
+
+  /// No description provided for @httpSummary.
+  ///
+  /// In ko, this message translates to:
+  /// **'진행 {active} · 성공 {completed} · 실패 {failed} · 보냄 {sent} · 받음 {received}'**
+  String httpSummary(
+    int active,
+    int completed,
+    int failed,
+    String sent,
+    String received,
+  );
+
+  /// No description provided for @httpCopyAddress.
+  ///
+  /// In ko, this message translates to:
+  /// **'주소 복사'**
+  String get httpCopyAddress;
+
+  /// No description provided for @httpAddressCopied.
+  ///
+  /// In ko, this message translates to:
+  /// **'{url} 복사했어요'**
+  String httpAddressCopied(String url);
+
+  /// No description provided for @httpReasonAborted.
+  ///
+  /// In ko, this message translates to:
+  /// **'연결이 끊겼거나 중단했어요'**
+  String get httpReasonAborted;
+
+  /// No description provided for @httpReasonIo.
+  ///
+  /// In ko, this message translates to:
+  /// **'파일을 읽거나 쓰지 못했어요'**
+  String get httpReasonIo;
+
+  /// No description provided for @httpReasonDiskFull.
+  ///
+  /// In ko, this message translates to:
+  /// **'디스크 공간이 부족해요'**
+  String get httpReasonDiskFull;
+
+  /// No description provided for @httpReasonBlocked.
+  ///
+  /// In ko, this message translates to:
+  /// **'루트 폴더 밖이거나 허용하지 않는 경로예요'**
+  String get httpReasonBlocked;
+
+  /// No description provided for @httpReasonStatus.
+  ///
+  /// In ko, this message translates to:
+  /// **'응답 코드 {status}'**
+  String httpReasonStatus(int status);
+
+  /// No description provided for @logHttpStarted.
+  ///
+  /// In ko, this message translates to:
+  /// **'HTTP 서버를 {address}:{port}에서 시작했어요 · {root}'**
+  String logHttpStarted(String address, int port, String root);
+
+  /// No description provided for @logHttpStopped.
+  ///
+  /// In ko, this message translates to:
+  /// **'HTTP 서버를 멈췄어요'**
+  String get logHttpStopped;
+
+  /// No description provided for @logHttpRequest.
+  ///
+  /// In ko, this message translates to:
+  /// **'{method} {path} → {status} ({client}) · {bytes} · {seconds}초 · {rate}'**
+  String logHttpRequest(
+    String method,
+    String path,
+    int status,
+    String client,
+    String bytes,
+    String seconds,
+    String rate,
+  );
+
+  /// No description provided for @logHttpAborted.
+  ///
+  /// In ko, this message translates to:
+  /// **'{method} {path} 중단됨 ({client}) · {bytes}까지 보냈어요'**
+  String logHttpAborted(
+    String method,
+    String path,
+    String client,
+    String bytes,
+  );
+
+  /// No description provided for @logHttpBlocked.
+  ///
+  /// In ko, this message translates to:
+  /// **'허용하지 않는 경로를 막았어요: {path} ({client}, {reason})'**
+  String logHttpBlocked(String path, String client, String reason);
+
+  /// No description provided for @logHttpBusy.
+  ///
+  /// In ko, this message translates to:
+  /// **'동시 요청이 너무 많아서 거절했어요 ({client}, 최대 {limit}개)'**
+  String logHttpBusy(String client, int limit);
+
+  /// No description provided for @logHttpConnectionError.
+  ///
+  /// In ko, this message translates to:
+  /// **'연결 오류: {error}'**
+  String logHttpConnectionError(String error);
+
+  /// No description provided for @logHttpPortInUse.
+  ///
+  /// In ko, this message translates to:
+  /// **'{address}:{port}는 이미 다른 프로그램이 쓰고 있어요: {error}'**
+  String logHttpPortInUse(String address, int port, String error);
+
+  /// No description provided for @logHttpPermissionDenied.
+  ///
+  /// In ko, this message translates to:
+  /// **'{address}:{port}를 열 권한이 없어요: {error}'**
+  String logHttpPermissionDenied(String address, int port, String error);
+
+  /// No description provided for @logHttpBindFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'{address}:{port}를 열지 못했어요: {error}'**
+  String logHttpBindFailed(String address, int port, String error);
 }
 
 class _AppLocalizationsDelegate
