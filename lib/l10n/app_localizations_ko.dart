@@ -1358,4 +1358,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String dhcpTftpPortNote(String port) {
     return 'TFTP 서비스가 $port번 포트를 써서 보드가 찾지 못할 수 있어요 (보통 69번)';
   }
+
+  @override
+  String get fieldRootDirDropHint => '폴더를 이 칸으로 끌어다 놓을 수도 있어요';
 }

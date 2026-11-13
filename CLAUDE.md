@@ -33,6 +33,7 @@ DHCP, TFTP, FTP(이후 Syslog 등) 같은 랩용 네트워크 서비스를 한 �
 - **DHCP 확장(P4)**: Lease는 `%APPDATA%\Jongyun Ahn\Lab Daemon\dhcp_leases.json`에 저장·복원한다(`lease_store.dart`, 확정된 것만, 켤 때 만료·범위 밖은 버림). 제안 전 ping 확인(`conflict.dart`, 설정 기본 켬이지만 `DhcpConfig` 코어 기본은 끔 — 시험의 가짜 전송이 응답을 동기로 읽는다). 예약은 설정 패널에서 추가·삭제하며 서비스가 켜져 있어도 `reserve`/`unreserve` 명령으로 즉시 적용하고, 범위 밖 주소도 그 MAC에 줄 수 있다. option 66/67은 TFTP 서비스 설정(주소·루트 폴더)에서 채운다.
 - **서비스 로그 파일**: 서비스마다 "로그를 파일에도 저장"(기본 끔)을 켜면 `…\logs\<서비스>-YYYY-MM-DD.log`에 영어 문구로 쓴다 (`log_file.dart`, 1초에 한 번, 14일 보관). 패킷 처리 경로에는 아무것도 더하지 않는다.
 - **FTP는 계정 하나**(사용자 이름 + 솔트 SHA-256 해시)와 **익명 허용**, **쓰기 허용** 스위치 하나뿐이다 (FileZilla 같은 계정별 권한은 두지 않는다). 패시브 기본 범위는 40000~40199 — Windows 동적 범위(49152~)는 Hyper-V/WSL이 100개씩 예약해 막히는 일이 있다.
+- 루트 폴더 칸(`FolderField`)은 탐색기에서 폴더를 끌어다 놓을 수 있다(`desktop_drop`). Windows 플러그인은 끌어온 항목이 폴더인지 알려 주지 않으므로 `folderFromDroppedPaths`가 직접 판별한다(폴더 우선, 파일뿐이면 그 파일이 든 폴더). 네이티브 플러그인이라 핫 리스타트가 아니라 앱을 새로 실행해야 적용된다.
 - TFTP·FTP는 루트 폴더 밖으로 나갈 수 없다 (`fs_sandbox.dart`: `..`, 드라이브·ADS, 예약 장치 이름, 링크 탈출). 올리기는 임시 파일(`*.lab-part-*`)에 받다가 끝나면 이름을 바꾼다.
 
 ## 시험

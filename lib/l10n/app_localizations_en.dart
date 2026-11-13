@@ -1379,4 +1379,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String dhcpTftpPortNote(String port) {
     return 'The TFTP service uses port $port, so boards may not find it (usually 69)';
   }
+
+  @override
+  String get fieldRootDirDropHint =>
+      'You can also drag a folder onto this field';
 }

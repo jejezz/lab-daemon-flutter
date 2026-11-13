@@ -1462,5 +1462,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "fieldRootDirDropHint": "폴더를 이 칸으로 끌어다 놓을 수도 있어요"
 }

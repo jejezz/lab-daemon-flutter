@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lab_daemon/ui/boot_file_picker.dart';
+import 'package:lab_daemon/ui/widgets/fields.dart';
 
 void main() {
   late Directory root;
@@ -26,5 +27,15 @@ void main() {
       File('${root.path}/f$i.bin').writeAsBytesSync(const [1]);
     }
     expect(await listBootCandidates(root.path, limit: 3), hasLength(3));
+  });
+
+  test('folderFromDroppedPaths: 폴더가 있으면 그 폴더, 파일뿐이면 그 파일이 든 폴더, 없으면 null', () {
+    final dir = Directory('${root.path}/images')..createSync();
+    final file = File('${root.path}/zImage')..writeAsBytesSync([1]);
+    expect(folderFromDroppedPaths([dir.path]), dir.path);
+    expect(folderFromDroppedPaths([file.path, dir.path]), dir.path, reason: '폴더가 있으면 폴더가 먼저');
+    expect(folderFromDroppedPaths([file.path]), root.path);
+    expect(folderFromDroppedPaths(['${root.path}/없는-경로', '']), isNull);
+    expect(folderFromDroppedPaths(const []), isNull);
   });
 }

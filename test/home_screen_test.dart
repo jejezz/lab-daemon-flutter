@@ -23,6 +23,7 @@ import 'package:lab_daemon/state/service_models.dart';
 import 'package:lab_daemon/theme/app_theme.dart';
 import 'package:lab_daemon/ui/log_panel.dart';
 import 'package:lab_daemon/ui/home_screen.dart';
+import 'package:lab_daemon/ui/widgets/fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/fake_transport.dart';
@@ -554,6 +555,60 @@ void main() {
       expect(find.text('Done'), findsOneWidget);
       expect(find.textContaining('Done 1'), findsOneWidget);
       expect(find.textContaining('Sent boot.bin to 127.0.0.1'), findsOneWidget);
+    });
+  });
+
+  group('폴더 끌어다 놓기', () {
+    /// 탐색기에서 [paths]를 [target] 칸 위로 끌어다 놓는 것을 플러그인 채널 이벤트로 흉내 낸다.
+    Future<void> dropOn(WidgetTester tester, Finder target, List<String> paths) async {
+      final at = tester.getCenter(target);
+      Future<void> send(String method, Object args) => tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+            'desktop_drop',
+            const StandardMethodCodec().encodeMethodCall(MethodCall(method, args)),
+            (_) {},
+          );
+      await send('entered', [at.dx, at.dy]);
+      await tester.pump();
+      await send('performOperation', paths);
+      await tester.pump();
+    }
+
+    _testApp('TFTP 루트 폴더 칸에 폴더를 끌어다 놓으면 그 폴더로 바뀐다', (tester, app) async {
+      await tester.tap(find.text('TFTP').first);
+      await tester.pumpAndSettle();
+      expect(find.text('You can also drag a folder onto this field'), findsOneWidget);
+
+      await dropOn(tester, find.byType(FolderField), [app.root.path]);
+      expect(app.tftp.settings.rootDir, app.root.path);
+      expect(find.text(app.root.path), findsOneWidget, reason: '입력 칸에도 바로 보인다');
+    });
+
+    _testApp('파일을 놓으면 그 파일이 든 폴더로, 폴더가 섞여 있으면 폴더를 고른다', (tester, app) async {
+      final sub = Directory('${app.root.path}/images')..createSync();
+      final file = File('${app.root.path}/zImage')..writeAsBytesSync([1]);
+      await tester.tap(find.text('FTP').first);
+      await tester.pumpAndSettle();
+
+      await dropOn(tester, find.byType(FolderField), [file.path]);
+      expect(app.ftp.settings.rootDir, app.root.path);
+
+      await dropOn(tester, find.byType(FolderField), [file.path, sub.path]);
+      expect(app.ftp.settings.rootDir, sub.path);
+    });
+
+    _testApp('서비스가 켜져 있어 칸이 잠겨 있으면 끌어다 놓아도 바뀌지 않는다', (tester, app) async {
+      final port = (await tester.runAsync(_freePort))!;
+      app.tftp.update(app.tftp.settings.copyWith(bindIp: '127.0.0.1', port: '$port', rootDir: app.root.path));
+      await tester.tap(find.text('TFTP').first);
+      await tester.pumpAndSettle();
+      await tester.runAsync(() async {
+        await app.tftp.start();
+      });
+      await tester.pump();
+      final other = Directory('${app.root.path}/other')..createSync();
+
+      await dropOn(tester, find.byType(FolderField), [other.path]);
+      expect(app.tftp.settings.rootDir, app.root.path);
     });
   });
 

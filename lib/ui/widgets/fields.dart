@@ -1,5 +1,8 @@
 // 서비스 설정 패널이 같이 쓰는 입력 위젯: 글자 칸, NIC 선택, 폴더 선택, 스위치, 소제목.
 
+import 'dart:io';
+
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
@@ -163,8 +166,21 @@ class NicDropdown extends StatelessWidget {
   }
 }
 
-/// 폴더 경로 칸 + [찾아보기] (Windows 폴더 선택 창).
-class FolderField extends StatelessWidget {
+/// 끌어다 놓은 경로들에서 폴더 하나를 고른다: 폴더가 있으면 그 첫 번째, 파일뿐이면 첫 파일이 들어 있는 폴더.
+/// (Windows는 끌어다 놓은 항목이 폴더인지 알려 주지 않아서 직접 확인한다.) 고를 것이 없으면 null.
+String? folderFromDroppedPaths(Iterable<String> paths) {
+  final list = paths.where((p) => p.trim().isNotEmpty).toList();
+  for (final p in list) {
+    if (FileSystemEntity.isDirectorySync(p)) return p;
+  }
+  for (final p in list) {
+    if (FileSystemEntity.isFileSync(p)) return File(p).parent.path;
+  }
+  return null;
+}
+
+/// 폴더 경로 칸 + [찾아보기] (Windows 폴더 선택 창). 탐색기에서 폴더를 이 칸으로 끌어다 놓아도 된다.
+class FolderField extends StatefulWidget {
   const FolderField({super.key, required this.value, required this.onChanged, this.error, this.enabled = true});
 
   final String value;
@@ -173,23 +189,52 @@ class FolderField extends StatelessWidget {
   final bool enabled;
 
   @override
+  State<FolderField> createState() => _FolderFieldState();
+}
+
+class _FolderFieldState extends State<FolderField> {
+  bool _dragging = false;
+
+  void _dropped(List<String> paths) {
+    setState(() => _dragging = false);
+    final folder = folderFromDroppedPaths(paths);
+    if (folder != null) widget.onChanged(folder);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return SettingsTextField(
-      label: l10n.fieldRootDir,
-      value: value,
-      error: error,
-      enabled: enabled,
-      onChanged: onChanged,
-      suffix: IconButton(
-        tooltip: l10n.fieldBrowse,
-        icon: const Icon(Icons.folder_open_outlined, size: 20),
-        onPressed: !enabled
-            ? null
-            : () async {
-                final picked = await getDirectoryPath(initialDirectory: value.isEmpty ? null : value);
-                if (picked != null) onChanged(picked);
-              },
+    final primary = Theme.of(context).colorScheme.primary;
+    return DropTarget(
+      enable: widget.enabled,
+      onDragEntered: (_) => setState(() => _dragging = true),
+      onDragExited: (_) => setState(() => _dragging = false),
+      onDragDone: (details) => _dropped([for (final f in details.files) f.path]),
+      child: DecoratedBox(
+        // 끌고 오는 동안 칸을 강조해서 놓을 수 있는 자리임을 보인다.
+        decoration: BoxDecoration(
+          color: _dragging ? primary.withValues(alpha: 0.10) : null,
+          borderRadius: const BorderRadius.all(Radius.circular(AppRadius.button)),
+          border: Border.all(color: _dragging ? primary : Colors.transparent, width: 2),
+        ),
+        child: SettingsTextField(
+          label: l10n.fieldRootDir,
+          value: widget.value,
+          error: widget.error,
+          helper: widget.enabled && widget.error == null ? l10n.fieldRootDirDropHint : null,
+          enabled: widget.enabled,
+          onChanged: widget.onChanged,
+          suffix: IconButton(
+            tooltip: l10n.fieldBrowse,
+            icon: const Icon(Icons.folder_open_outlined, size: 20),
+            onPressed: !widget.enabled
+                ? null
+                : () async {
+                    final picked = await getDirectoryPath(initialDirectory: widget.value.isEmpty ? null : widget.value);
+                    if (picked != null) widget.onChanged(picked);
+                  },
+          ),
+        ),
       ),
     );
   }

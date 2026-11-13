@@ -2305,6 +2305,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'TFTP 서비스가 {port}번 포트를 써서 보드가 찾지 못할 수 있어요 (보통 69번)'**
   String dhcpTftpPortNote(String port);
+
+  /// No description provided for @fieldRootDirDropHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'폴더를 이 칸으로 끌어다 놓을 수도 있어요'**
+  String get fieldRootDirDropHint;
 }
 
 class _AppLocalizationsDelegate
