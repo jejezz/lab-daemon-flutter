@@ -84,6 +84,9 @@ class LeasePool {
   final _reservations = <MacAddress, Ipv4>{};
   final _declined = <Ipv4, DateTime>{};
 
+  /// Lease 표가 바뀔 때마다 늘어난다. 화면용 스냅샷이 필요한지 O(1)로 알아내는 데 쓴다.
+  int version = 0;
+
   DateTime get now => _clock();
 
   /// 풀이 나눠 줄 수 있는 주소 수 (제외 주소 뺀 것).
@@ -125,8 +128,14 @@ class LeasePool {
     expire();
     final existing = _byMac[mac];
     if (existing != null) {
-      existing.hostname = hostname ?? existing.hostname;
-      if (existing.state == LeaseState.offered) existing.expiresAt = now.add(offerHold);
+      if (hostname != null && hostname != existing.hostname) {
+        existing.hostname = hostname;
+        version++;
+      }
+      if (existing.state == LeaseState.offered) {
+        existing.expiresAt = now.add(offerHold);
+        version++;
+      }
       return existing;
     }
     final reserved = _reservations[mac];
@@ -167,6 +176,7 @@ class LeasePool {
       ..grantedAt = now
       ..expiresAt = leaseTime == null ? null : now.add(leaseTime!)
       ..hostname = hostname ?? lease.hostname;
+    version++;
     return lease;
   }
 
@@ -190,6 +200,7 @@ class LeasePool {
     final released = leases;
     _byMac.clear();
     _byIp.clear();
+    if (released.isNotEmpty) version++;
     return released;
   }
 
@@ -198,6 +209,7 @@ class LeasePool {
     final lease = _byIp[ip];
     if (lease != null) _remove(lease);
     _declined[ip] = now.add(declineQuarantine);
+    version++;
   }
 
   /// 만료된 Lease를 지우고 돌려준다. 제안 보류가 끝난 것도 포함한다.
@@ -235,11 +247,13 @@ class LeasePool {
   Lease _put(Lease lease) {
     _byMac[lease.mac] = lease;
     _byIp[lease.ip] = lease;
+    version++;
     return lease;
   }
 
   void _remove(Lease lease) {
     _byMac.remove(lease.mac);
     _byIp.remove(lease.ip);
+    version++;
   }
 }

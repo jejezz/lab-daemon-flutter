@@ -8,13 +8,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
-import 'dhcp_settings_section.dart';
 import 'settings_menus.dart';
 import 'settings_widgets.dart';
 
 enum SettingsSection {
-  appearance(Icons.palette_outlined),
-  dhcp(Icons.dns_outlined);
+  appearance(Icons.palette_outlined);
 
   const SettingsSection(this.icon);
 
@@ -22,7 +20,6 @@ enum SettingsSection {
 
   String label(AppLocalizations l10n) => switch (this) {
         appearance => l10n.settingsSectionAppearance,
-        dhcp => l10n.settingsSectionDhcp,
       };
 }
 
@@ -57,7 +54,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
       padding: EdgeInsets.only(left: wide ? 16 : 0, bottom: 16),
       child: switch (_section) {
         SettingsSection.appearance => const _AppearanceSection(),
-        SettingsSection.dhcp => const DhcpSettingsSection(),
       },
     );
 

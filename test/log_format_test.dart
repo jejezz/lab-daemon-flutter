@@ -16,8 +16,9 @@ const _args = <String, Object?>{
   'ip': '192.168.50.100',
   'hostname': 'rk3568',
   'seconds': 3600,
-  'reason': 'addressUnavailable',
+  'reason': 'notFound',
   'server': '192.168.50.254',
+  'servers': ['192.168.50.254'],
   'from': '192.168.50.9',
   'to': '192.168.50.9',
   'error': 'boom',
@@ -26,18 +27,52 @@ const _args = <String, Object?>{
   'start': '192.168.50.100',
   'end': '192.168.50.110',
   'mask': '255.255.255.0',
+  'client': '192.168.50.9:2000',
+  'file': 'boot.bin',
+  'mode': 'octet',
+  'bytes': 4096,
+  'rate': 2048,
+  'limit': 64,
+  'root': r'C:\tftp',
+  'user': 'board',
+  'command': 'RETR boot.bin',
+  'path': '/boot.bin',
+  'passive': '40000-40199',
+  'range': '40000-40199',
+  'reserved': ['40000-40059'],
+  'profiles': ['Public'],
+  'ports': ['UDP 69'],
+  'protocol': 'UDP',
+  'pid': 1234,
+  'process': 'svchost.exe',
+  'count': 3,
+};
+
+/// 문자열을 이어 붙여 만드는 키 (소스에 통째로 나오지 않는다).
+const _dynamicKeys = {
+  'logCheckPortInUse',
+  'logCheckFirewallBlocked',
+  'logCheckOtherDhcpServer',
+  'logCheckPortsReserved',
+  'logTftpPortInUse',
+  'logTftpPermissionDenied',
+  'logTftpBindFailed',
+  'logFtpPortInUse',
+  'logFtpPermissionDenied',
+  'logFtpBindFailed',
 };
 
 void main() {
-  // 코어 코드에서 log(...)/_log(...)에 쓰는 'logDhcp…' 키를 소스에서 직접 모은다.
+  final pattern = RegExp(r"'(log(?:Dhcp|Tftp|Ftp|Check)[A-Za-z]+|logDropped)'");
   final keys = <String>{
+    ..._dynamicKeys,
     for (final dir in ['lib/core', 'lib/state'])
       for (final file in Directory(dir).listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.dart')))
-        for (final m in RegExp(r"'(logDhcp[A-Za-z]+)'").allMatches(file.readAsStringSync())) m.group(1)!,
+        for (final m in pattern.allMatches(file.readAsStringSync())) m.group(1)!,
   };
 
   test('소스에서 로그 키를 찾았다', () {
-    expect(keys.length, greaterThan(20));
+    expect(keys.length, greaterThan(60));
   });
 
   for (final locale in AppLocalizations.supportedLocales) {
@@ -45,7 +80,7 @@ void main() {
       final l10n = await AppLocalizations.delegate.load(locale);
       final missing = <String>[];
       for (final key in keys) {
-        final text = formatLog(l10n, LogEvent('dhcp', LogLevel.info, key, args: _args));
+        final text = formatLog(l10n, LogEvent('x', LogLevel.info, key, args: _args));
         if (text.startsWith(key)) missing.add(key);
         expect(text.trim(), isNotEmpty, reason: key);
         expect(text, isNot(contains('{')), reason: '$key: 채워지지 않은 자리표시자');
@@ -54,24 +89,27 @@ void main() {
     });
   }
 
-  test('ARB의 logDhcp 키는 모두 소스에서 실제로 쓰인다 (쓰지 않는 키가 쌓이지 않게)', () {
+  test('ARB의 로그 키는 모두 소스에서 실제로 쓰인다 (쓰지 않는 키가 쌓이지 않게)', () {
     final arb = jsonDecode(File('lib/l10n/app_ko.arb').readAsStringSync()) as Map<String, dynamic>;
-    // logDhcpPacketIn/Out은 패킷 로깅 옵션을 켤 때만 쓰이지만 소스에는 문자열로 들어 있다.
-    final unused = arb.keys.where((k) => k.startsWith('logDhcp') && !keys.contains(k)).toList();
+    final unused = arb.keys.where((k) => pattern.hasMatch("'$k'") && !keys.contains(k)).toList();
     expect(unused, isEmpty);
+  });
+
+  test('크기와 속도는 사람이 읽는 단위로 나온다', () async {
+    final l10n = await AppLocalizations.delegate.load(const Locale('en'));
+    final text = formatLog(l10n, LogEvent('tftp', LogLevel.info, 'logTftpSent', args: const {'file': 'a', 'client': 'c', 'bytes': 1572864, 'seconds': '1.00', 'rate': 1572864}));
+    expect(text, 'Sent a to c · 1.5 MB · 1.00s · 1.5 MB/s');
   });
 
   test('알 수 없는 키는 숨기지 않고 키와 인자를 보여 준다', () async {
     final l10n = await AppLocalizations.delegate.load(const Locale('en'));
     expect(formatLog(l10n, LogEvent('x', LogLevel.info, 'logFuture', args: const {'a': 1})), 'logFuture {a: 1}');
-    expect(formatLog(l10n, LogEvent('x', LogLevel.info, 'logFuture')), 'logFuture');
   });
 
-  test('무제한 Lease와 값 없는 호스트 이름도 어색하지 않게 나온다', () async {
+  test('없는 값(사용자·호스트 이름)이 어색한 공백을 남기지 않는다', () async {
     final l10n = await AppLocalizations.delegate.load(const Locale('en'));
-    final ack = formatLog(l10n, LogEvent('dhcp', LogLevel.info, 'logDhcpAck', args: const {'ip': '1.1.1.1', 'mac': 'm', 'seconds': null}));
-    expect(ack, contains('lease Unlimited'));
-    final discover = formatLog(l10n, LogEvent('dhcp', LogLevel.info, 'logDhcpDiscover', args: const {'mac': 'm', 'hostname': null}));
-    expect(discover, 'DISCOVER from m');
+    expect(formatLog(l10n, LogEvent('dhcp', LogLevel.info, 'logDhcpDiscover', args: const {'mac': 'm'})), 'DISCOVER from m');
+    expect(formatLog(l10n, LogEvent('dhcp', LogLevel.info, 'logDhcpAck', args: const {'ip': '1.1.1.1', 'mac': 'm'})), contains('lease Unlimited'));
+    expect(formatLog(l10n, LogEvent('ftp', LogLevel.info, 'logFtpDisconnected', args: const {'client': 'c', 'seconds': 3})), 'Disconnected c (3s)');
   });
 }

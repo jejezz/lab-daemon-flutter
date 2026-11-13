@@ -6,10 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/dhcp/config.dart';
 import '../core/ipv4.dart';
 import '../core/lease_time.dart';
+import 'settings_common.dart';
+
+export 'settings_common.dart' show FieldError;
 
 enum DhcpField { serverIp, rangeStart, rangeEnd, mask, gateway, dns, leaseTime, domain, tftpServer, bootFile }
 
-enum FieldError { required, invalidIp, invalidMask, invalidLeaseTime, notInSubnet, notHostAddress, rangeReversed, tooLong }
 
 class DhcpSettings {
   const DhcpSettings({
@@ -148,13 +150,21 @@ class DhcpSettings {
         detectOtherServers: detectOtherServers ?? this.detectOtherServers,
       );
 
-  /// 같은 서브넷(/24)에서 쓸 만한 기본값을 채운다. 비어 있는 칸만 건드린다.
+  /// 같은 서브넷(/24)에서 쓸 만한 기본값을 채운다. 비어 있거나 새 서버의 망 밖에 있는 칸만 바꾼다.
   DhcpSettings withSuggestionsFor(Ipv4 server) {
     final base = server.value & 0xFFFFFF00;
+    // 비어 있거나, 다른 NIC를 쓰던 때의 값이라 새 서버의 망 밖에 있는 칸만 바꾼다.
+    final maskIp = Ipv4.tryParse(mask);
+    final m = maskIp != null && maskIp.isValidMask ? maskIp : Ipv4.parse('255.255.255.0');
+    bool stale(String text) {
+      final ip = Ipv4.tryParse(text);
+      return text.trim().isEmpty || ip == null || !ip.isInSubnet(server, m);
+    }
+
     return copyWith(
-      rangeStart: rangeStart.isEmpty ? Ipv4(base | 100).toString() : null,
-      rangeEnd: rangeEnd.isEmpty ? Ipv4(base | 200).toString() : null,
-      gateway: gateway.isEmpty ? server.toString() : null,
+      rangeStart: stale(rangeStart) ? Ipv4(base | 100).toString() : null,
+      rangeEnd: stale(rangeEnd) ? Ipv4(base | 200).toString() : null,
+      gateway: stale(gateway) ? server.toString() : null,
     );
   }
 

@@ -43,9 +43,8 @@ Future<void> main() async {
   }
 
   final settings = await AppSettings.load();
-  final controller = LabDaemonController(
-    prefs: await SharedPreferences.getInstance(),
-  );
+  // 서비스마다 자기 Isolate에서 돈다 (lib/core/host.dart).
+  final controller = LabDaemonController.create(await SharedPreferences.getInstance());
   unawaited(controller.refreshNics());
   // 데스크톱이 아니거나 UPDATE_SERVER 가 비어 있으면 null — 업데이트 확인 없음.
   final updates = await UpdateService.create();
@@ -144,7 +143,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   // 앱을 끌 때 열려 있는 소켓을 닫는다.
   @override
   Future<ui.AppExitResponse> didRequestAppExit() async {
-    await widget.controller.dhcp.stop();
+    await widget.controller.stopAll();
     return ui.AppExitResponse.exit;
   }
 

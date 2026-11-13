@@ -251,7 +251,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeEmptyTitle.
   ///
   /// In ko, this message translates to:
-  /// **'실행 중인 서비스가 없어요'**
+  /// **'서비스가 꺼져 있어요'**
   String get homeEmptyTitle;
 
   /// No description provided for @homeEmptyAction.
@@ -662,12 +662,6 @@ abstract class AppLocalizations {
   /// **'장비가 DHCP로 주소를 요청하면 여기에 나타나요'**
   String get leaseEmptyHint;
 
-  /// No description provided for @startInvalidSettings.
-  ///
-  /// In ko, this message translates to:
-  /// **'DHCP 설정이 올바르지 않아요. 설정에서 확인해 주세요.'**
-  String get startInvalidSettings;
-
   /// No description provided for @startFailed.
   ///
   /// In ko, this message translates to:
@@ -679,12 +673,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'복사'**
   String get errorCopy;
-
-  /// No description provided for @openSettings.
-  ///
-  /// In ko, this message translates to:
-  /// **'설정 열기'**
-  String get openSettings;
 
   /// No description provided for @logTitle.
   ///
@@ -763,12 +751,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'일시정지됨 · 새 로그 {count}개'**
   String logPausedBanner(int count);
-
-  /// No description provided for @settingsSectionDhcp.
-  ///
-  /// In ko, this message translates to:
-  /// **'DHCP'**
-  String get settingsSectionDhcp;
 
   /// No description provided for @dhcpFieldServerIp.
   ///
@@ -1154,12 +1136,6 @@ abstract class AppLocalizations {
   /// **'다른 DHCP 서버 확인 중 ({address})'**
   String logDhcpProbeStart(String address);
 
-  /// No description provided for @logDhcpProbeFound.
-  ///
-  /// In ko, this message translates to:
-  /// **'다른 DHCP 서버 발견: {server} (제안 {ip})'**
-  String logDhcpProbeFound(String server, String ip);
-
   /// No description provided for @logDhcpProbeNone.
   ///
   /// In ko, this message translates to:
@@ -1171,6 +1147,834 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'다른 DHCP 서버를 확인하지 못했어요: {error}'**
   String logDhcpProbeFailed(String error);
+
+  /// No description provided for @serviceTftp.
+  ///
+  /// In ko, this message translates to:
+  /// **'TFTP'**
+  String get serviceTftp;
+
+  /// No description provided for @serviceFtp.
+  ///
+  /// In ko, this message translates to:
+  /// **'FTP'**
+  String get serviceFtp;
+
+  /// No description provided for @panelToggleTooltip.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 패널 보이기/숨기기'**
+  String get panelToggleTooltip;
+
+  /// No description provided for @panelTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'{service} 설정'**
+  String panelTitle(String service);
+
+  /// No description provided for @runningLockedNote.
+  ///
+  /// In ko, this message translates to:
+  /// **'실행 중에는 설정을 바꿀 수 없어요. 서비스를 멈추고 바꾸세요.'**
+  String get runningLockedNote;
+
+  /// No description provided for @fieldBindNic.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용할 NIC'**
+  String get fieldBindNic;
+
+  /// No description provided for @fieldAllNics.
+  ///
+  /// In ko, this message translates to:
+  /// **'모든 NIC (0.0.0.0)'**
+  String get fieldAllNics;
+
+  /// No description provided for @fieldAllNicsWarning.
+  ///
+  /// In ko, this message translates to:
+  /// **'모든 NIC에서 받아요. 회사망 쪽에도 열릴 수 있어요.'**
+  String get fieldAllNicsWarning;
+
+  /// No description provided for @fieldPort.
+  ///
+  /// In ko, this message translates to:
+  /// **'포트'**
+  String get fieldPort;
+
+  /// No description provided for @fieldRootDir.
+  ///
+  /// In ko, this message translates to:
+  /// **'루트 폴더'**
+  String get fieldRootDir;
+
+  /// No description provided for @fieldBrowse.
+  ///
+  /// In ko, this message translates to:
+  /// **'찾아보기'**
+  String get fieldBrowse;
+
+  /// No description provided for @sectionAdvanced.
+  ///
+  /// In ko, this message translates to:
+  /// **'고급'**
+  String get sectionAdvanced;
+
+  /// No description provided for @fieldErrDirMissing.
+  ///
+  /// In ko, this message translates to:
+  /// **'폴더가 없어요'**
+  String get fieldErrDirMissing;
+
+  /// No description provided for @fieldErrInvalidPort.
+  ///
+  /// In ko, this message translates to:
+  /// **'1~65535 사이여야 해요'**
+  String get fieldErrInvalidPort;
+
+  /// No description provided for @fieldErrInvalidNumber.
+  ///
+  /// In ko, this message translates to:
+  /// **'허용 범위 밖의 숫자예요'**
+  String get fieldErrInvalidNumber;
+
+  /// No description provided for @startInvalidSettingsFor.
+  ///
+  /// In ko, this message translates to:
+  /// **'{service} 설정이 올바르지 않아요. 왼쪽 설정을 확인해 주세요.'**
+  String startInvalidSettingsFor(String service);
+
+  /// No description provided for @tftpAllowWrite.
+  ///
+  /// In ko, this message translates to:
+  /// **'업로드 허용'**
+  String get tftpAllowWrite;
+
+  /// No description provided for @tftpAllowWriteHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'클라이언트가 루트 폴더에 파일을 올릴 수 있어요'**
+  String get tftpAllowWriteHint;
+
+  /// No description provided for @tftpAllowOverwrite.
+  ///
+  /// In ko, this message translates to:
+  /// **'기존 파일 덮어쓰기 허용'**
+  String get tftpAllowOverwrite;
+
+  /// No description provided for @tftpMaxBlockSize.
+  ///
+  /// In ko, this message translates to:
+  /// **'최대 블록 크기 (바이트)'**
+  String get tftpMaxBlockSize;
+
+  /// No description provided for @tftpMaxWindow.
+  ///
+  /// In ko, this message translates to:
+  /// **'최대 윈도우 (블록)'**
+  String get tftpMaxWindow;
+
+  /// No description provided for @tftpTimeout.
+  ///
+  /// In ko, this message translates to:
+  /// **'재전송 대기 (ms)'**
+  String get tftpTimeout;
+
+  /// No description provided for @tftpMaxTransfers.
+  ///
+  /// In ko, this message translates to:
+  /// **'동시 전송 수'**
+  String get tftpMaxTransfers;
+
+  /// No description provided for @tftpLogPackets.
+  ///
+  /// In ko, this message translates to:
+  /// **'요청 패킷 덤프를 디버그 로그에 기록'**
+  String get tftpLogPackets;
+
+  /// No description provided for @tftpColClient.
+  ///
+  /// In ko, this message translates to:
+  /// **'클라이언트'**
+  String get tftpColClient;
+
+  /// No description provided for @tftpColFile.
+  ///
+  /// In ko, this message translates to:
+  /// **'파일'**
+  String get tftpColFile;
+
+  /// No description provided for @tftpColDirection.
+  ///
+  /// In ko, this message translates to:
+  /// **'방향'**
+  String get tftpColDirection;
+
+  /// No description provided for @tftpColProgress.
+  ///
+  /// In ko, this message translates to:
+  /// **'진행'**
+  String get tftpColProgress;
+
+  /// No description provided for @tftpColRate.
+  ///
+  /// In ko, this message translates to:
+  /// **'속도'**
+  String get tftpColRate;
+
+  /// No description provided for @tftpColState.
+  ///
+  /// In ko, this message translates to:
+  /// **'상태'**
+  String get tftpColState;
+
+  /// No description provided for @tftpDownload.
+  ///
+  /// In ko, this message translates to:
+  /// **'보냄'**
+  String get tftpDownload;
+
+  /// No description provided for @tftpUpload.
+  ///
+  /// In ko, this message translates to:
+  /// **'받음'**
+  String get tftpUpload;
+
+  /// No description provided for @tftpStateActive.
+  ///
+  /// In ko, this message translates to:
+  /// **'진행 중'**
+  String get tftpStateActive;
+
+  /// No description provided for @tftpStateDone.
+  ///
+  /// In ko, this message translates to:
+  /// **'완료'**
+  String get tftpStateDone;
+
+  /// No description provided for @tftpStateFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'실패'**
+  String get tftpStateFailed;
+
+  /// No description provided for @tftpAbort.
+  ///
+  /// In ko, this message translates to:
+  /// **'중단'**
+  String get tftpAbort;
+
+  /// No description provided for @tftpClearRecent.
+  ///
+  /// In ko, this message translates to:
+  /// **'끝난 전송 지우기'**
+  String get tftpClearRecent;
+
+  /// No description provided for @tftpEmptyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 전송이 없어요'**
+  String get tftpEmptyTitle;
+
+  /// No description provided for @tftpEmptyHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'장비가 TFTP로 파일을 요청하면 여기에 나타나요'**
+  String get tftpEmptyHint;
+
+  /// No description provided for @tftpSummary.
+  ///
+  /// In ko, this message translates to:
+  /// **'진행 {active} · 완료 {completed} · 실패 {failed} · 보냄 {sent} · 받음 {received}'**
+  String tftpSummary(
+    int active,
+    int completed,
+    int failed,
+    String sent,
+    String received,
+  );
+
+  /// No description provided for @tftpReasonNotFound.
+  ///
+  /// In ko, this message translates to:
+  /// **'파일 없음'**
+  String get tftpReasonNotFound;
+
+  /// No description provided for @tftpReasonAccessViolation.
+  ///
+  /// In ko, this message translates to:
+  /// **'접근 거부'**
+  String get tftpReasonAccessViolation;
+
+  /// No description provided for @tftpReasonFileExists.
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 있는 파일'**
+  String get tftpReasonFileExists;
+
+  /// No description provided for @tftpReasonWriteDisabled.
+  ///
+  /// In ko, this message translates to:
+  /// **'업로드 꺼짐'**
+  String get tftpReasonWriteDisabled;
+
+  /// No description provided for @tftpReasonTimeout.
+  ///
+  /// In ko, this message translates to:
+  /// **'응답 없음'**
+  String get tftpReasonTimeout;
+
+  /// No description provided for @tftpReasonClientError.
+  ///
+  /// In ko, this message translates to:
+  /// **'클라이언트가 중단'**
+  String get tftpReasonClientError;
+
+  /// No description provided for @tftpReasonAborted.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용자가 중단'**
+  String get tftpReasonAborted;
+
+  /// No description provided for @tftpReasonDiskFull.
+  ///
+  /// In ko, this message translates to:
+  /// **'디스크 가득 참'**
+  String get tftpReasonDiskFull;
+
+  /// No description provided for @tftpReasonIo.
+  ///
+  /// In ko, this message translates to:
+  /// **'파일 입출력 오류'**
+  String get tftpReasonIo;
+
+  /// No description provided for @tftpReasonUnsupportedMode.
+  ///
+  /// In ko, this message translates to:
+  /// **'지원하지 않는 모드'**
+  String get tftpReasonUnsupportedMode;
+
+  /// No description provided for @ftpAccount.
+  ///
+  /// In ko, this message translates to:
+  /// **'계정'**
+  String get ftpAccount;
+
+  /// No description provided for @ftpUsername.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용자 이름'**
+  String get ftpUsername;
+
+  /// No description provided for @ftpPassword.
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀번호'**
+  String get ftpPassword;
+
+  /// No description provided for @ftpPasswordSet.
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀번호가 설정돼 있어요. 바꾸려면 새로 입력하세요.'**
+  String get ftpPasswordSet;
+
+  /// No description provided for @ftpPasswordHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'입력하면 바로 해시로만 저장돼요'**
+  String get ftpPasswordHint;
+
+  /// No description provided for @ftpAllowAnonymous.
+  ///
+  /// In ko, this message translates to:
+  /// **'익명(anonymous) 접속 허용'**
+  String get ftpAllowAnonymous;
+
+  /// No description provided for @ftpAllowWrite.
+  ///
+  /// In ko, this message translates to:
+  /// **'쓰기 허용 (올리기·지우기·이름 바꾸기)'**
+  String get ftpAllowWrite;
+
+  /// No description provided for @ftpAnonymousWriteWarning.
+  ///
+  /// In ko, this message translates to:
+  /// **'익명 사용자도 파일을 바꿀 수 있어요'**
+  String get ftpAnonymousWriteWarning;
+
+  /// No description provided for @ftpPassiveStart.
+  ///
+  /// In ko, this message translates to:
+  /// **'패시브 포트 시작'**
+  String get ftpPassiveStart;
+
+  /// No description provided for @ftpPassiveEnd.
+  ///
+  /// In ko, this message translates to:
+  /// **'패시브 포트 끝'**
+  String get ftpPassiveEnd;
+
+  /// No description provided for @ftpPassiveHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'방화벽에서 이 범위도 열려 있어야 해요'**
+  String get ftpPassiveHint;
+
+  /// No description provided for @ftpMaxConnections.
+  ///
+  /// In ko, this message translates to:
+  /// **'동시 접속 수'**
+  String get ftpMaxConnections;
+
+  /// No description provided for @ftpIdleTimeout.
+  ///
+  /// In ko, this message translates to:
+  /// **'유휴 시간 제한 (초)'**
+  String get ftpIdleTimeout;
+
+  /// No description provided for @ftpLogCommands.
+  ///
+  /// In ko, this message translates to:
+  /// **'모든 명령을 디버그 로그에 기록 (비밀번호는 가림)'**
+  String get ftpLogCommands;
+
+  /// No description provided for @ftpColClient.
+  ///
+  /// In ko, this message translates to:
+  /// **'클라이언트'**
+  String get ftpColClient;
+
+  /// No description provided for @ftpColUser.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용자'**
+  String get ftpColUser;
+
+  /// No description provided for @ftpColDir.
+  ///
+  /// In ko, this message translates to:
+  /// **'폴더'**
+  String get ftpColDir;
+
+  /// No description provided for @ftpColActivity.
+  ///
+  /// In ko, this message translates to:
+  /// **'활동'**
+  String get ftpColActivity;
+
+  /// No description provided for @ftpColTraffic.
+  ///
+  /// In ko, this message translates to:
+  /// **'받음 / 보냄'**
+  String get ftpColTraffic;
+
+  /// No description provided for @ftpColConnected.
+  ///
+  /// In ko, this message translates to:
+  /// **'접속'**
+  String get ftpColConnected;
+
+  /// No description provided for @ftpNotLoggedIn.
+  ///
+  /// In ko, this message translates to:
+  /// **'로그인 전'**
+  String get ftpNotLoggedIn;
+
+  /// No description provided for @ftpDisconnect.
+  ///
+  /// In ko, this message translates to:
+  /// **'끊기'**
+  String get ftpDisconnect;
+
+  /// No description provided for @ftpClosed.
+  ///
+  /// In ko, this message translates to:
+  /// **'끊김'**
+  String get ftpClosed;
+
+  /// No description provided for @ftpUploading.
+  ///
+  /// In ko, this message translates to:
+  /// **'올리는 중 {file}'**
+  String ftpUploading(String file);
+
+  /// No description provided for @ftpDownloading.
+  ///
+  /// In ko, this message translates to:
+  /// **'내려받는 중 {file}'**
+  String ftpDownloading(String file);
+
+  /// No description provided for @ftpEmptyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'연결된 클라이언트가 없어요'**
+  String get ftpEmptyTitle;
+
+  /// No description provided for @ftpEmptyHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'FTP 클라이언트가 접속하면 여기에 나타나요'**
+  String get ftpEmptyHint;
+
+  /// No description provided for @ftpSummary.
+  ///
+  /// In ko, this message translates to:
+  /// **'연결 {open} · 누적 {total} · 받음 {received} · 보냄 {sent}'**
+  String ftpSummary(int open, int total, String received, String sent);
+
+  /// No description provided for @checkTitleBlocked.
+  ///
+  /// In ko, this message translates to:
+  /// **'서비스를 시작할 수 없어요'**
+  String get checkTitleBlocked;
+
+  /// No description provided for @checkTitleWarning.
+  ///
+  /// In ko, this message translates to:
+  /// **'시작하기 전에 확인하세요'**
+  String get checkTitleWarning;
+
+  /// No description provided for @checkPortInUse.
+  ///
+  /// In ko, this message translates to:
+  /// **'{protocol} {port}를 다른 프로그램이 쓰고 있어요: {process} (PID {pid})'**
+  String checkPortInUse(String protocol, int port, String process, int pid);
+
+  /// No description provided for @checkFirewall.
+  ///
+  /// In ko, this message translates to:
+  /// **'Windows 방화벽이 {profiles} 프로필에서 {ports} 수신을 막을 수 있어요. 이 프로그램의 허용 규칙이 없어요.'**
+  String checkFirewall(String profiles, String ports);
+
+  /// No description provided for @checkOtherDhcp.
+  ///
+  /// In ko, this message translates to:
+  /// **'같은 망에 다른 DHCP 서버가 있어요: {servers}'**
+  String checkOtherDhcp(String servers);
+
+  /// No description provided for @checkPortsReserved.
+  ///
+  /// In ko, this message translates to:
+  /// **'Windows가 패시브 포트 범위 {range} 중 {reserved}를 예약해 두었어요 (쓸 수 있는 포트 {free}개).'**
+  String checkPortsReserved(String range, String reserved, int free);
+
+  /// No description provided for @checkPortsReservedAdvice.
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 범위(예: 40000~40199)로 바꾸세요. 예약 범위는 netsh int ipv4 show excludedportrange protocol=tcp 로 볼 수 있어요.'**
+  String get checkPortsReservedAdvice;
+
+  /// No description provided for @checkAddRule.
+  ///
+  /// In ko, this message translates to:
+  /// **'방화벽 규칙 추가'**
+  String get checkAddRule;
+
+  /// No description provided for @checkAddRuleHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'관리자 권한 확인 창이 떠요'**
+  String get checkAddRuleHint;
+
+  /// No description provided for @checkRuleAdded.
+  ///
+  /// In ko, this message translates to:
+  /// **'방화벽 규칙을 추가했어요'**
+  String get checkRuleAdded;
+
+  /// No description provided for @logDropped.
+  ///
+  /// In ko, this message translates to:
+  /// **'로그가 너무 많아 {count}건을 건너뛰었어요'**
+  String logDropped(int count);
+
+  /// No description provided for @logCheckPortInUse.
+  ///
+  /// In ko, this message translates to:
+  /// **'{protocol} {port}를 {process} (PID {pid})가 쓰고 있어요'**
+  String logCheckPortInUse(String protocol, int port, String process, int pid);
+
+  /// No description provided for @logCheckFirewallBlocked.
+  ///
+  /// In ko, this message translates to:
+  /// **'방화벽 허용 규칙 없음: {profiles} 프로필, {ports}'**
+  String logCheckFirewallBlocked(String profiles, String ports);
+
+  /// No description provided for @logCheckOtherDhcpServer.
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 DHCP 서버 발견: {servers}'**
+  String logCheckOtherDhcpServer(String servers);
+
+  /// No description provided for @logCheckPortsReserved.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약된 포트: {range} 중 {reserved}'**
+  String logCheckPortsReserved(String range, String reserved);
+
+  /// No description provided for @logCheckRuleAdded.
+  ///
+  /// In ko, this message translates to:
+  /// **'방화벽 규칙을 추가했어요'**
+  String get logCheckRuleAdded;
+
+  /// No description provided for @logCheckRuleFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'방화벽 규칙을 추가하지 못했어요 (거부되었거나 실패)'**
+  String get logCheckRuleFailed;
+
+  /// No description provided for @logTftpStarted.
+  ///
+  /// In ko, this message translates to:
+  /// **'TFTP 서버 시작 {address}:{port} · {root}'**
+  String logTftpStarted(String address, int port, String root);
+
+  /// No description provided for @logTftpStopped.
+  ///
+  /// In ko, this message translates to:
+  /// **'TFTP 서버를 중지했어요'**
+  String get logTftpStopped;
+
+  /// No description provided for @logTftpRrq.
+  ///
+  /// In ko, this message translates to:
+  /// **'읽기 요청 {file} ← {client} ({mode})'**
+  String logTftpRrq(String file, String client, String mode);
+
+  /// No description provided for @logTftpWrq.
+  ///
+  /// In ko, this message translates to:
+  /// **'쓰기 요청 {file} ← {client} ({mode})'**
+  String logTftpWrq(String file, String client, String mode);
+
+  /// No description provided for @logTftpSent.
+  ///
+  /// In ko, this message translates to:
+  /// **'보냄 {file} → {client} · {bytes} · {seconds}초 · {rate}'**
+  String logTftpSent(
+    String file,
+    String client,
+    String bytes,
+    String seconds,
+    String rate,
+  );
+
+  /// No description provided for @logTftpReceived.
+  ///
+  /// In ko, this message translates to:
+  /// **'받음 {file} ← {client} · {bytes} · {seconds}초 · {rate}'**
+  String logTftpReceived(
+    String file,
+    String client,
+    String bytes,
+    String seconds,
+    String rate,
+  );
+
+  /// No description provided for @logTftpFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'실패 {file} ({client}): {reason}'**
+  String logTftpFailed(String file, String client, String reason);
+
+  /// No description provided for @logTftpBusy.
+  ///
+  /// In ko, this message translates to:
+  /// **'{client}의 {file} 요청을 거절했어요 (동시 전송 {limit}개 초과)'**
+  String logTftpBusy(String client, String file, int limit);
+
+  /// No description provided for @logTftpMalformed.
+  ///
+  /// In ko, this message translates to:
+  /// **'{from}에서 온 잘못된 요청'**
+  String logTftpMalformed(String from);
+
+  /// No description provided for @logTftpPortInUse.
+  ///
+  /// In ko, this message translates to:
+  /// **'{address}:{port}를 다른 프로그램이 쓰고 있어요: {error}'**
+  String logTftpPortInUse(String address, int port, String error);
+
+  /// No description provided for @logTftpPermissionDenied.
+  ///
+  /// In ko, this message translates to:
+  /// **'{address}:{port}를 열 권한이 없어요: {error}'**
+  String logTftpPermissionDenied(String address, int port, String error);
+
+  /// No description provided for @logTftpBindFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'{address}:{port}를 열지 못했어요: {error}'**
+  String logTftpBindFailed(String address, int port, String error);
+
+  /// No description provided for @logTftpPacketIn.
+  ///
+  /// In ko, this message translates to:
+  /// **'요청 패킷 ← {client}'**
+  String logTftpPacketIn(String client);
+
+  /// No description provided for @logFtpStarted.
+  ///
+  /// In ko, this message translates to:
+  /// **'FTP 서버 시작 {address}:{port} · {root} · 패시브 {passive}'**
+  String logFtpStarted(String address, int port, String root, String passive);
+
+  /// No description provided for @logFtpStopped.
+  ///
+  /// In ko, this message translates to:
+  /// **'FTP 서버를 중지했어요'**
+  String get logFtpStopped;
+
+  /// No description provided for @logFtpConnected.
+  ///
+  /// In ko, this message translates to:
+  /// **'접속 {client}'**
+  String logFtpConnected(String client);
+
+  /// No description provided for @logFtpDisconnected.
+  ///
+  /// In ko, this message translates to:
+  /// **'끊김 {client} {user} ({seconds}초)'**
+  String logFtpDisconnected(String client, String user, int seconds);
+
+  /// No description provided for @logFtpLogin.
+  ///
+  /// In ko, this message translates to:
+  /// **'로그인 {user} ({client})'**
+  String logFtpLogin(String user, String client);
+
+  /// No description provided for @logFtpLoginFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'로그인 실패 {user} ({client})'**
+  String logFtpLoginFailed(String user, String client);
+
+  /// No description provided for @logFtpDownload.
+  ///
+  /// In ko, this message translates to:
+  /// **'내려받음 {file} → {user} · {bytes} · {seconds}초 · {rate}'**
+  String logFtpDownload(
+    String file,
+    String user,
+    String bytes,
+    String seconds,
+    String rate,
+  );
+
+  /// No description provided for @logFtpUpload.
+  ///
+  /// In ko, this message translates to:
+  /// **'올림 {file} ← {user} · {bytes} · {seconds}초 · {rate}'**
+  String logFtpUpload(
+    String file,
+    String user,
+    String bytes,
+    String seconds,
+    String rate,
+  );
+
+  /// No description provided for @logFtpTransferFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'전송 실패 {file} ({user}): {error}'**
+  String logFtpTransferFailed(String file, String user, String error);
+
+  /// No description provided for @logFtpDenied.
+  ///
+  /// In ko, this message translates to:
+  /// **'거부 {command} {path} ({user}, {client})'**
+  String logFtpDenied(String command, String path, String user, String client);
+
+  /// No description provided for @logFtpDeleted.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제 {path} ({user})'**
+  String logFtpDeleted(String path, String user);
+
+  /// No description provided for @logFtpMkdir.
+  ///
+  /// In ko, this message translates to:
+  /// **'폴더 만듦 {path} ({user})'**
+  String logFtpMkdir(String path, String user);
+
+  /// No description provided for @logFtpRmdir.
+  ///
+  /// In ko, this message translates to:
+  /// **'폴더 지움 {path} ({user})'**
+  String logFtpRmdir(String path, String user);
+
+  /// No description provided for @logFtpRenamed.
+  ///
+  /// In ko, this message translates to:
+  /// **'이름 바꿈 {from} → {to} ({user})'**
+  String logFtpRenamed(String from, String to, String user);
+
+  /// No description provided for @logFtpTooMany.
+  ///
+  /// In ko, this message translates to:
+  /// **'{client} 연결 거절 (동시 접속 {limit}개 초과)'**
+  String logFtpTooMany(String client, int limit);
+
+  /// No description provided for @logFtpIdleTimeout.
+  ///
+  /// In ko, this message translates to:
+  /// **'유휴 시간 초과로 끊음 {client} {user}'**
+  String logFtpIdleTimeout(String client, String user);
+
+  /// No description provided for @logFtpKicked.
+  ///
+  /// In ko, this message translates to:
+  /// **'관리자가 끊음 {client} {user}'**
+  String logFtpKicked(String client, String user);
+
+  /// No description provided for @logFtpNoPassivePort.
+  ///
+  /// In ko, this message translates to:
+  /// **'패시브 포트 {range}에 빈 포트가 없어요'**
+  String logFtpNoPassivePort(String range);
+
+  /// No description provided for @logFtpPortInUse.
+  ///
+  /// In ko, this message translates to:
+  /// **'{address}:{port}를 다른 프로그램이 쓰고 있어요: {error}'**
+  String logFtpPortInUse(String address, int port, String error);
+
+  /// No description provided for @logFtpPermissionDenied.
+  ///
+  /// In ko, this message translates to:
+  /// **'{address}:{port}를 열 권한이 없어요: {error}'**
+  String logFtpPermissionDenied(String address, int port, String error);
+
+  /// No description provided for @logFtpBindFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'{address}:{port}를 열지 못했어요: {error}'**
+  String logFtpBindFailed(String address, int port, String error);
+
+  /// No description provided for @logFtpCommand.
+  ///
+  /// In ko, this message translates to:
+  /// **'{client} › {command}'**
+  String logFtpCommand(String client, String command);
+
+  /// 업데이트 알림의 변경 항목 아래. 개수 제한으로 뺀 항목이 있을 때.
+  ///
+  /// In ko, this message translates to:
+  /// **'외 {count}건'**
+  String updateMoreChanges(int count);
+
+  /// No description provided for @updateViewReleaseNotes.
+  ///
+  /// In ko, this message translates to:
+  /// **'릴리스 노트 보기'**
+  String get updateViewReleaseNotes;
+
+  /// No description provided for @logLevelTooltip.
+  ///
+  /// In ko, this message translates to:
+  /// **'표시할 최소 수준'**
+  String get logLevelTooltip;
 }
 
 class _AppLocalizationsDelegate

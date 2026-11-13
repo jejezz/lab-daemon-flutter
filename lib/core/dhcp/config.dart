@@ -70,6 +70,72 @@ class DhcpConfig implements ServiceConfig {
   /// true면 주고받은 패킷의 16진수 덤프를 DEBUG 로그에 남긴다.
   final bool logPackets;
 
+  /// Isolate 경계와 저장소를 건너는 JSON 형태.
+  @override
+  Map<String, Object?> toJson() => {
+        'serverIp': '$serverIp',
+        'rangeStart': '$rangeStart',
+        'rangeEnd': '$rangeEnd',
+        'mask': '$mask',
+        'gateway': gateway?.toString(),
+        'dnsServers': [for (final ip in dnsServers) '$ip'],
+        'leaseSeconds': leaseTime?.inSeconds,
+        'domainName': domainName,
+        'ntpServers': [for (final ip in ntpServers) '$ip'],
+        'tftpServer': tftpServer,
+        'bootFile': bootFile,
+        'excluded': [for (final ip in excluded) '$ip'],
+        'reservations': [
+          for (final MapEntry(key: mac, value: ip) in reservations.entries) ['$mac', '$ip'],
+        ],
+        'bindAddress': bindAddress?.toString(),
+        'serverPort': serverPort,
+        'clientPort': clientPort,
+        'directedBroadcast': directedBroadcast,
+        'offerHoldSeconds': offerHold.inSeconds,
+        'declineQuarantineSeconds': declineQuarantine.inSeconds,
+        'logPackets': logPackets,
+      };
+
+  /// [toJson]의 반대. 값이 없거나 형식이 틀리면 [FormatException].
+  factory DhcpConfig.fromJson(Map<String, Object?> json) {
+    try {
+      Ipv4 ip(String key) => Ipv4.parse(json[key]! as String);
+      Ipv4? optIp(String key) => json[key] == null ? null : Ipv4.parse(json[key]! as String);
+      List<Ipv4> ips(String key) => [for (final s in (json[key] as List? ?? const [])) Ipv4.parse(s as String)];
+      final lease = json['leaseSeconds'] as int?;
+      return DhcpConfig(
+        serverIp: ip('serverIp'),
+        rangeStart: ip('rangeStart'),
+        rangeEnd: ip('rangeEnd'),
+        mask: ip('mask'),
+        gateway: optIp('gateway'),
+        dnsServers: ips('dnsServers'),
+        leaseTime: lease == null ? null : Duration(seconds: lease),
+        domainName: json['domainName'] as String?,
+        ntpServers: ips('ntpServers'),
+        tftpServer: json['tftpServer'] as String?,
+        bootFile: json['bootFile'] as String?,
+        excluded: ips('excluded'),
+        reservations: {
+          for (final pair in (json['reservations'] as List? ?? const []))
+            MacAddress.parse((pair as List)[0] as String): Ipv4.parse(pair[1] as String),
+        },
+        bindAddress: optIp('bindAddress'),
+        serverPort: json['serverPort'] as int? ?? 67,
+        clientPort: json['clientPort'] as int? ?? 68,
+        directedBroadcast: json['directedBroadcast'] as bool? ?? false,
+        offerHold: Duration(seconds: json['offerHoldSeconds'] as int? ?? 60),
+        declineQuarantine: Duration(seconds: json['declineQuarantineSeconds'] as int? ?? 600),
+        logPackets: json['logPackets'] as bool? ?? false,
+      );
+    } on FormatException {
+      rethrow;
+    } catch (e) {
+      throw FormatException('Invalid DHCP config: $e');
+    }
+  }
+
   Ipv4 get bindTo => bindAddress ?? serverIp;
 
   Ipv4 get broadcastTarget => directedBroadcast ? serverIp.broadcastOf(mask) : Ipv4.broadcast;

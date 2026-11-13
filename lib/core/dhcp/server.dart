@@ -1,10 +1,15 @@
 // DHCP 서버: 전송 계층에서 패킷을 받아 [DhcpEngine]에 넘기고 응답을 보낸다. 상태·로그·이벤트는
-// [BaseNetService]가 맡고, 이 클래스는 소켓 수명과 Lease 만료 타이머, 화면용 이벤트를 다룬다.
+// [BaseNetService]가 맡고, 이 클래스는 소켓 수명과 Lease 만료 타이머, 화면용 스냅샷을 다룬다.
+//
+// 성능: 패킷마다 하는 일은 엔진 호출과 응답 전송, 그리고 "표가 바뀜" 표시뿐이다. Lease 표와 통계의
+// 스냅샷은 [BaseNetService.scheduleSnapshot]이 일정 간격에 한 번만 만든다.
 
 import 'dart:async';
 import 'dart:typed_data';
 
+import '../host.dart';
 import '../ipv4.dart';
+import '../lease_time.dart';
 import '../service.dart';
 import 'config.dart';
 import 'engine.dart';
@@ -42,7 +47,7 @@ class LeaseInfo {
   final DateTime? expiresAt;
 }
 
-/// Lease 표가 바뀔 때마다 전체 스냅샷을 내보낸다 (표는 작아서 차분보다 단순하다).
+/// Lease 표가 바뀌면 전체 스냅샷을 내보낸다 (표는 작아서 차분보다 단순하다).
 final class DhcpLeasesEvent extends ServiceEvent {
   DhcpLeasesEvent(super.service, this.leases, {required this.capacity, super.time});
 
@@ -60,12 +65,16 @@ final class DhcpStatsEvent extends ServiceEvent {
   final Map<String, int> counts;
 }
 
+/// 서비스 Isolate에서 DHCP 서버를 만드는 최상위 함수 ([IsolateHost]에 넘긴다).
+NetService<ServiceConfig> createDhcpService() => DhcpServer();
+
 class DhcpServer extends BaseNetService<DhcpConfig> {
-  DhcpServer(LogBus bus, {DhcpTransportFactory? transportFactory, this.clock})
+  DhcpServer({DhcpTransportFactory? transportFactory, this.clock, super.snapshotInterval})
       : _transportFactory = transportFactory ?? UdpDhcpTransport.bind,
-        super('dhcp', bus);
+        super('dhcp');
 
   final DhcpTransportFactory _transportFactory;
+
   /// 테스트에서 시간을 주입한다. null이면 실제 시계.
   final DateTime Function()? clock;
 
@@ -75,12 +84,17 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
   DhcpTransport? _transport;
   StreamSubscription<DhcpDatagram>? _subscription;
   Timer? _timer;
+  int _publishedVersion = -1;
 
-  /// 실행 중인 설정 (멈췄으면 null). 화면은 편집 중인 값이 아니라 이것을 보여 준다.
+  /// 실행 중인 설정 (멈췄으면 null).
   DhcpConfig? get config => _config;
 
   LeasePool? get pool => _pool;
+
   DhcpStats get stats => _engine?.stats ?? DhcpStats();
+
+  @override
+  DhcpConfig decodeConfig(Map<String, Object?> json) => DhcpConfig.fromJson(json);
 
   @override
   Future<void> onStart(DhcpConfig config) async {
@@ -97,6 +111,7 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
     _config = config;
     _pool = pool;
     _engine = engine;
+    _publishedVersion = -1;
     _subscription = _transport!.incoming.listen(_onDatagram);
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => expireNow());
     log(LogLevel.info, 'logDhcpStarted', args: {
@@ -105,8 +120,8 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
       'end': '${config.rangeEnd}',
       'mask': '${config.mask}',
     });
-    _emitLeases();
-    _emitStats();
+    _publishLeases();
+    _publishStats();
   }
 
   @override
@@ -124,7 +139,30 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
     if (hadTransport) log(LogLevel.info, 'logDhcpStopped');
   }
 
-  // ---- 화면에서 부르는 조작 -----------------------------------------------------------------------
+  @override
+  Future<Object?> handleCommand(String name, Map<String, Object?> args) async {
+    switch (name) {
+      case 'releaseIp':
+        return releaseIp(Ipv4.parse(args['ip']! as String)) != null;
+      case 'releaseMac':
+        return releaseMac(MacAddress.parse(args['mac']! as String)) != null;
+      case 'releaseAll':
+        return releaseAll();
+      case 'setLeaseTime':
+        final text = args['leaseTime'] as String?;
+        setLeaseTime(text == null ? null : parseLeaseTime(text));
+        return null;
+      case 'reserve':
+        reserve(MacAddress.parse(args['mac']! as String), Ipv4.parse(args['ip']! as String));
+        return null;
+      case 'unreserve':
+        unreserve(MacAddress.parse(args['mac']! as String));
+        return null;
+    }
+    return super.handleCommand(name, args);
+  }
+
+  // ---- 조작 -------------------------------------------------------------------------------------
 
   /// 만료된 Lease를 지운다. 1초마다 불리고, 테스트에서는 직접 부른다.
   void expireNow() {
@@ -137,7 +175,7 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
         log(LogLevel.info, 'logDhcpExpired', kind: 'EXPIRE', args: {'mac': '${lease.mac}', 'ip': '${lease.ip}'});
       }
     }
-    if (gone.isNotEmpty) _emitLeases();
+    _publishLeases();
   }
 
   Lease? releaseIp(Ipv4 ip) => _release(_requirePool().releaseIp(ip));
@@ -150,7 +188,7 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
     for (final lease in released) {
       log(LogLevel.info, 'logDhcpManualRelease', kind: 'RELEASE', args: {'mac': '${lease.mac}', 'ip': '${lease.ip}'});
     }
-    _emitLeases();
+    _publishLeases();
     return released.length;
   }
 
@@ -176,7 +214,7 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
   Lease? _release(Lease? lease) {
     if (lease != null) {
       log(LogLevel.info, 'logDhcpManualRelease', kind: 'RELEASE', args: {'mac': '${lease.mac}', 'ip': '${lease.ip}'});
-      _emitLeases();
+      _publishLeases();
     }
     return lease;
   }
@@ -195,17 +233,17 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
       log(LogLevel.warning, 'logDhcpMalformed', args: {'from': '${datagram.from}', 'error': e.message});
       return;
     }
-    if (_config?.logPackets ?? false) {
+    final logPackets = _config?.logPackets ?? false;
+    if (logPackets) {
       log(LogLevel.debug, 'logDhcpPacketIn', kind: DhcpMessageType.name(request.messageType),
           args: {'from': '${datagram.from}'}, detail: DhcpPacket.hexDump(datagram.data));
     }
-    final before = _snapshotKey();
     final reply = engine.handle(request);
     if (reply != null) {
       final Uint8List bytes = reply.packet.toBytes();
       try {
         transport.send(bytes, reply.address, reply.port);
-        if (_config?.logPackets ?? false) {
+        if (logPackets) {
           log(LogLevel.debug, 'logDhcpPacketOut', kind: DhcpMessageType.name(reply.packet.messageType),
               args: {'to': '${reply.address}', 'port': reply.port}, detail: DhcpPacket.hexDump(bytes));
         }
@@ -213,21 +251,22 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
         log(LogLevel.error, 'logDhcpSendFailed', args: {'to': '${reply.address}', 'error': '$e'});
       }
     }
-    if (_snapshotKey() != before) _emitLeases();
-    _emitStats();
+    _publishLeases();
+    _publishStats();
   }
 
-  /// Lease 표가 바뀌었는지 싸게 알아내는 지문.
-  String _snapshotKey() => _pool!.leases.map((l) => '${l.ip}/${l.mac}/${l.state.name}/${l.expiresAt?.millisecondsSinceEpoch}').join(',');
-
-  void _emitLeases() {
+  /// 풀이 바뀌었을 때만 스냅샷을 예약한다 (표 크기와 무관한 O(1) 비교).
+  void _publishLeases() {
     final pool = _pool;
-    if (pool == null) return;
-    emit(DhcpLeasesEvent(id, [for (final l in pool.leases) LeaseInfo.of(l)], capacity: pool.capacity));
+    if (pool == null || pool.version == _publishedVersion) return;
+    _publishedVersion = pool.version;
+    scheduleSnapshot('leases', () {
+      final p = _pool;
+      return DhcpLeasesEvent(id, [if (p != null) for (final l in p.leases) LeaseInfo.of(l)], capacity: p?.capacity ?? 0);
+    });
   }
 
-  void _emitStats() {
-    final engine = _engine;
-    if (engine != null) emit(DhcpStatsEvent(id, engine.stats.toMap()));
+  void _publishStats() {
+    scheduleSnapshot('stats', () => DhcpStatsEvent(id, _engine?.stats.toMap() ?? const {}));
   }
 }

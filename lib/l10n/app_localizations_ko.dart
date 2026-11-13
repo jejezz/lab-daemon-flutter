@@ -90,7 +90,7 @@ class AppLocalizationsKo extends AppLocalizations {
       'DHCP, TFTP, FTP 서버를 켜고 접속 현황과 로그를 실시간으로 확인합니다. 보드 플래싱과 랩 환경에서 쓰는 간이 서버 모음입니다.';
 
   @override
-  String get homeEmptyTitle => '실행 중인 서비스가 없어요';
+  String get homeEmptyTitle => '서비스가 꺼져 있어요';
 
   @override
   String get homeEmptyAction => '서비스 시작';
@@ -330,18 +330,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get leaseEmptyHint => '장비가 DHCP로 주소를 요청하면 여기에 나타나요';
 
   @override
-  String get startInvalidSettings => 'DHCP 설정이 올바르지 않아요. 설정에서 확인해 주세요.';
-
-  @override
   String startFailed(String error) {
     return '서비스를 시작하지 못했어요: $error';
   }
 
   @override
   String get errorCopy => '복사';
-
-  @override
-  String get openSettings => '설정 열기';
 
   @override
   String get logTitle => '로그';
@@ -383,9 +377,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String logPausedBanner(int count) {
     return '일시정지됨 · 새 로그 $count개';
   }
-
-  @override
-  String get settingsSectionDhcp => 'DHCP';
 
   @override
   String get dhcpFieldServerIp => '서버 NIC';
@@ -636,15 +627,538 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String logDhcpProbeFound(String server, String ip) {
-    return '다른 DHCP 서버 발견: $server (제안 $ip)';
-  }
-
-  @override
   String get logDhcpProbeNone => '다른 DHCP 서버의 응답이 없었어요';
 
   @override
   String logDhcpProbeFailed(String error) {
     return '다른 DHCP 서버를 확인하지 못했어요: $error';
   }
+
+  @override
+  String get serviceTftp => 'TFTP';
+
+  @override
+  String get serviceFtp => 'FTP';
+
+  @override
+  String get panelToggleTooltip => '설정 패널 보이기/숨기기';
+
+  @override
+  String panelTitle(String service) {
+    return '$service 설정';
+  }
+
+  @override
+  String get runningLockedNote => '실행 중에는 설정을 바꿀 수 없어요. 서비스를 멈추고 바꾸세요.';
+
+  @override
+  String get fieldBindNic => '사용할 NIC';
+
+  @override
+  String get fieldAllNics => '모든 NIC (0.0.0.0)';
+
+  @override
+  String get fieldAllNicsWarning => '모든 NIC에서 받아요. 회사망 쪽에도 열릴 수 있어요.';
+
+  @override
+  String get fieldPort => '포트';
+
+  @override
+  String get fieldRootDir => '루트 폴더';
+
+  @override
+  String get fieldBrowse => '찾아보기';
+
+  @override
+  String get sectionAdvanced => '고급';
+
+  @override
+  String get fieldErrDirMissing => '폴더가 없어요';
+
+  @override
+  String get fieldErrInvalidPort => '1~65535 사이여야 해요';
+
+  @override
+  String get fieldErrInvalidNumber => '허용 범위 밖의 숫자예요';
+
+  @override
+  String startInvalidSettingsFor(String service) {
+    return '$service 설정이 올바르지 않아요. 왼쪽 설정을 확인해 주세요.';
+  }
+
+  @override
+  String get tftpAllowWrite => '업로드 허용';
+
+  @override
+  String get tftpAllowWriteHint => '클라이언트가 루트 폴더에 파일을 올릴 수 있어요';
+
+  @override
+  String get tftpAllowOverwrite => '기존 파일 덮어쓰기 허용';
+
+  @override
+  String get tftpMaxBlockSize => '최대 블록 크기 (바이트)';
+
+  @override
+  String get tftpMaxWindow => '최대 윈도우 (블록)';
+
+  @override
+  String get tftpTimeout => '재전송 대기 (ms)';
+
+  @override
+  String get tftpMaxTransfers => '동시 전송 수';
+
+  @override
+  String get tftpLogPackets => '요청 패킷 덤프를 디버그 로그에 기록';
+
+  @override
+  String get tftpColClient => '클라이언트';
+
+  @override
+  String get tftpColFile => '파일';
+
+  @override
+  String get tftpColDirection => '방향';
+
+  @override
+  String get tftpColProgress => '진행';
+
+  @override
+  String get tftpColRate => '속도';
+
+  @override
+  String get tftpColState => '상태';
+
+  @override
+  String get tftpDownload => '보냄';
+
+  @override
+  String get tftpUpload => '받음';
+
+  @override
+  String get tftpStateActive => '진행 중';
+
+  @override
+  String get tftpStateDone => '완료';
+
+  @override
+  String get tftpStateFailed => '실패';
+
+  @override
+  String get tftpAbort => '중단';
+
+  @override
+  String get tftpClearRecent => '끝난 전송 지우기';
+
+  @override
+  String get tftpEmptyTitle => '아직 전송이 없어요';
+
+  @override
+  String get tftpEmptyHint => '장비가 TFTP로 파일을 요청하면 여기에 나타나요';
+
+  @override
+  String tftpSummary(
+    int active,
+    int completed,
+    int failed,
+    String sent,
+    String received,
+  ) {
+    return '진행 $active · 완료 $completed · 실패 $failed · 보냄 $sent · 받음 $received';
+  }
+
+  @override
+  String get tftpReasonNotFound => '파일 없음';
+
+  @override
+  String get tftpReasonAccessViolation => '접근 거부';
+
+  @override
+  String get tftpReasonFileExists => '이미 있는 파일';
+
+  @override
+  String get tftpReasonWriteDisabled => '업로드 꺼짐';
+
+  @override
+  String get tftpReasonTimeout => '응답 없음';
+
+  @override
+  String get tftpReasonClientError => '클라이언트가 중단';
+
+  @override
+  String get tftpReasonAborted => '사용자가 중단';
+
+  @override
+  String get tftpReasonDiskFull => '디스크 가득 참';
+
+  @override
+  String get tftpReasonIo => '파일 입출력 오류';
+
+  @override
+  String get tftpReasonUnsupportedMode => '지원하지 않는 모드';
+
+  @override
+  String get ftpAccount => '계정';
+
+  @override
+  String get ftpUsername => '사용자 이름';
+
+  @override
+  String get ftpPassword => '비밀번호';
+
+  @override
+  String get ftpPasswordSet => '비밀번호가 설정돼 있어요. 바꾸려면 새로 입력하세요.';
+
+  @override
+  String get ftpPasswordHint => '입력하면 바로 해시로만 저장돼요';
+
+  @override
+  String get ftpAllowAnonymous => '익명(anonymous) 접속 허용';
+
+  @override
+  String get ftpAllowWrite => '쓰기 허용 (올리기·지우기·이름 바꾸기)';
+
+  @override
+  String get ftpAnonymousWriteWarning => '익명 사용자도 파일을 바꿀 수 있어요';
+
+  @override
+  String get ftpPassiveStart => '패시브 포트 시작';
+
+  @override
+  String get ftpPassiveEnd => '패시브 포트 끝';
+
+  @override
+  String get ftpPassiveHint => '방화벽에서 이 범위도 열려 있어야 해요';
+
+  @override
+  String get ftpMaxConnections => '동시 접속 수';
+
+  @override
+  String get ftpIdleTimeout => '유휴 시간 제한 (초)';
+
+  @override
+  String get ftpLogCommands => '모든 명령을 디버그 로그에 기록 (비밀번호는 가림)';
+
+  @override
+  String get ftpColClient => '클라이언트';
+
+  @override
+  String get ftpColUser => '사용자';
+
+  @override
+  String get ftpColDir => '폴더';
+
+  @override
+  String get ftpColActivity => '활동';
+
+  @override
+  String get ftpColTraffic => '받음 / 보냄';
+
+  @override
+  String get ftpColConnected => '접속';
+
+  @override
+  String get ftpNotLoggedIn => '로그인 전';
+
+  @override
+  String get ftpDisconnect => '끊기';
+
+  @override
+  String get ftpClosed => '끊김';
+
+  @override
+  String ftpUploading(String file) {
+    return '올리는 중 $file';
+  }
+
+  @override
+  String ftpDownloading(String file) {
+    return '내려받는 중 $file';
+  }
+
+  @override
+  String get ftpEmptyTitle => '연결된 클라이언트가 없어요';
+
+  @override
+  String get ftpEmptyHint => 'FTP 클라이언트가 접속하면 여기에 나타나요';
+
+  @override
+  String ftpSummary(int open, int total, String received, String sent) {
+    return '연결 $open · 누적 $total · 받음 $received · 보냄 $sent';
+  }
+
+  @override
+  String get checkTitleBlocked => '서비스를 시작할 수 없어요';
+
+  @override
+  String get checkTitleWarning => '시작하기 전에 확인하세요';
+
+  @override
+  String checkPortInUse(String protocol, int port, String process, int pid) {
+    return '$protocol $port를 다른 프로그램이 쓰고 있어요: $process (PID $pid)';
+  }
+
+  @override
+  String checkFirewall(String profiles, String ports) {
+    return 'Windows 방화벽이 $profiles 프로필에서 $ports 수신을 막을 수 있어요. 이 프로그램의 허용 규칙이 없어요.';
+  }
+
+  @override
+  String checkOtherDhcp(String servers) {
+    return '같은 망에 다른 DHCP 서버가 있어요: $servers';
+  }
+
+  @override
+  String checkPortsReserved(String range, String reserved, int free) {
+    return 'Windows가 패시브 포트 범위 $range 중 $reserved를 예약해 두었어요 (쓸 수 있는 포트 $free개).';
+  }
+
+  @override
+  String get checkPortsReservedAdvice =>
+      '다른 범위(예: 40000~40199)로 바꾸세요. 예약 범위는 netsh int ipv4 show excludedportrange protocol=tcp 로 볼 수 있어요.';
+
+  @override
+  String get checkAddRule => '방화벽 규칙 추가';
+
+  @override
+  String get checkAddRuleHint => '관리자 권한 확인 창이 떠요';
+
+  @override
+  String get checkRuleAdded => '방화벽 규칙을 추가했어요';
+
+  @override
+  String logDropped(int count) {
+    return '로그가 너무 많아 $count건을 건너뛰었어요';
+  }
+
+  @override
+  String logCheckPortInUse(String protocol, int port, String process, int pid) {
+    return '$protocol $port를 $process (PID $pid)가 쓰고 있어요';
+  }
+
+  @override
+  String logCheckFirewallBlocked(String profiles, String ports) {
+    return '방화벽 허용 규칙 없음: $profiles 프로필, $ports';
+  }
+
+  @override
+  String logCheckOtherDhcpServer(String servers) {
+    return '다른 DHCP 서버 발견: $servers';
+  }
+
+  @override
+  String logCheckPortsReserved(String range, String reserved) {
+    return '예약된 포트: $range 중 $reserved';
+  }
+
+  @override
+  String get logCheckRuleAdded => '방화벽 규칙을 추가했어요';
+
+  @override
+  String get logCheckRuleFailed => '방화벽 규칙을 추가하지 못했어요 (거부되었거나 실패)';
+
+  @override
+  String logTftpStarted(String address, int port, String root) {
+    return 'TFTP 서버 시작 $address:$port · $root';
+  }
+
+  @override
+  String get logTftpStopped => 'TFTP 서버를 중지했어요';
+
+  @override
+  String logTftpRrq(String file, String client, String mode) {
+    return '읽기 요청 $file ← $client ($mode)';
+  }
+
+  @override
+  String logTftpWrq(String file, String client, String mode) {
+    return '쓰기 요청 $file ← $client ($mode)';
+  }
+
+  @override
+  String logTftpSent(
+    String file,
+    String client,
+    String bytes,
+    String seconds,
+    String rate,
+  ) {
+    return '보냄 $file → $client · $bytes · $seconds초 · $rate';
+  }
+
+  @override
+  String logTftpReceived(
+    String file,
+    String client,
+    String bytes,
+    String seconds,
+    String rate,
+  ) {
+    return '받음 $file ← $client · $bytes · $seconds초 · $rate';
+  }
+
+  @override
+  String logTftpFailed(String file, String client, String reason) {
+    return '실패 $file ($client): $reason';
+  }
+
+  @override
+  String logTftpBusy(String client, String file, int limit) {
+    return '$client의 $file 요청을 거절했어요 (동시 전송 $limit개 초과)';
+  }
+
+  @override
+  String logTftpMalformed(String from) {
+    return '$from에서 온 잘못된 요청';
+  }
+
+  @override
+  String logTftpPortInUse(String address, int port, String error) {
+    return '$address:$port를 다른 프로그램이 쓰고 있어요: $error';
+  }
+
+  @override
+  String logTftpPermissionDenied(String address, int port, String error) {
+    return '$address:$port를 열 권한이 없어요: $error';
+  }
+
+  @override
+  String logTftpBindFailed(String address, int port, String error) {
+    return '$address:$port를 열지 못했어요: $error';
+  }
+
+  @override
+  String logTftpPacketIn(String client) {
+    return '요청 패킷 ← $client';
+  }
+
+  @override
+  String logFtpStarted(String address, int port, String root, String passive) {
+    return 'FTP 서버 시작 $address:$port · $root · 패시브 $passive';
+  }
+
+  @override
+  String get logFtpStopped => 'FTP 서버를 중지했어요';
+
+  @override
+  String logFtpConnected(String client) {
+    return '접속 $client';
+  }
+
+  @override
+  String logFtpDisconnected(String client, String user, int seconds) {
+    return '끊김 $client $user ($seconds초)';
+  }
+
+  @override
+  String logFtpLogin(String user, String client) {
+    return '로그인 $user ($client)';
+  }
+
+  @override
+  String logFtpLoginFailed(String user, String client) {
+    return '로그인 실패 $user ($client)';
+  }
+
+  @override
+  String logFtpDownload(
+    String file,
+    String user,
+    String bytes,
+    String seconds,
+    String rate,
+  ) {
+    return '내려받음 $file → $user · $bytes · $seconds초 · $rate';
+  }
+
+  @override
+  String logFtpUpload(
+    String file,
+    String user,
+    String bytes,
+    String seconds,
+    String rate,
+  ) {
+    return '올림 $file ← $user · $bytes · $seconds초 · $rate';
+  }
+
+  @override
+  String logFtpTransferFailed(String file, String user, String error) {
+    return '전송 실패 $file ($user): $error';
+  }
+
+  @override
+  String logFtpDenied(String command, String path, String user, String client) {
+    return '거부 $command $path ($user, $client)';
+  }
+
+  @override
+  String logFtpDeleted(String path, String user) {
+    return '삭제 $path ($user)';
+  }
+
+  @override
+  String logFtpMkdir(String path, String user) {
+    return '폴더 만듦 $path ($user)';
+  }
+
+  @override
+  String logFtpRmdir(String path, String user) {
+    return '폴더 지움 $path ($user)';
+  }
+
+  @override
+  String logFtpRenamed(String from, String to, String user) {
+    return '이름 바꿈 $from → $to ($user)';
+  }
+
+  @override
+  String logFtpTooMany(String client, int limit) {
+    return '$client 연결 거절 (동시 접속 $limit개 초과)';
+  }
+
+  @override
+  String logFtpIdleTimeout(String client, String user) {
+    return '유휴 시간 초과로 끊음 $client $user';
+  }
+
+  @override
+  String logFtpKicked(String client, String user) {
+    return '관리자가 끊음 $client $user';
+  }
+
+  @override
+  String logFtpNoPassivePort(String range) {
+    return '패시브 포트 $range에 빈 포트가 없어요';
+  }
+
+  @override
+  String logFtpPortInUse(String address, int port, String error) {
+    return '$address:$port를 다른 프로그램이 쓰고 있어요: $error';
+  }
+
+  @override
+  String logFtpPermissionDenied(String address, int port, String error) {
+    return '$address:$port를 열 권한이 없어요: $error';
+  }
+
+  @override
+  String logFtpBindFailed(String address, int port, String error) {
+    return '$address:$port를 열지 못했어요: $error';
+  }
+
+  @override
+  String logFtpCommand(String client, String command) {
+    return '$client › $command';
+  }
+
+  @override
+  String updateMoreChanges(int count) {
+    return '외 $count건';
+  }
+
+  @override
+  String get updateViewReleaseNotes => '릴리스 노트 보기';
+
+  @override
+  String get logLevelTooltip => '표시할 최소 수준';
 }

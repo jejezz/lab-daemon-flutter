@@ -71,6 +71,15 @@ DhcpConfig _config({bool logPackets = false}) => DhcpConfig(
       logPackets: logPackets,
     );
 
+/// 서비스가 내는 로그를 [bus]에 모은다 (실제 앱에서는 화면 쪽 호스트가 하는 일).
+DhcpServer _make(LogBus bus, {DateTime Function()? clock, DhcpTransportFactory? transportFactory}) {
+  final server = DhcpServer(clock: clock, transportFactory: transportFactory, snapshotInterval: Duration.zero);
+  server.events.listen((e) {
+    if (e is LogEvent) bus.add(e);
+  });
+  return server;
+}
+
 void main() {
   late LogBus bus;
   late _FakeTransport transport;
@@ -85,7 +94,7 @@ void main() {
     now = DateTime.utc(2026, 11, 2, 12);
     boundAddress = null;
     boundPort = null;
-    server = DhcpServer(bus, clock: () => now, transportFactory: (address, port) async {
+    server = _make(bus, clock: () => now, transportFactory: (address, port) async {
       boundAddress = address;
       boundPort = port;
       return transport;
@@ -237,7 +246,7 @@ void main() {
     });
 
     test('바인딩이 실패하면 원인을 로그로 남기고 error가 된다', () async {
-      final failing = DhcpServer(bus, transportFactory: (a, p) async => throw const SocketException('in use', osError: OSError('in use', 10048)));
+      final failing = _make(bus, transportFactory: (a, p) async => throw const SocketException('in use', osError: OSError('in use', 10048)));
       await expectLater(failing.start(_config()), throwsA(isA<SocketException>()));
       expect(failing.state, ServiceState.error);
       expect(bus.history.map((e) => e.key), contains('logDhcpPortInUse'));
@@ -305,7 +314,7 @@ void main() {
     });
 
     test('실제 소켓으로 서버가 시작하고 멈춘다', () async {
-      final real = DhcpServer(bus);
+      final real = _make(bus);
       addTearDown(real.dispose);
       final config = DhcpConfig(
         serverIp: ip('127.0.0.1'),

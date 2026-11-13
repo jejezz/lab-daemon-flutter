@@ -91,7 +91,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Run DHCP, TFTP and FTP servers and watch connections and logs in real time. A set of simple servers for board flashing and lab setups.';
 
   @override
-  String get homeEmptyTitle => 'No services are running';
+  String get homeEmptyTitle => 'The service is stopped';
 
   @override
   String get homeEmptyAction => 'Start Service';
@@ -333,19 +333,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Devices show up here when they ask for an address';
 
   @override
-  String get startInvalidSettings =>
-      'The DHCP settings are not valid. Check them in Settings.';
-
-  @override
   String startFailed(String error) {
     return 'Could not start the service: $error';
   }
 
   @override
   String get errorCopy => 'Copy';
-
-  @override
-  String get openSettings => 'Open Settings';
 
   @override
   String get logTitle => 'Log';
@@ -387,9 +380,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String logPausedBanner(int count) {
     return 'Paused · $count new';
   }
-
-  @override
-  String get settingsSectionDhcp => 'DHCP';
 
   @override
   String get dhcpFieldServerIp => 'Server interface';
@@ -642,15 +632,551 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String logDhcpProbeFound(String server, String ip) {
-    return 'Another DHCP server found: $server (offered $ip)';
-  }
-
-  @override
   String get logDhcpProbeNone => 'No other DHCP server answered';
 
   @override
   String logDhcpProbeFailed(String error) {
     return 'Could not check for other DHCP servers: $error';
   }
+
+  @override
+  String get serviceTftp => 'TFTP';
+
+  @override
+  String get serviceFtp => 'FTP';
+
+  @override
+  String get panelToggleTooltip => 'Show or hide settings';
+
+  @override
+  String panelTitle(String service) {
+    return '$service settings';
+  }
+
+  @override
+  String get runningLockedNote =>
+      'Settings are locked while the service runs. Stop it to make changes.';
+
+  @override
+  String get fieldBindNic => 'Interface';
+
+  @override
+  String get fieldAllNics => 'All interfaces (0.0.0.0)';
+
+  @override
+  String get fieldAllNicsWarning =>
+      'Listens on every interface, including your office network.';
+
+  @override
+  String get fieldPort => 'Port';
+
+  @override
+  String get fieldRootDir => 'Root folder';
+
+  @override
+  String get fieldBrowse => 'Browse';
+
+  @override
+  String get sectionAdvanced => 'Advanced';
+
+  @override
+  String get fieldErrDirMissing => 'Folder does not exist';
+
+  @override
+  String get fieldErrInvalidPort => 'Must be 1 to 65535';
+
+  @override
+  String get fieldErrInvalidNumber => 'Number out of range';
+
+  @override
+  String startInvalidSettingsFor(String service) {
+    return 'The $service settings are not valid. Check the settings on the left.';
+  }
+
+  @override
+  String get tftpAllowWrite => 'Allow uploads';
+
+  @override
+  String get tftpAllowWriteHint =>
+      'Clients can write files into the root folder';
+
+  @override
+  String get tftpAllowOverwrite => 'Allow overwriting existing files';
+
+  @override
+  String get tftpMaxBlockSize => 'Max block size (bytes)';
+
+  @override
+  String get tftpMaxWindow => 'Max window (blocks)';
+
+  @override
+  String get tftpTimeout => 'Retransmit timeout (ms)';
+
+  @override
+  String get tftpMaxTransfers => 'Concurrent transfers';
+
+  @override
+  String get tftpLogPackets => 'Write request hex dumps to the debug log';
+
+  @override
+  String get tftpColClient => 'Client';
+
+  @override
+  String get tftpColFile => 'File';
+
+  @override
+  String get tftpColDirection => 'Direction';
+
+  @override
+  String get tftpColProgress => 'Progress';
+
+  @override
+  String get tftpColRate => 'Rate';
+
+  @override
+  String get tftpColState => 'State';
+
+  @override
+  String get tftpDownload => 'Sent';
+
+  @override
+  String get tftpUpload => 'Received';
+
+  @override
+  String get tftpStateActive => 'Active';
+
+  @override
+  String get tftpStateDone => 'Done';
+
+  @override
+  String get tftpStateFailed => 'Failed';
+
+  @override
+  String get tftpAbort => 'Abort';
+
+  @override
+  String get tftpClearRecent => 'Clear finished';
+
+  @override
+  String get tftpEmptyTitle => 'No transfers yet';
+
+  @override
+  String get tftpEmptyHint =>
+      'Devices show up here when they request a file over TFTP';
+
+  @override
+  String tftpSummary(
+    int active,
+    int completed,
+    int failed,
+    String sent,
+    String received,
+  ) {
+    return 'Active $active · Done $completed · Failed $failed · Sent $sent · Received $received';
+  }
+
+  @override
+  String get tftpReasonNotFound => 'file not found';
+
+  @override
+  String get tftpReasonAccessViolation => 'access denied';
+
+  @override
+  String get tftpReasonFileExists => 'file already exists';
+
+  @override
+  String get tftpReasonWriteDisabled => 'uploads disabled';
+
+  @override
+  String get tftpReasonTimeout => 'timed out';
+
+  @override
+  String get tftpReasonClientError => 'cancelled by the client';
+
+  @override
+  String get tftpReasonAborted => 'aborted';
+
+  @override
+  String get tftpReasonDiskFull => 'disk full';
+
+  @override
+  String get tftpReasonIo => 'file I/O error';
+
+  @override
+  String get tftpReasonUnsupportedMode => 'unsupported mode';
+
+  @override
+  String get ftpAccount => 'Account';
+
+  @override
+  String get ftpUsername => 'Username';
+
+  @override
+  String get ftpPassword => 'Password';
+
+  @override
+  String get ftpPasswordSet =>
+      'A password is set. Type a new one to change it.';
+
+  @override
+  String get ftpPasswordHint => 'Stored only as a salted hash';
+
+  @override
+  String get ftpAllowAnonymous => 'Allow anonymous login';
+
+  @override
+  String get ftpAllowWrite => 'Allow writing (upload, delete, rename)';
+
+  @override
+  String get ftpAnonymousWriteWarning => 'Anonymous users can change files too';
+
+  @override
+  String get ftpPassiveStart => 'Passive ports from';
+
+  @override
+  String get ftpPassiveEnd => 'Passive ports to';
+
+  @override
+  String get ftpPassiveHint => 'This range must also be open in the firewall';
+
+  @override
+  String get ftpMaxConnections => 'Max connections';
+
+  @override
+  String get ftpIdleTimeout => 'Idle timeout (seconds)';
+
+  @override
+  String get ftpLogCommands =>
+      'Write every command to the debug log (passwords hidden)';
+
+  @override
+  String get ftpColClient => 'Client';
+
+  @override
+  String get ftpColUser => 'User';
+
+  @override
+  String get ftpColDir => 'Folder';
+
+  @override
+  String get ftpColActivity => 'Activity';
+
+  @override
+  String get ftpColTraffic => 'In / out';
+
+  @override
+  String get ftpColConnected => 'Connected';
+
+  @override
+  String get ftpNotLoggedIn => 'Not logged in';
+
+  @override
+  String get ftpDisconnect => 'Disconnect';
+
+  @override
+  String get ftpClosed => 'Closed';
+
+  @override
+  String ftpUploading(String file) {
+    return 'Uploading $file';
+  }
+
+  @override
+  String ftpDownloading(String file) {
+    return 'Downloading $file';
+  }
+
+  @override
+  String get ftpEmptyTitle => 'No clients connected';
+
+  @override
+  String get ftpEmptyHint => 'Clients show up here when they connect';
+
+  @override
+  String ftpSummary(int open, int total, String received, String sent) {
+    return 'Open $open · Total $total · In $received · Out $sent';
+  }
+
+  @override
+  String get checkTitleBlocked => 'The service cannot start';
+
+  @override
+  String get checkTitleWarning => 'Check before starting';
+
+  @override
+  String checkPortInUse(String protocol, int port, String process, int pid) {
+    return '$protocol $port is used by another program: $process (PID $pid)';
+  }
+
+  @override
+  String checkFirewall(String profiles, String ports) {
+    return 'Windows Firewall may block incoming $ports on the $profiles profile. There is no allow rule for this program.';
+  }
+
+  @override
+  String checkOtherDhcp(String servers) {
+    return 'Another DHCP server is on this network: $servers';
+  }
+
+  @override
+  String checkPortsReserved(String range, String reserved, int free) {
+    return 'Windows reserves $reserved of the passive range $range ($free ports left).';
+  }
+
+  @override
+  String get checkPortsReservedAdvice =>
+      'Pick another range (for example 40000-40199). See reserved ranges with: netsh int ipv4 show excludedportrange protocol=tcp';
+
+  @override
+  String get checkAddRule => 'Add Firewall Rule';
+
+  @override
+  String get checkAddRuleHint => 'Windows asks for administrator approval';
+
+  @override
+  String get checkRuleAdded => 'Firewall rule added';
+
+  @override
+  String logDropped(int count) {
+    return 'Too many log lines: skipped $count';
+  }
+
+  @override
+  String logCheckPortInUse(String protocol, int port, String process, int pid) {
+    return '$protocol $port is used by $process (PID $pid)';
+  }
+
+  @override
+  String logCheckFirewallBlocked(String profiles, String ports) {
+    return 'No firewall allow rule: $profiles profile, $ports';
+  }
+
+  @override
+  String logCheckOtherDhcpServer(String servers) {
+    return 'Another DHCP server found: $servers';
+  }
+
+  @override
+  String logCheckPortsReserved(String range, String reserved) {
+    return 'Reserved ports: $reserved of $range';
+  }
+
+  @override
+  String get logCheckRuleAdded => 'Firewall rule added';
+
+  @override
+  String get logCheckRuleFailed =>
+      'Could not add the firewall rule (declined or failed)';
+
+  @override
+  String logTftpStarted(String address, int port, String root) {
+    return 'TFTP server started on $address:$port · $root';
+  }
+
+  @override
+  String get logTftpStopped => 'TFTP server stopped';
+
+  @override
+  String logTftpRrq(String file, String client, String mode) {
+    return 'Read request $file from $client ($mode)';
+  }
+
+  @override
+  String logTftpWrq(String file, String client, String mode) {
+    return 'Write request $file from $client ($mode)';
+  }
+
+  @override
+  String logTftpSent(
+    String file,
+    String client,
+    String bytes,
+    String seconds,
+    String rate,
+  ) {
+    return 'Sent $file to $client · $bytes · ${seconds}s · $rate';
+  }
+
+  @override
+  String logTftpReceived(
+    String file,
+    String client,
+    String bytes,
+    String seconds,
+    String rate,
+  ) {
+    return 'Received $file from $client · $bytes · ${seconds}s · $rate';
+  }
+
+  @override
+  String logTftpFailed(String file, String client, String reason) {
+    return 'Failed $file ($client): $reason';
+  }
+
+  @override
+  String logTftpBusy(String client, String file, int limit) {
+    return 'Refused $file from $client (more than $limit transfers)';
+  }
+
+  @override
+  String logTftpMalformed(String from) {
+    return 'Malformed request from $from';
+  }
+
+  @override
+  String logTftpPortInUse(String address, int port, String error) {
+    return '$address:$port is already in use: $error';
+  }
+
+  @override
+  String logTftpPermissionDenied(String address, int port, String error) {
+    return 'No permission to open $address:$port: $error';
+  }
+
+  @override
+  String logTftpBindFailed(String address, int port, String error) {
+    return 'Could not open $address:$port: $error';
+  }
+
+  @override
+  String logTftpPacketIn(String client) {
+    return 'Request packet from $client';
+  }
+
+  @override
+  String logFtpStarted(String address, int port, String root, String passive) {
+    return 'FTP server started on $address:$port · $root · passive $passive';
+  }
+
+  @override
+  String get logFtpStopped => 'FTP server stopped';
+
+  @override
+  String logFtpConnected(String client) {
+    return 'Connected $client';
+  }
+
+  @override
+  String logFtpDisconnected(String client, String user, int seconds) {
+    return 'Disconnected $client $user (${seconds}s)';
+  }
+
+  @override
+  String logFtpLogin(String user, String client) {
+    return 'Logged in $user ($client)';
+  }
+
+  @override
+  String logFtpLoginFailed(String user, String client) {
+    return 'Login failed $user ($client)';
+  }
+
+  @override
+  String logFtpDownload(
+    String file,
+    String user,
+    String bytes,
+    String seconds,
+    String rate,
+  ) {
+    return 'Downloaded $file by $user · $bytes · ${seconds}s · $rate';
+  }
+
+  @override
+  String logFtpUpload(
+    String file,
+    String user,
+    String bytes,
+    String seconds,
+    String rate,
+  ) {
+    return 'Uploaded $file by $user · $bytes · ${seconds}s · $rate';
+  }
+
+  @override
+  String logFtpTransferFailed(String file, String user, String error) {
+    return 'Transfer failed $file ($user): $error';
+  }
+
+  @override
+  String logFtpDenied(String command, String path, String user, String client) {
+    return 'Denied $command $path ($user, $client)';
+  }
+
+  @override
+  String logFtpDeleted(String path, String user) {
+    return 'Deleted $path ($user)';
+  }
+
+  @override
+  String logFtpMkdir(String path, String user) {
+    return 'Created folder $path ($user)';
+  }
+
+  @override
+  String logFtpRmdir(String path, String user) {
+    return 'Removed folder $path ($user)';
+  }
+
+  @override
+  String logFtpRenamed(String from, String to, String user) {
+    return 'Renamed $from to $to ($user)';
+  }
+
+  @override
+  String logFtpTooMany(String client, int limit) {
+    return 'Refused $client (more than $limit connections)';
+  }
+
+  @override
+  String logFtpIdleTimeout(String client, String user) {
+    return 'Idle timeout $client $user';
+  }
+
+  @override
+  String logFtpKicked(String client, String user) {
+    return 'Disconnected by you $client $user';
+  }
+
+  @override
+  String logFtpNoPassivePort(String range) {
+    return 'No free passive port in $range';
+  }
+
+  @override
+  String logFtpPortInUse(String address, int port, String error) {
+    return '$address:$port is already in use: $error';
+  }
+
+  @override
+  String logFtpPermissionDenied(String address, int port, String error) {
+    return 'No permission to open $address:$port: $error';
+  }
+
+  @override
+  String logFtpBindFailed(String address, int port, String error) {
+    return 'Could not open $address:$port: $error';
+  }
+
+  @override
+  String logFtpCommand(String client, String command) {
+    return '$client › $command';
+  }
+
+  @override
+  String updateMoreChanges(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'and $count more',
+      one: 'and 1 more',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get updateViewReleaseNotes => 'Release notes';
+
+  @override
+  String get logLevelTooltip => 'Minimum level';
 }
