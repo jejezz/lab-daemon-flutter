@@ -2107,6 +2107,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'설정'**
   String get panelRailLabel;
+
+  /// No description provided for @settingsTextScale.
+  ///
+  /// In ko, this message translates to:
+  /// **'화면 글자 크기'**
+  String get settingsTextScale;
+
+  /// No description provided for @settingsTextScaleReset.
+  ///
+  /// In ko, this message translates to:
+  /// **'기본 크기로'**
+  String get settingsTextScaleReset;
 }
 
 class _AppLocalizationsDelegate

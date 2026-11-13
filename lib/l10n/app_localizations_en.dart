@@ -1260,4 +1260,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get panelRailLabel => 'Settings';
+
+  @override
+  String get settingsTextScale => 'Text size';
+
+  @override
+  String get settingsTextScaleReset => 'Reset to default';
 }

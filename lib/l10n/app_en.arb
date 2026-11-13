@@ -409,5 +409,7 @@
   "fieldPortDefault": "Port (default {port})",
   "panelCollapseTooltip": "Collapse settings (Ctrl+B)",
   "panelExpandTooltip": "Expand settings (Ctrl+B)",
-  "panelRailLabel": "Settings"
+  "panelRailLabel": "Settings",
+  "settingsTextScale": "Text size",
+  "settingsTextScaleReset": "Reset to default"
 }

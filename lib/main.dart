@@ -200,12 +200,16 @@ class _AppState extends State<App> with WidgetsBindingObserver {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             localeResolutionCallback: AppSettings.resolveLocale,
-            builder: (context, child) => AppMenuBar(
-              onAbout: _showAbout,
-              onCheckForUpdates: widget.updates == null
-                  ? null
-                  : _checkForUpdates,
-              child: child!,
+            builder: (context, child) => MediaQuery(
+              // 설정의 글자 크기 배율을 앱 전체에 적용한다 (fonts.md §6).
+              data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(widget.settings.textScale)),
+              child: AppMenuBar(
+                onAbout: _showAbout,
+                onCheckForUpdates: widget.updates == null
+                    ? null
+                    : _checkForUpdates,
+                child: child!,
+              ),
             ),
             home: HomeScreen(onAbout: _showAbout),
           ),

@@ -67,6 +67,26 @@ void main() {
     expect(prefs.getString('app_locale'), 'ko');
   });
 
+  testWidgets('글자 크기 슬라이더가 언어 아래에 있고, 움직이면 퍼센트가 바뀌고 저장된다', (tester) async {
+    final settings = await _pump(tester);
+    expect(find.text('Text size'), findsOneWidget);
+    expect(tester.getTopLeft(find.text('Text size')).dy, greaterThan(tester.getTopLeft(find.text('Language')).dy));
+    expect(find.text('100%'), findsOneWidget);
+
+    final slider = find.byType(Slider);
+    await tester.ensureVisible(slider);
+    await tester.pumpAndSettle();
+    await tester.drag(slider, const Offset(400, 0)); // 가운데(100%)의 손잡이를 오른쪽 끝으로
+    await tester.pumpAndSettle();
+    expect(settings.textScale, 1.5);
+    expect(find.text('${(settings.textScale * 100).round()}%'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Reset to default'));
+    await tester.pumpAndSettle();
+    expect(settings.textScale, 1.0);
+    expect(find.text('100%'), findsOneWidget);
+  });
+
   testWidgets('도킹 크기(480×480)에서도 넘치지 않고 구역을 위쪽 칩으로 보인다', (tester) async {
     await _pump(tester, size: const Size(480, 480));
     expect(tester.takeException(), isNull);

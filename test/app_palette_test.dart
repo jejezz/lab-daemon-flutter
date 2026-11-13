@@ -29,6 +29,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(primary(), AccentPalette.rose.darkPrimary, reason: '색 구성을 고르면 테마가 따라간다');
 
+    double scaled() => MediaQuery.textScalerOf(tester.element(find.byType(Scaffold).first)).scale(10);
+    expect(scaled(), 10);
+    await settings.setTextScale(1.3);
+    await tester.pumpAndSettle();
+    expect(scaled(), closeTo(13, 0.001), reason: '글자 크기 배율이 앱 전체에 적용된다');
+
     await tester.pumpWidget(const SizedBox());
     await tester.runAsync(controller.stopAll);
   });

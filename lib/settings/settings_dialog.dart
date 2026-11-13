@@ -48,7 +48,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     final screen = MediaQuery.sizeOf(context);
     // 앱 창보다 커질 수 없다: 바깥 여백 16 + 제목 줄과 닫기 줄(약 150)을 뺀 만큼만 쓴다.
     final width = math.min(640.0, screen.width - 32);
-    final height = (screen.height - 32 - 150).clamp(160.0, 380.0);
+    final height = (screen.height - 32 - 150).clamp(160.0, 440.0);
     final wide = width >= _wideBreakpoint;
     final content = SingleChildScrollView(
       padding: EdgeInsets.only(left: wide ? 16 : 0, bottom: 16),
@@ -165,6 +165,8 @@ class _AppearanceSection extends StatelessWidget {
         const AccentPaletteChips(),
         SettingsHeading(l10n.settingsLanguage),
         const LanguageSegmentedButton(),
+        SettingsHeading(l10n.settingsTextScale),
+        const TextScaleSlider(),
       ],
     );
   }

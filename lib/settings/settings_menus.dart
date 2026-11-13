@@ -84,6 +84,41 @@ class AccentPaletteChips extends StatelessWidget {
   }
 }
 
+/// 설정 화면 "외형" 구역의 글자 크기 슬라이더 (settings-screen.md §3 항목 5: 50-150%, 10% 단계).
+/// 끄는 동안 바로 앱 전체에 적용되고 저장된다.
+class TextScaleSlider extends StatelessWidget {
+  const TextScaleSlider({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = AppSettingsScope.of(context);
+    final l10n = AppLocalizations.of(context);
+    final steps = ((AppSettings.textScaleMax - AppSettings.textScaleMin) / AppSettings.textScaleStep).round();
+    return Row(
+      children: [
+        Expanded(
+          child: Slider(
+            min: AppSettings.textScaleMin,
+            max: AppSettings.textScaleMax,
+            divisions: steps,
+            value: settings.textScale,
+            onChanged: settings.setTextScale,
+          ),
+        ),
+        SizedBox(
+          width: 56,
+          child: Text('${(settings.textScale * 100).round()}%', textAlign: TextAlign.end, style: Theme.of(context).textTheme.bodyMedium),
+        ),
+        IconButton(
+          tooltip: l10n.settingsTextScaleReset,
+          icon: const Icon(Icons.restart_alt_rounded, size: 20),
+          onPressed: settings.textScale == 1.0 ? null : () => settings.setTextScale(1.0),
+        ),
+      ],
+    );
+  }
+}
+
 /// 모바일 설정 화면용.
 class LanguageSegmentedButton extends StatelessWidget {
   const LanguageSegmentedButton({super.key});

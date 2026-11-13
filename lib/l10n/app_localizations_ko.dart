@@ -1241,4 +1241,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get panelRailLabel => '설정';
+
+  @override
+  String get settingsTextScale => '화면 글자 크기';
+
+  @override
+  String get settingsTextScaleReset => '기본 크기로';
 }
