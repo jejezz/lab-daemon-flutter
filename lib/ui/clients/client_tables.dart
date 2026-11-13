@@ -23,6 +23,7 @@ class _Table extends StatelessWidget {
   const _Table({
     required this.headers,
     required this.flex,
+    this.rightAligned = const {},
     required this.rowCount,
     required this.rowBuilder,
     required this.emptyIcon,
@@ -32,12 +33,19 @@ class _Table extends StatelessWidget {
 
   final List<String> headers;
   final List<int> flex;
+
+  /// 내용을 오른쪽 정렬하는 열 번호 (숫자 열). 제목은 모든 열이 가운데 정렬이다.
+  final Set<int> rightAligned;
   final int rowCount;
   final Widget Function(BuildContext context, int index) rowBuilder;
   final IconData emptyIcon;
   final String emptyTitle;
   final String emptyHint;
   static const actionWidth = 44.0;
+  static const gap = AppSpacing.md;
+
+  /// 오른쪽 정렬 열 뒤에 왼쪽 정렬 열이 오면 글자가 붙지 않게 오른쪽 여백을 둔다 (제목과 내용에 같이 쓴다).
+  bool gapAfter(int i) => rightAligned.contains(i) && i + 1 < headers.length && !rightAligned.contains(i + 1);
 
   @override
   Widget build(BuildContext context) {
@@ -59,12 +67,23 @@ class _Table extends StatelessWidget {
     final headerStyle = theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700);
     return Column(
       children: [
+        // 제목 줄도 행과 같은 높이로 세로 가운데에 둔다.
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-          child: Row(children: [
-            for (var i = 0; i < headers.length; i++) Expanded(flex: flex[i], child: Text(headers[i], style: headerStyle)),
-            SizedBox(width: actionWidth),
-          ]),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          child: SizedBox(
+            height: 38,
+            child: Row(children: [
+              for (var i = 0; i < headers.length; i++)
+                Expanded(
+                  flex: flex[i],
+                  child: Padding(
+                    padding: EdgeInsets.only(right: gapAfter(i) ? gap : 0),
+                    child: Text(headers[i], style: headerStyle, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis),
+                  ),
+                ),
+              SizedBox(width: actionWidth),
+            ]),
+          ),
         ),
         Divider(height: 1, color: theme.dividerColor),
         Expanded(child: ListView.builder(itemCount: rowCount, itemExtent: 38, itemBuilder: rowBuilder)),
@@ -210,6 +229,7 @@ class TftpTransferTable extends StatelessWidget {
     return _Table(
       headers: [l10n.tftpColClient, l10n.tftpColFile, l10n.tftpColDirection, l10n.tftpColProgress, l10n.tftpColRate, l10n.tftpColState],
       flex: flex,
+      rightAligned: const {3, 4},
       rowCount: transfers.length,
       emptyIcon: Icons.swap_vert_rounded,
       emptyTitle: l10n.tftpEmptyTitle,
@@ -238,19 +258,27 @@ class TftpTransferTable extends StatelessWidget {
             ),
             Expanded(
               flex: flex[3],
-              child: Padding(
-                padding: const EdgeInsets.only(right: AppSpacing.sm),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(size == null ? formatBytes(t.bytes) : '${formatBytes(t.bytes)} / ${formatBytes(size)}', style: theme.textTheme.bodySmall, overflow: TextOverflow.ellipsis),
-                    if (active) LinearProgressIndicator(value: t.progress, minHeight: 3),
-                  ],
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    size == null ? formatBytes(t.bytes) : '${formatBytes(t.bytes)} / ${formatBytes(size)}',
+                    style: theme.textTheme.bodySmall,
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (active) LinearProgressIndicator(value: t.progress, minHeight: 3),
+                ],
               ),
             ),
-            Expanded(flex: flex[4], child: Text(active ? formatRate(t.rate) : '', style: theme.textTheme.bodySmall)),
+            Expanded(
+              flex: flex[4],
+              child: Padding(
+                padding: const EdgeInsets.only(right: _Table.gap),
+                child: Text(tftpRateText(t, active), style: theme.textTheme.bodySmall, textAlign: TextAlign.right),
+              ),
+            ),
             Expanded(
               flex: flex[5],
               child: Align(
@@ -278,6 +306,15 @@ class TftpTransferTable extends StatelessWidget {
       },
     );
   }
+}
+
+/// 전송 중에는 지금 속도, 끝난 전송은 전체 평균 속도 (받은 바이트 ÷ 걸린 시간). 실패해서 바이트가 없으면 비운다.
+String tftpRateText(TftpTransferInfo t, bool active) {
+  if (active) return formatRate(t.rate);
+  final end = t.endedAt;
+  if (end == null || t.bytes <= 0) return '';
+  final ms = end.difference(t.startedAt).inMilliseconds;
+  return ms <= 0 ? '' : formatRate(t.bytes * 1000 / ms);
 }
 
 // ---- FTP --------------------------------------------------------------------------------------
