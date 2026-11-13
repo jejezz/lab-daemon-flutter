@@ -23,7 +23,7 @@ class _Table extends StatelessWidget {
   const _Table({
     required this.headers,
     required this.flex,
-    this.rightAligned = const {},
+    required this.cols,
     required this.rowCount,
     required this.rowBuilder,
     required this.emptyIcon,
@@ -34,18 +34,14 @@ class _Table extends StatelessWidget {
   final List<String> headers;
   final List<int> flex;
 
-  /// 내용을 오른쪽 정렬하는 열 번호 (숫자 열). 제목은 모든 열이 가운데 정렬이다.
-  final Set<int> rightAligned;
+  /// 열마다 정렬. 제목과 내용이 같은 정렬을 쓴다 (긴 글은 왼쪽, 짧은 분류·상태는 가운데, 숫자는 오른쪽).
+  final List<Col> cols;
   final int rowCount;
   final Widget Function(BuildContext context, int index) rowBuilder;
   final IconData emptyIcon;
   final String emptyTitle;
   final String emptyHint;
   static const actionWidth = 44.0;
-  static const gap = AppSpacing.md;
-
-  /// 오른쪽 정렬 열 뒤에 왼쪽 정렬 열이 오면 글자가 붙지 않게 오른쪽 여백을 둔다 (제목과 내용에 같이 쓴다).
-  bool gapAfter(int i) => rightAligned.contains(i) && i + 1 < headers.length && !rightAligned.contains(i + 1);
 
   @override
   Widget build(BuildContext context) {
@@ -74,13 +70,7 @@ class _Table extends StatelessWidget {
             height: 38,
             child: Row(children: [
               for (var i = 0; i < headers.length; i++)
-                Expanded(
-                  flex: flex[i],
-                  child: Padding(
-                    padding: EdgeInsets.only(right: gapAfter(i) ? gap : 0),
-                    child: Text(headers[i], style: headerStyle, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis),
-                  ),
-                ),
+                _cell(flex[i], cols[i], Text(headers[i], style: headerStyle, overflow: TextOverflow.ellipsis)),
               SizedBox(width: actionWidth),
             ]),
           ),
@@ -91,6 +81,24 @@ class _Table extends StatelessWidget {
     );
   }
 }
+
+enum Col { left, center, right }
+
+/// 제목과 행이 같이 쓰는 칸: 열 너비 비율, 정렬, 칸 사이 좌우 여백(글자끼리 붙지 않게).
+Widget _cell(int flex, Col col, Widget child) => Expanded(
+      flex: flex,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: Align(
+          alignment: switch (col) {
+            Col.left => Alignment.centerLeft,
+            Col.center => Alignment.center,
+            Col.right => Alignment.centerRight,
+          },
+          child: child,
+        ),
+      ),
+    );
 
 TextStyle _mono(BuildContext context) => AppFonts.mono.copyWith(fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize);
 
@@ -161,6 +169,7 @@ class _LeaseTableState extends State<LeaseTable> with _Ticking {
     return _Table(
       headers: [l10n.leaseColIp, l10n.leaseColMac, l10n.leaseColHostname, l10n.leaseColState, l10n.leaseColRemaining],
       flex: flex,
+      cols: const [Col.left, Col.left, Col.left, Col.center, Col.right],
       rowCount: widget.leases.length,
       emptyIcon: Icons.devices_other_outlined,
       emptyTitle: l10n.leaseEmptyTitle,
@@ -179,20 +188,11 @@ class _LeaseTableState extends State<LeaseTable> with _Ticking {
               color: lease.ip == widget.selected ? scheme.primary.withValues(alpha: 0.12) : null,
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Row(children: [
-                Expanded(flex: flex[0], child: Text('${lease.ip}', style: mono)),
-                Expanded(flex: flex[1], child: Text('${lease.mac}', style: mono)),
-                Expanded(flex: flex[2], child: Text(lease.hostname ?? '', overflow: TextOverflow.ellipsis, style: AppFonts.userContent)),
-                Expanded(
-                  flex: flex[3],
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: StatusPill(label: bound ? l10n.leaseStateBound : l10n.leaseStateOffered, tone: bound ? PillTone.success : PillTone.warning),
-                  ),
-                ),
-                Expanded(
-                  flex: flex[4],
-                  child: Text(remaining == null ? l10n.leaseUnlimited : formatElapsed(remaining.isNegative ? Duration.zero : remaining), style: mono),
-                ),
+                _cell(flex[0], Col.left, Text('${lease.ip}', style: mono)),
+                _cell(flex[1], Col.left, Text('${lease.mac}', style: mono)),
+                _cell(flex[2], Col.left, Text(lease.hostname ?? '', overflow: TextOverflow.ellipsis, style: AppFonts.userContent)),
+                _cell(flex[3], Col.center, StatusPill(label: bound ? l10n.leaseStateBound : l10n.leaseStateOffered, tone: bound ? PillTone.success : PillTone.warning)),
+                _cell(flex[4], Col.right, Text(remaining == null ? l10n.leaseUnlimited : formatElapsed(remaining.isNegative ? Duration.zero : remaining), style: mono)),
                 SizedBox(
                   width: 44,
                   child: IconButton(
@@ -229,7 +229,7 @@ class TftpTransferTable extends StatelessWidget {
     return _Table(
       headers: [l10n.tftpColClient, l10n.tftpColFile, l10n.tftpColDirection, l10n.tftpColProgress, l10n.tftpColRate, l10n.tftpColState],
       flex: flex,
-      rightAligned: const {3, 4},
+      cols: const [Col.left, Col.left, Col.center, Col.right, Col.right, Col.center],
       rowCount: transfers.length,
       emptyIcon: Icons.swap_vert_rounded,
       emptyTitle: l10n.tftpEmptyTitle,
@@ -246,19 +246,22 @@ class TftpTransferTable extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Row(children: [
-            Expanded(flex: flex[0], child: Text(t.client, style: mono, overflow: TextOverflow.ellipsis)),
-            Expanded(flex: flex[1], child: Text(t.file, overflow: TextOverflow.ellipsis, style: AppFonts.userContent)),
-            Expanded(
-              flex: flex[2],
-              child: Row(children: [
+            _cell(flex[0], Col.left, Text(t.client, style: mono, overflow: TextOverflow.ellipsis)),
+            _cell(flex[1], Col.left, Text(t.file, overflow: TextOverflow.ellipsis, style: AppFonts.userContent)),
+            _cell(
+              flex[2],
+              Col.center,
+              Row(mainAxisSize: MainAxisSize.min, children: [
                 Icon(t.upload ? Icons.south_rounded : Icons.north_rounded, size: 16, color: theme.colorScheme.onSurfaceVariant),
                 const SizedBox(width: 4),
                 Flexible(child: Text(t.upload ? l10n.tftpUpload : l10n.tftpDownload, overflow: TextOverflow.ellipsis)),
               ]),
             ),
-            Expanded(
-              flex: flex[3],
-              child: Column(
+            // 진행: 숫자는 오른쪽, 진행 막대는 칸 폭 전체.
+            _cell(
+              flex[3],
+              Col.right,
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -272,21 +275,13 @@ class TftpTransferTable extends StatelessWidget {
                 ],
               ),
             ),
-            Expanded(
-              flex: flex[4],
-              child: Padding(
-                padding: const EdgeInsets.only(right: _Table.gap),
-                child: Text(tftpRateText(t, active), style: theme.textTheme.bodySmall, textAlign: TextAlign.right),
-              ),
-            ),
-            Expanded(
-              flex: flex[5],
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Tooltip(
-                  message: t.failure == null ? '' : '${tftpReason(l10n, t.failure)}${t.failureDetail == null ? '' : ' — ${t.failureDetail}'}',
-                  child: StatusPill(label: label, tone: tone),
-                ),
+            _cell(flex[4], Col.right, Text(tftpRateText(t, active), style: theme.textTheme.bodySmall)),
+            _cell(
+              flex[5],
+              Col.center,
+              Tooltip(
+                message: t.failure == null ? '' : '${tftpReason(l10n, t.failure)}${t.failureDetail == null ? '' : ' — ${t.failureDetail}'}',
+                child: StatusPill(label: label, tone: tone),
               ),
             ),
             SizedBox(
@@ -339,10 +334,11 @@ class _FtpSessionTableState extends State<FtpSessionTable> with _Ticking {
     final theme = Theme.of(context);
     final mono = _mono(context);
     final now = DateTime.now();
-    const flex = [3, 2, 3, 5, 3, 2];
+    const flex = [3, 3, 3, 5, 3, 2];
     return _Table(
       headers: [l10n.ftpColClient, l10n.ftpColUser, l10n.ftpColDir, l10n.ftpColActivity, l10n.ftpColTraffic, l10n.ftpColConnected],
       flex: flex,
+      cols: const [Col.left, Col.left, Col.left, Col.left, Col.right, Col.center],
       rowCount: widget.sessions.length,
       emptyIcon: Icons.lan_outlined,
       emptyTitle: l10n.ftpEmptyTitle,
@@ -357,20 +353,12 @@ class _FtpSessionTableState extends State<FtpSessionTable> with _Ticking {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Row(children: [
-            Expanded(flex: flex[0], child: Text(s.client, style: mono.copyWith(color: dim), overflow: TextOverflow.ellipsis)),
-            Expanded(
-              flex: flex[1],
-              child: Text(s.authenticated ? (s.user ?? '') : l10n.ftpNotLoggedIn, overflow: TextOverflow.ellipsis, style: TextStyle(color: dim)),
-            ),
-            Expanded(flex: flex[2], child: Text(s.cwd, overflow: TextOverflow.ellipsis, style: AppFonts.userContent.copyWith(color: dim))),
-            Expanded(flex: flex[3], child: Text(activity, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall?.copyWith(color: dim))),
-            Expanded(flex: flex[4], child: Text('${formatBytes(s.bytesIn)} / ${formatBytes(s.bytesOut)}', style: theme.textTheme.bodySmall?.copyWith(color: dim))),
-            Expanded(
-              flex: flex[5],
-              child: s.closed
-                  ? Align(alignment: Alignment.centerLeft, child: StatusPill(label: l10n.ftpClosed))
-                  : Text(formatElapsed(now.difference(s.connectedAt)), style: mono),
-            ),
+            _cell(flex[0], Col.left, Text(s.client, style: mono.copyWith(color: dim), overflow: TextOverflow.ellipsis)),
+            _cell(flex[1], Col.left, Text(s.authenticated ? (s.user ?? '') : l10n.ftpNotLoggedIn, overflow: TextOverflow.ellipsis, style: TextStyle(color: dim))),
+            _cell(flex[2], Col.left, Text(s.cwd, overflow: TextOverflow.ellipsis, style: AppFonts.userContent.copyWith(color: dim))),
+            _cell(flex[3], Col.left, Text(activity, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall?.copyWith(color: dim))),
+            _cell(flex[4], Col.right, Text('${formatBytes(s.bytesIn)} / ${formatBytes(s.bytesOut)}', style: theme.textTheme.bodySmall?.copyWith(color: dim))),
+            _cell(flex[5], Col.center, s.closed ? StatusPill(label: l10n.ftpClosed) : Text(formatElapsed(now.difference(s.connectedAt)), style: mono)),
             SizedBox(
               width: 44,
               child: s.closed
