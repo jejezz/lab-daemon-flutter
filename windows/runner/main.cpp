@@ -2,6 +2,9 @@
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
 
+#include <cstdlib>
+#include <string>
+
 #include "flutter_window.h"
 #include "utils.h"
 
@@ -21,6 +24,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
   std::vector<std::string> command_line_arguments =
       GetCommandLineArguments();
+
+  // Impeller is off by default (the app updates tables and logs often and felt
+  // heavy on Impeller). To try it: `lab_daemon.exe --enable-impeller` or set the
+  // environment variable LABDAEMON_IMPELLER=1.
+  bool enable_impeller = false;
+  for (const auto &arg : command_line_arguments) {
+    if (arg == "--enable-impeller") enable_impeller = true;
+  }
+  char *env_impeller = nullptr;
+  size_t env_len = 0;
+  if (_dupenv_s(&env_impeller, &env_len, "LABDAEMON_IMPELLER") == 0 &&
+      env_impeller != nullptr) {
+    if (std::string(env_impeller) == "1") enable_impeller = true;
+    free(env_impeller);
+  }
+  project.set_impeller_switch(enable_impeller
+                                  ? flutter::ImpellerSwitch::Enabled
+                                  : flutter::ImpellerSwitch::Disabled);
 
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
 

@@ -11,6 +11,7 @@ DHCP, TFTP, FTP(이후 Syslog 등) 같은 랩용 네트워크 서비스를 한 �
 - 플랫폼은 **Windows만**. 릴리스 워크플로에서 macOS/Linux 잡을 뺐고, 표시 이름 원본은 `windows/runner/Runner.rc`의 `ProductName`이다 (macos/ 폴더가 없다).
 - 앱은 **일반 권한(asInvoker)** 으로 실행한다. UDP 67/69, TCP 21 바인딩에 관리자 권한이 필요 없다 (2026-11-02 확인). 방화벽 인바운드 규칙은 설치 프로그램(`installer/windows/app.iss`)이 넣고, 개발 빌드는 서비스 시작 시 점검 대화상자의 [방화벽 규칙 추가](UAC)로 넣는다.
 - 규약 저장소의 로컬 사본은 `C:\Users\jejez\MyWork\Projects\application-release-templates`에 있다 (FLUTTER 폴더 밖으로 옮겨졌다).
+- **Impeller는 기본으로 끈다**(Skia 렌더러): 표·로그 갱신이 잦은 이 앱은 Impeller에서 화면 변화가 무겁게 느껴졌다. `windows/runner/main.cpp`가 `set_impeller_switch`로 정하고, 켜 보려면 `lab_daemon.exe --enable-impeller` 또는 환경 변수 `LABDAEMON_IMPELLER=1`. 꺼졌는지는 debug 빌드 콘솔에 `Using the Impeller rendering backend` 줄이 없는 것으로 확인한다. (main.cpp 주석은 ASCII로 쓴다: 한글이 있으면 MSVC C4819 경고가 난다.)
 - `window_manager ^0.5.2`, `screen_retriever ^0.2.2`로 고정한다 (공통 `window_placement.dart`가 이 버전 API에 맞춰져 있다).
 - 업데이터는 `app_updater`를 커밋 `22ebf8a`(updater-v0.2.0 내용, 릴리스 노트 요약)로 가리킨다. 규약 저장소에 `updater-v0.2.0` 태그가 생기면 `pubspec.yaml`의 `ref`를 태그로 바꾼다.
 
