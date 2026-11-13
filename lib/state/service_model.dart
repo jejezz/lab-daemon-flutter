@@ -14,6 +14,7 @@ import '../core/ipv4.dart';
 import '../core/netcheck.dart';
 import '../core/netutil.dart';
 import '../core/service.dart';
+import 'log_file.dart';
 
 enum StartResult { started, invalid, blocked, needsConfirmation, failed }
 
@@ -23,11 +24,37 @@ abstract class ServiceModel extends ChangeNotifier {
     required this.host,
     required this.prefs,
     required this.checker,
+    this.logSink,
     this.notifyDelay = const Duration(milliseconds: 50),
   }) {
     final saved = prefs.getInt('${id}_log_capacity');
     if (saved != null && LogBus.capacityChoices.contains(saved)) logs.capacity = saved;
     _subscription = host.events.listen(_onEvent);
+    if (logToFile) logSink?.attach(logs);
+  }
+
+  /// 로그를 파일에 쓰는 도구 (없으면 파일 저장 기능이 없다).
+  final LogFileSink? logSink;
+
+  /// 로그를 파일에도 저장하는가 (서비스마다 따로, 기본 꺼짐).
+  bool get logToFile => prefs.getBool('${id}_log_file') ?? false;
+
+  /// 로그 파일 폴더. 저장 기능이 없으면 null.
+  String? get logDirectory => logSink?.directory;
+
+  /// 모인 로그를 바로 파일에 쓴다 (앱을 끝낼 때).
+  Future<void> flushLogs() async => logSink?.flush();
+
+  Future<void> setLogToFile(bool value) async {
+    final sink = logSink;
+    if (sink == null) return;
+    await prefs.setBool('${id}_log_file', value);
+    if (value) {
+      sink.attach(logs);
+    } else {
+      await sink.detach();
+    }
+    notifyNow();
   }
 
   final String id;

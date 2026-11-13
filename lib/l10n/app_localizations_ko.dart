@@ -1320,4 +1320,14 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get dhcpConflictCheckHint =>
       '나눠 주기 전에 그 주소로 ping을 보내, 고정 IP를 쓰는 장비와 겹치지 않게 합니다. 쓰이지 않는 주소는 응답을 약 0.3초 기다립니다. ICMP를 막는 장비는 찾지 못해요.';
+
+  @override
+  String get logToFile => '로그를 파일에도 저장';
+
+  @override
+  String get logToFileHint =>
+      '날짜별 파일(영어 문구)로 14일 동안 보관합니다. 서비스가 꺼져 있어도 이 앱이 켜져 있는 동안 계속 씁니다.';
+
+  @override
+  String get logOpenFolder => '로그 폴더 열기';
 }

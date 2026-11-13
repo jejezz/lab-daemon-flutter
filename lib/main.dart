@@ -24,6 +24,7 @@ import 'theme/app_theme.dart';
 import 'update/update_scope.dart';
 import 'update/update_service.dart';
 import 'ui/home_screen.dart';
+import 'ui/log_format.dart';
 import 'window/window_placement.dart';
 
 final bool _isDesktop =
@@ -44,7 +45,9 @@ Future<void> main() async {
 
   final settings = await AppSettings.load();
   // 서비스마다 자기 Isolate에서 돈다 (lib/core/host.dart).
-  final controller = LabDaemonController.create(await SharedPreferences.getInstance());
+  // 서비스 로그 파일은 언어와 상관없이 영어 문구로 남긴다.
+  final englishLogs = lookupAppLocalizations(const Locale('en'));
+  final controller = LabDaemonController.create(await SharedPreferences.getInstance(), logText: (e) => formatLog(englishLogs, e));
   unawaited(controller.refreshNics());
   // 데스크톱이 아니거나 UPDATE_SERVER 가 비어 있으면 null — 업데이트 확인 없음.
   final updates = await UpdateService.create();

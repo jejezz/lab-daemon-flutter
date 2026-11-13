@@ -8,9 +8,11 @@ import '../../core/netutil.dart';
 import '../../l10n/app_localizations.dart';
 import '../../state/dhcp_settings.dart';
 import '../../state/ftp_settings.dart';
+import '../../state/service_model.dart';
 import '../../state/service_models.dart';
 import '../../state/tftp_settings.dart';
 import '../../theme/app_theme.dart';
+import '../open_folder.dart';
 import '../widgets/error_snackbar.dart';
 import '../widgets/fields.dart';
 
@@ -91,6 +93,7 @@ class DhcpPanel extends StatelessWidget {
         PanelHeading(l10n.dhcpReservations),
         _ReservationsSection(model: model, error: errors[DhcpField.reservations]),
         PanelHeading(l10n.sectionAdvanced),
+        _LogFileRow(model: model),
         SwitchRow(
           title: l10n.dhcpPersistLeases,
           subtitle: l10n.dhcpPersistLeasesHint,
@@ -127,6 +130,36 @@ class DhcpPanel extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+/// 서비스 로그를 파일에도 저장하는 스위치와 [로그 폴더 열기]. 파일 저장 기능이 없는 모델(시험)에서는 아무것도 그리지 않는다.
+class _LogFileRow extends StatelessWidget {
+  const _LogFileRow({required this.model});
+
+  final ServiceModel model;
+
+  @override
+  Widget build(BuildContext context) {
+    final dir = model.logDirectory;
+    if (dir == null) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      SwitchRow(
+        title: l10n.logToFile,
+        subtitle: l10n.logToFileHint,
+        value: model.logToFile,
+        onChanged: (v) => model.setLogToFile(v),
+      ),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton.icon(
+          onPressed: () => openInExplorer(dir, create: true),
+          icon: const Icon(Icons.folder_open_outlined, size: 18),
+          label: Text(l10n.logOpenFolder),
+        ),
+      ),
+    ]);
   }
 }
 
@@ -300,6 +333,7 @@ class TftpPanel extends StatelessWidget {
           onChanged: (v) => model.update(model.settings.copyWith(allowOverwrite: v)),
         ),
         PanelHeading(l10n.sectionAdvanced),
+        _LogFileRow(model: model),
         FieldPair(text(TftpField.maxBlockSize, l10n.tftpMaxBlockSize), text(TftpField.maxWindowSize, l10n.tftpMaxWindow)),
         fieldGap,
         FieldPair(text(TftpField.timeoutMs, l10n.tftpTimeout), text(TftpField.maxTransfers, l10n.tftpMaxTransfers)),
@@ -387,6 +421,7 @@ class FtpPanel extends StatelessWidget {
           onChanged: (v) => model.update(model.settings.copyWith(allowWrite: v)),
         ),
         PanelHeading(l10n.sectionAdvanced),
+        _LogFileRow(model: model),
         FieldPair(text(FtpField.passiveStart, l10n.ftpPassiveStart, helper: l10n.ftpPassiveHint), text(FtpField.passiveEnd, l10n.ftpPassiveEnd)),
         fieldGap,
         FieldPair(text(FtpField.maxConnections, l10n.ftpMaxConnections), text(FtpField.idleTimeout, l10n.ftpIdleTimeout)),

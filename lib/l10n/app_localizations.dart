@@ -2239,6 +2239,24 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'나눠 주기 전에 그 주소로 ping을 보내, 고정 IP를 쓰는 장비와 겹치지 않게 합니다. 쓰이지 않는 주소는 응답을 약 0.3초 기다립니다. ICMP를 막는 장비는 찾지 못해요.'**
   String get dhcpConflictCheckHint;
+
+  /// No description provided for @logToFile.
+  ///
+  /// In ko, this message translates to:
+  /// **'로그를 파일에도 저장'**
+  String get logToFile;
+
+  /// No description provided for @logToFileHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'날짜별 파일(영어 문구)로 14일 동안 보관합니다. 서비스가 꺼져 있어도 이 앱이 켜져 있는 동안 계속 씁니다.'**
+  String get logToFileHint;
+
+  /// No description provided for @logOpenFolder.
+  ///
+  /// In ko, this message translates to:
+  /// **'로그 폴더 열기'**
+  String get logOpenFolder;
 }
 
 class _AppLocalizationsDelegate

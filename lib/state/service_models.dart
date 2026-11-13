@@ -20,7 +20,7 @@ import 'tftp_settings.dart';
 typedef DhcpProber = Future<DhcpProbeResult> Function(Ipv4 interfaceIp);
 
 class DhcpModel extends ServiceModel {
-  DhcpModel({required super.host, required super.prefs, required super.checker, DhcpProber? prober, this.leaseFile, super.notifyDelay})
+  DhcpModel({required super.host, required super.prefs, required super.checker, DhcpProber? prober, this.leaseFile, super.logSink, super.notifyDelay})
       : _prober = prober ?? ((ip) => detectOtherDhcpServers(interfaceIp: ip)),
         super(id: 'dhcp') {
     settings = DhcpSettings.load(prefs);
@@ -139,7 +139,7 @@ class DhcpModel extends ServiceModel {
 }
 
 class TftpModel extends ServiceModel {
-  TftpModel({required super.host, required super.prefs, required super.checker, super.notifyDelay}) : super(id: 'tftp') {
+  TftpModel({required super.host, required super.prefs, required super.checker, super.logSink, super.notifyDelay}) : super(id: 'tftp') {
     settings = TftpSettings.load(prefs);
   }
 
@@ -185,7 +185,7 @@ class TftpModel extends ServiceModel {
 }
 
 class FtpModel extends ServiceModel {
-  FtpModel({required super.host, required super.prefs, required super.checker, super.notifyDelay}) : super(id: 'ftp') {
+  FtpModel({required super.host, required super.prefs, required super.checker, super.logSink, super.notifyDelay}) : super(id: 'ftp') {
     settings = FtpSettings.load(prefs);
   }
 

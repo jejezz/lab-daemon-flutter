@@ -431,5 +431,8 @@
   "reserveFailed": "Could not reserve: {error}",
   "logDhcpConflict": "Got a reply from {ip}, so it was not offered (asked by {mac}) — skipping it for {minutes} min",
   "dhcpConflictCheck": "Check an address before offering it (ping)",
-  "dhcpConflictCheckHint": "Pings the address before handing it out so it never collides with a device using a fixed IP. An unused address waits about 0.3 s for a reply. Devices that block ICMP are not found."
+  "dhcpConflictCheckHint": "Pings the address before handing it out so it never collides with a device using a fixed IP. An unused address waits about 0.3 s for a reply. Devices that block ICMP are not found.",
+  "logToFile": "Also save the log to a file",
+  "logToFileHint": "One file per day (in English), kept for 14 days. Writing continues while this app runs, even when the service is stopped.",
+  "logOpenFolder": "Open log folder"
 }

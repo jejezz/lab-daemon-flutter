@@ -13,7 +13,9 @@ import '../core/host.dart';
 import '../core/netcheck.dart';
 import '../core/netutil.dart';
 import '../core/tftp/server.dart';
+import '../core/service.dart';
 import 'app_paths.dart';
+import 'log_file.dart';
 import 'service_model.dart';
 import 'service_models.dart';
 
@@ -30,13 +32,21 @@ class LabDaemonController extends ChangeNotifier {
   }
 
   /// 앱용: 서비스마다 자기 Isolate에서 돈다.
-  factory LabDaemonController.create(SharedPreferences prefs) {
+  ///
+  /// [logText]를 주면 서비스 로그를 파일에 저장하는 기능이 켜진다 (로그 한 줄을 영어 문구로 바꾸는 함수).
+  factory LabDaemonController.create(SharedPreferences prefs, {String Function(LogEvent event)? logText}) {
     final checker = PreStartChecker();
+    LogFileSink? sink(String id) {
+      final dir = appDataDir();
+      if (dir == null || logText == null) return null;
+      return LogFileSink(directory: '$dir${Platform.pathSeparator}logs', serviceId: id, format: logText);
+    }
+
     return LabDaemonController(
       prefs: prefs,
-      dhcp: DhcpModel(host: IsolateHost('dhcp', createDhcpService), prefs: prefs, checker: checker, leaseFile: _dataFile('dhcp_leases.json')),
-      tftp: TftpModel(host: IsolateHost('tftp', createTftpService), prefs: prefs, checker: checker),
-      ftp: FtpModel(host: IsolateHost('ftp', createFtpService), prefs: prefs, checker: checker),
+      dhcp: DhcpModel(host: IsolateHost('dhcp', createDhcpService), prefs: prefs, checker: checker, leaseFile: _dataFile('dhcp_leases.json'), logSink: sink('dhcp')),
+      tftp: TftpModel(host: IsolateHost('tftp', createTftpService), prefs: prefs, checker: checker, logSink: sink('tftp')),
+      ftp: FtpModel(host: IsolateHost('ftp', createFtpService), prefs: prefs, checker: checker, logSink: sink('ftp')),
     );
   }
 
@@ -75,6 +85,7 @@ class LabDaemonController extends ChangeNotifier {
   /// 앱을 끝낼 때 열려 있는 소켓을 모두 닫는다.
   Future<void> stopAll() async {
     await Future.wait([for (final s in services) s.stop().catchError((_) {})]);
+    await Future.wait([for (final s in services) s.flushLogs()]);
   }
 
   @override

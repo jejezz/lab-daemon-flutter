@@ -1341,4 +1341,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dhcpConflictCheckHint =>
       'Pings the address before handing it out so it never collides with a device using a fixed IP. An unused address waits about 0.3 s for a reply. Devices that block ICMP are not found.';
+
+  @override
+  String get logToFile => 'Also save the log to a file';
+
+  @override
+  String get logToFileHint =>
+      'One file per day (in English), kept for 14 days. Writing continues while this app runs, even when the service is stopped.';
+
+  @override
+  String get logOpenFolder => 'Open log folder';
 }
