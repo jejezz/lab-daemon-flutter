@@ -225,7 +225,7 @@ class TftpTransferTable extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final mono = _mono(context);
-    const flex = [3, 4, 2, 4, 2, 2];
+    const flex = [5, 3, 2, 4, 3, 3];
     return _Table(
       headers: [l10n.tftpColClient, l10n.tftpColFile, l10n.tftpColDirection, l10n.tftpColProgress, l10n.tftpColRate, l10n.tftpColState],
       flex: flex,
@@ -246,7 +246,7 @@ class TftpTransferTable extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Row(children: [
-            _cell(flex[0], Col.left, Text(t.client, style: mono, overflow: TextOverflow.ellipsis)),
+            _cell(flex[0], Col.left, Text(t.client, style: mono.copyWith(fontSize: 13), overflow: TextOverflow.ellipsis)),
             _cell(flex[1], Col.left, Text(t.file, overflow: TextOverflow.ellipsis, style: AppFonts.userContent)),
             _cell(
               flex[2],
@@ -275,7 +275,7 @@ class TftpTransferTable extends StatelessWidget {
                 ],
               ),
             ),
-            _cell(flex[4], Col.right, Text(tftpRateText(t, active), style: theme.textTheme.bodySmall)),
+            _cell(flex[4], Col.right, Text(tftpRateText(t, active), style: theme.textTheme.bodySmall, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis)),
             _cell(
               flex[5],
               Col.center,
@@ -334,7 +334,7 @@ class _FtpSessionTableState extends State<FtpSessionTable> with _Ticking {
     final theme = Theme.of(context);
     final mono = _mono(context);
     final now = DateTime.now();
-    const flex = [3, 3, 3, 5, 3, 2];
+    const flex = [5, 3, 3, 5, 3, 3];
     return _Table(
       headers: [l10n.ftpColClient, l10n.ftpColUser, l10n.ftpColDir, l10n.ftpColActivity, l10n.ftpColTraffic, l10n.ftpColConnected],
       flex: flex,
@@ -353,7 +353,7 @@ class _FtpSessionTableState extends State<FtpSessionTable> with _Ticking {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Row(children: [
-            _cell(flex[0], Col.left, Text(s.client, style: mono.copyWith(color: dim), overflow: TextOverflow.ellipsis)),
+            _cell(flex[0], Col.left, Text(s.client, style: mono.copyWith(color: dim, fontSize: 13), overflow: TextOverflow.ellipsis)),
             _cell(flex[1], Col.left, Text(s.authenticated ? (s.user ?? '') : l10n.ftpNotLoggedIn, overflow: TextOverflow.ellipsis, style: TextStyle(color: dim))),
             _cell(flex[2], Col.left, Text(s.cwd, overflow: TextOverflow.ellipsis, style: AppFonts.userContent.copyWith(color: dim))),
             _cell(flex[3], Col.left, Text(activity, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall?.copyWith(color: dim))),
