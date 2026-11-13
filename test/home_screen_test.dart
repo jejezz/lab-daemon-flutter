@@ -21,6 +21,7 @@ import 'package:lab_daemon/settings/app_settings.dart';
 import 'package:lab_daemon/state/controller.dart';
 import 'package:lab_daemon/state/service_models.dart';
 import 'package:lab_daemon/theme/app_theme.dart';
+import 'package:lab_daemon/ui/log_panel.dart';
 import 'package:lab_daemon/ui/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -514,6 +515,27 @@ void main() {
   });
 
   group('로그 패널', () {
+    _testApp('위 경계를 끌면 로그 높이가 마우스 위치를 그대로 따라가고, 한계를 넘었다 돌아와도 어긋나지 않는다', (tester, app) async {
+      final handle = find.byWidgetPredicate((w) => w is MouseRegion && w.cursor == SystemMouseCursors.resizeRow);
+      double logHeight() => tester.getSize(find.byType(LogPanel)).height;
+      final start = logHeight();
+      final y0 = tester.getCenter(handle).dy;
+
+      final drag = await tester.startGesture(Offset(tester.getCenter(handle).dx, y0));
+      await drag.moveTo(Offset(tester.getCenter(handle).dx, y0 - 100));
+      await tester.pump();
+      expect(logHeight(), start + 100, reason: '위로 100 끌면 정확히 100 커진다');
+      expect(tester.getCenter(handle).dy, closeTo(y0 - 100, 0.5), reason: '손잡이가 마우스 위치에 있다');
+
+      // 화면 위쪽 한계를 한참 넘어 끌었다가 처음 위치 근처로 돌아온다.
+      await drag.moveTo(Offset(tester.getCenter(handle).dx, -3000));
+      await tester.pump();
+      await drag.moveTo(Offset(tester.getCenter(handle).dx, y0 - 40));
+      await tester.pump();
+      expect(logHeight(), start + 40, reason: '한계에서 멈췄다 돌아와도 시작 위치 기준으로 정확하다');
+      await drag.up();
+    });
+
     _testApp('보관 줄 수는 기본 1000줄이고, 고르면 바로 줄어들고 서비스별로 저장된다', (tester, app) async {
       expect(find.byTooltip('Log lines to keep: 1000 lines'), findsOneWidget);
       await _startDhcp(tester);

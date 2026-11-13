@@ -33,6 +33,8 @@ class ServicePage extends StatefulWidget {
 class _ServicePageState extends State<ServicePage> {
   final _searchFocus = FocusNode();
   double _logHeight = 240;
+  double _dragStartY = 0;
+  double _dragStartHeight = 240;
   bool _panelOpen = true;
   Ipv4? _selectedLease;
 
@@ -109,7 +111,12 @@ class _ServicePageState extends State<ServicePage> {
                             cursor: SystemMouseCursors.resizeRow,
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
-                              onVerticalDragUpdate: (d) => setState(() => _logHeight = (logHeight - d.delta.dy).clamp(_minLog, maxLog)),
+                              onVerticalDragStart: (d) {
+                                _dragStartY = d.globalPosition.dy;
+                                _dragStartHeight = logHeight;
+                              },
+                              // 움직인 양을 더하지 않고 시작 위치와 지금 위치의 차로 높이를 정한다 (한계에서 멈췄다 돌아와도 손잡이가 마우스를 따라간다).
+                              onVerticalDragUpdate: (d) => setState(() => _logHeight = (_dragStartHeight - (d.globalPosition.dy - _dragStartY)).clamp(_minLog, maxLog)),
                               child: const SizedBox(height: 8, child: Divider(height: 8)),
                             ),
                           ),
