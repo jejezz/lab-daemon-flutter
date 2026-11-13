@@ -26,6 +26,7 @@ class DhcpConfig implements ServiceConfig {
     this.offerHold = const Duration(seconds: 60),
     this.declineQuarantine = const Duration(minutes: 10),
     this.logPackets = false,
+    this.leaseFile,
   });
 
   /// 이 서버의 주소 (option 54). 선택한 NIC의 고정 IP여야 한다.
@@ -70,6 +71,9 @@ class DhcpConfig implements ServiceConfig {
   /// true면 주고받은 패킷의 16진수 덤프를 DEBUG 로그에 남긴다.
   final bool logPackets;
 
+  /// Lease를 저장하는 파일 경로. null이면 저장하지 않는다.
+  final String? leaseFile;
+
   /// Isolate 경계와 저장소를 건너는 JSON 형태.
   @override
   Map<String, Object?> toJson() => {
@@ -95,6 +99,7 @@ class DhcpConfig implements ServiceConfig {
         'offerHoldSeconds': offerHold.inSeconds,
         'declineQuarantineSeconds': declineQuarantine.inSeconds,
         'logPackets': logPackets,
+        'leaseFile': leaseFile,
       };
 
   /// [toJson]의 반대. 값이 없거나 형식이 틀리면 [FormatException].
@@ -128,6 +133,7 @@ class DhcpConfig implements ServiceConfig {
         offerHold: Duration(seconds: json['offerHoldSeconds'] as int? ?? 60),
         declineQuarantine: Duration(seconds: json['declineQuarantineSeconds'] as int? ?? 600),
         logPackets: json['logPackets'] as bool? ?? false,
+        leaseFile: json['leaseFile'] as String?,
       );
     } on FormatException {
       rethrow;

@@ -1247,4 +1247,21 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settingsTextScaleReset => '기본 크기로';
+
+  @override
+  String logDhcpLeasesLoaded(int count, int skipped) {
+    return '저장된 Lease $count개를 되살렸어요 (건너뜀 $skipped개)';
+  }
+
+  @override
+  String logDhcpLeaseFileFailed(String error) {
+    return 'Lease 파일을 읽거나 쓰지 못했어요: $error';
+  }
+
+  @override
+  String get dhcpPersistLeases => '껐다 켜도 Lease 유지';
+
+  @override
+  String get dhcpPersistLeasesHint =>
+      'Lease를 파일에 저장해 서비스를 다시 켜면 이어서 씁니다 (범위 밖·만료된 것은 버림)';
 }

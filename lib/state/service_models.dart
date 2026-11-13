@@ -20,13 +20,16 @@ import 'tftp_settings.dart';
 typedef DhcpProber = Future<DhcpProbeResult> Function(Ipv4 interfaceIp);
 
 class DhcpModel extends ServiceModel {
-  DhcpModel({required super.host, required super.prefs, required super.checker, DhcpProber? prober, super.notifyDelay})
+  DhcpModel({required super.host, required super.prefs, required super.checker, DhcpProber? prober, this.leaseFile, super.notifyDelay})
       : _prober = prober ?? ((ip) => detectOtherDhcpServers(interfaceIp: ip)),
         super(id: 'dhcp') {
     settings = DhcpSettings.load(prefs);
   }
 
   final DhcpProber _prober;
+
+  /// Lease를 저장하는 파일 경로 (설정이 켜져 있을 때만 쓴다). null이면 저장하지 않는다.
+  final String? leaseFile;
   late DhcpSettings settings;
   List<LeaseInfo> leases = const [];
   int capacity = 0;
@@ -38,7 +41,7 @@ class DhcpModel extends ServiceModel {
   bool get settingsValid => errors.isEmpty;
 
   @override
-  Map<String, Object?> buildConfig() => settings.toConfig().toJson();
+  Map<String, Object?> buildConfig() => {...settings.toConfig().toJson(), 'leaseFile': settings.persistLeases ? leaseFile : null};
 
   @override
   Ipv4 get checkAddress => Ipv4.tryParse(settings.serverIp) ?? Ipv4.any;

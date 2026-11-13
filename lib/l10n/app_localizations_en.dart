@@ -1266,4 +1266,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsTextScaleReset => 'Reset to default';
+
+  @override
+  String logDhcpLeasesLoaded(int count, int skipped) {
+    return 'Restored $count saved lease(s) ($skipped skipped)';
+  }
+
+  @override
+  String logDhcpLeaseFileFailed(String error) {
+    return 'Could not read or write the lease file: $error';
+  }
+
+  @override
+  String get dhcpPersistLeases => 'Keep leases across restarts';
+
+  @override
+  String get dhcpPersistLeasesHint =>
+      'Saves leases to a file and reuses them when the service starts again (expired or out-of-range ones are dropped)';
 }

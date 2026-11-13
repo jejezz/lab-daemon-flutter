@@ -180,6 +180,19 @@ class LeasePool {
     return lease;
   }
 
+  // ---- 복원 -------------------------------------------------------------------------------------
+
+  /// 저장해 둔 Lease를 되살린다(확정 상태). 지금 설정과 맞지 않으면 null이다: 이미 만료됨, 범위 밖, 제외 주소,
+  /// 격리 중, 예약과 어긋남, 이미 같은 MAC·주소가 있음.
+  Lease? restore({required MacAddress mac, required Ipv4 ip, String? hostname, required DateTime grantedAt, DateTime? expiresAt}) {
+    if (expiresAt != null && !now.isBefore(expiresAt)) return null;
+    if (_byMac.containsKey(mac) || _byIp.containsKey(ip)) return null;
+    final reserved = _reservations[mac];
+    if (reserved != null && reserved != ip) return null;
+    if (!_isFree(ip, mac)) return null;
+    return _put(Lease(mac: mac, ip: ip, state: LeaseState.bound, grantedAt: grantedAt, expiresAt: expiresAt, hostname: hostname));
+  }
+
   // ---- 해제 / 거절 / 만료 -----------------------------------------------------------------------
 
   /// 해제한 Lease를 돌려준다. 없으면 null.
@@ -227,7 +240,9 @@ class LeasePool {
 
   /// [mac]이 [ip]를 받을 수 있는가: 범위 안, 제외 아님, 격리 중 아님, 다른 MAC의 Lease·예약이 아님.
   bool _isFree(Ipv4 ip, MacAddress mac) {
-    if (!_inRange(ip) || excluded.contains(ip) || _declined.containsKey(ip)) return false;
+    // 예약한 주소는 범위 밖이어도 그 MAC에는 줄 수 있다.
+    final ownReservation = _reservations[mac] == ip;
+    if ((!_inRange(ip) && !ownReservation) || excluded.contains(ip) || _declined.containsKey(ip)) return false;
     final holder = _byIp[ip];
     if (holder != null && holder.mac != mac) return false;
     for (final MapEntry(key: other, value: reserved) in _reservations.entries) {

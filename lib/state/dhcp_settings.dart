@@ -28,6 +28,7 @@ class DhcpSettings {
     this.directedBroadcast = false,
     this.logPackets = false,
     this.detectOtherServers = true,
+    this.persistLeases = true,
   });
 
   final String serverIp;
@@ -48,6 +49,9 @@ class DhcpSettings {
   /// 서버를 켜기 전에 같은 망의 다른 DHCP 서버를 찾아 경고한다.
   final bool detectOtherServers;
 
+  /// 서비스를 껐다 켜도 Lease를 이어 쓴다 (파일에 저장).
+  final bool persistLeases;
+
   static const _keys = {
     DhcpField.serverIp: 'dhcp_server_ip',
     DhcpField.rangeStart: 'dhcp_range_start',
@@ -63,6 +67,7 @@ class DhcpSettings {
   static const _directedKey = 'dhcp_directed_broadcast';
   static const _logPacketsKey = 'dhcp_log_packets';
   static const _detectKey = 'dhcp_detect_other_servers';
+  static const _persistKey = 'dhcp_persist_leases';
 
   factory DhcpSettings.load(SharedPreferences prefs) {
     const defaults = DhcpSettings();
@@ -81,6 +86,7 @@ class DhcpSettings {
       directedBroadcast: prefs.getBool(_directedKey) ?? false,
       logPackets: prefs.getBool(_logPacketsKey) ?? false,
       detectOtherServers: prefs.getBool(_detectKey) ?? true,
+      persistLeases: prefs.getBool(_persistKey) ?? true,
     );
   }
 
@@ -91,6 +97,7 @@ class DhcpSettings {
     await prefs.setBool(_directedKey, directedBroadcast);
     await prefs.setBool(_logPacketsKey, logPackets);
     await prefs.setBool(_detectKey, detectOtherServers);
+    await prefs.setBool(_persistKey, persistLeases);
   }
 
   String valueOf(DhcpField f) => switch (f) {
@@ -133,6 +140,7 @@ class DhcpSettings {
     bool? directedBroadcast,
     bool? logPackets,
     bool? detectOtherServers,
+    bool? persistLeases,
   }) =>
       DhcpSettings(
         serverIp: serverIp ?? this.serverIp,
@@ -148,6 +156,7 @@ class DhcpSettings {
         directedBroadcast: directedBroadcast ?? this.directedBroadcast,
         logPackets: logPackets ?? this.logPackets,
         detectOtherServers: detectOtherServers ?? this.detectOtherServers,
+        persistLeases: persistLeases ?? this.persistLeases,
       );
 
   /// 같은 서브넷(/24)에서 쓸 만한 기본값을 채운다. 비어 있거나 새 서버의 망 밖에 있는 칸만 바꾼다.

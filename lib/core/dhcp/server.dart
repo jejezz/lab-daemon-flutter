@@ -13,6 +13,7 @@ import '../lease_time.dart';
 import '../service.dart';
 import 'config.dart';
 import 'engine.dart';
+import 'lease_store.dart';
 import 'packet.dart';
 import 'pool.dart';
 import 'transport.dart';
@@ -85,6 +86,11 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
   StreamSubscription<DhcpDatagram>? _subscription;
   Timer? _timer;
   int _publishedVersion = -1;
+  LeaseStore? _store;
+  String _savedContent = '';
+  int _savedVersion = -1;
+  DateTime _lastSave = DateTime.fromMillisecondsSinceEpoch(0);
+  bool _saveFailedLogged = false;
 
   /// 실행 중인 설정 (멈췄으면 null).
   DhcpConfig? get config => _config;
@@ -112,6 +118,7 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
     _pool = pool;
     _engine = engine;
     _publishedVersion = -1;
+    _openStore(config, pool);
     _subscription = _transport!.incoming.listen(_onDatagram);
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => expireNow());
     log(LogLevel.info, 'logDhcpStarted', args: {
@@ -128,6 +135,8 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
   Future<void> onStop() async {
     _timer?.cancel();
     _timer = null;
+    await _saveLeases(force: true);
+    _store = null;
     await _subscription?.cancel();
     _subscription = null;
     final hadTransport = _transport != null;
@@ -169,6 +178,7 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
     final pool = _pool;
     if (pool == null) return;
     final gone = pool.expire();
+    unawaited(_saveLeases());
     for (final lease in gone) {
       // 제안(offered)이 시간 초과로 사라진 것은 Lease가 아니라서 조용히 둔다.
       if (lease.state == LeaseState.bound) {
@@ -200,6 +210,55 @@ class DhcpServer extends BaseNetService<DhcpConfig> {
   void unreserve(MacAddress mac) {
     _requirePool().unreserve(mac);
     log(LogLevel.info, 'logDhcpUnreserved', args: {'mac': '$mac'});
+  }
+
+  /// 저장 파일을 열고 Lease를 되살린다. 파일이 깨졌거나 읽을 수 없으면 경고만 남기고 빈 표로 시작한다.
+  void _openStore(DhcpConfig config, LeasePool pool) {
+    final path = config.leaseFile;
+    _store = path == null ? null : LeaseStore(path);
+    _savedContent = '';
+    _savedVersion = -1;
+    _saveFailedLogged = false;
+    final store = _store;
+    if (store == null) return;
+    try {
+      final stored = store.load();
+      var restored = 0;
+      for (final s in stored) {
+        if (pool.restore(mac: s.mac, ip: s.ip, hostname: s.hostname, grantedAt: s.grantedAt, expiresAt: s.expiresAt) != null) restored++;
+      }
+      if (stored.isNotEmpty) {
+        log(LogLevel.info, 'logDhcpLeasesLoaded', kind: 'LEASES', args: {'count': restored, 'skipped': stored.length - restored});
+      }
+      _savedContent = LeaseStore.encode(pool.leases);
+    } catch (e) {
+      log(LogLevel.warning, 'logDhcpLeaseFileFailed', kind: 'LEASES', args: {'error': '$e'});
+    }
+  }
+
+  /// 확정된 Lease가 바뀌었으면 파일에 쓴다. 평소에는 2초에 한 번만 쓰고, 멈출 때는 바로([force]) 쓴다.
+  Future<void> _saveLeases({bool force = false}) async {
+    final store = _store;
+    final pool = _pool;
+    if (store == null || pool == null) return;
+    if (pool.version == _savedVersion && !force) return;
+    final now = DateTime.now();
+    if (!force && now.difference(_lastSave) < const Duration(seconds: 2)) return;
+    _savedVersion = pool.version;
+    _lastSave = now;
+    final content = LeaseStore.encode(pool.leases);
+    if (content == _savedContent) return;
+    try {
+      await store.saveEncoded(content);
+      _savedContent = content;
+      _saveFailedLogged = false;
+    } catch (e) {
+      _savedVersion = -1; // 다음에 다시 시도한다
+      if (!_saveFailedLogged) {
+        _saveFailedLogged = true;
+        log(LogLevel.warning, 'logDhcpLeaseFileFailed', kind: 'LEASES', args: {'error': '$e'});
+      }
+    }
   }
 
   /// 실행 중에 새 Lease Time을 적용한다. 이미 받은 Lease는 갱신될 때부터 새 값을 따른다.

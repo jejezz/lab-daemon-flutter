@@ -411,5 +411,9 @@
   "panelExpandTooltip": "Expand settings (Ctrl+B)",
   "panelRailLabel": "Settings",
   "settingsTextScale": "Text size",
-  "settingsTextScaleReset": "Reset to default"
+  "settingsTextScaleReset": "Reset to default",
+  "logDhcpLeasesLoaded": "Restored {count} saved lease(s) ({skipped} skipped)",
+  "logDhcpLeaseFileFailed": "Could not read or write the lease file: {error}",
+  "dhcpPersistLeases": "Keep leases across restarts",
+  "dhcpPersistLeasesHint": "Saves leases to a file and reuses them when the service starts again (expired or out-of-range ones are dropped)"
 }

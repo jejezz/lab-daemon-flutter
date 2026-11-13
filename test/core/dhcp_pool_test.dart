@@ -221,4 +221,39 @@ void main() {
       pool.reserve(mac(2), ip('192.168.50.100'));
     });
   });
+  group('복원과 범위 밖 예약', () {
+    test('저장한 Lease를 확정 상태로 되살리고, 맞지 않는 것은 거부한다', () {
+      final clock = _Clock();
+      final pool = _pool(clock);
+      final lease = pool.restore(mac: mac(1), ip: ip('192.168.50.100'), hostname: 'board', grantedAt: clock.now, expiresAt: clock.now.add(const Duration(minutes: 5)));
+      expect(lease!.state, LeaseState.bound);
+      expect(lease.hostname, 'board');
+      expect(pool.leaseOfIp(ip('192.168.50.100'))!.mac, mac(1));
+
+      final soon = clock.now.add(const Duration(minutes: 5));
+      expect(pool.restore(mac: mac(2), ip: ip('192.168.50.100'), grantedAt: clock.now, expiresAt: soon), isNull, reason: '같은 주소가 이미 있음');
+      expect(pool.restore(mac: mac(1), ip: ip('192.168.50.102'), grantedAt: clock.now, expiresAt: soon), isNull, reason: '같은 MAC이 이미 있음');
+      expect(pool.restore(mac: mac(3), ip: ip('192.168.50.101'), grantedAt: clock.now, expiresAt: soon), isNull, reason: '제외 주소');
+      expect(pool.restore(mac: mac(4), ip: ip('192.168.50.150'), grantedAt: clock.now, expiresAt: soon), isNull, reason: '범위 밖');
+      expect(pool.restore(mac: mac(5), ip: ip('192.168.50.102'), grantedAt: clock.now, expiresAt: clock.now), isNull, reason: '이미 만료');
+      expect(pool.restore(mac: mac(6), ip: ip('192.168.50.102'), grantedAt: clock.now, expiresAt: null)!.expiresAt, isNull, reason: '무제한');
+    });
+
+    test('다른 MAC에 예약된 주소나 다른 주소로 예약된 MAC의 Lease는 되살리지 않는다', () {
+      final clock = _Clock();
+      final pool = _pool(clock);
+      pool.reserve(mac(1), ip('192.168.50.100'));
+      final soon = clock.now.add(const Duration(minutes: 5));
+      expect(pool.restore(mac: mac(2), ip: ip('192.168.50.100'), grantedAt: clock.now, expiresAt: soon), isNull);
+      expect(pool.restore(mac: mac(1), ip: ip('192.168.50.102'), grantedAt: clock.now, expiresAt: soon), isNull);
+      expect(pool.restore(mac: mac(1), ip: ip('192.168.50.100'), grantedAt: clock.now, expiresAt: soon), isNotNull);
+    });
+
+    test('범위 밖 주소로 예약해도 그 MAC에는 그 주소를 준다', () {
+      final pool = _pool(_Clock());
+      pool.reserve(mac(1), ip('192.168.50.20'));
+      expect(pool.offer(mac(1))!.ip, ip('192.168.50.20'));
+      expect(pool.offer(mac(2))!.ip, isNot(ip('192.168.50.20')));
+    });
+  });
 }

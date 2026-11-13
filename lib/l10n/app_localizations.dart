@@ -2119,6 +2119,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'기본 크기로'**
   String get settingsTextScaleReset;
+
+  /// No description provided for @logDhcpLeasesLoaded.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장된 Lease {count}개를 되살렸어요 (건너뜀 {skipped}개)'**
+  String logDhcpLeasesLoaded(int count, int skipped);
+
+  /// No description provided for @logDhcpLeaseFileFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'Lease 파일을 읽거나 쓰지 못했어요: {error}'**
+  String logDhcpLeaseFileFailed(String error);
+
+  /// No description provided for @dhcpPersistLeases.
+  ///
+  /// In ko, this message translates to:
+  /// **'껐다 켜도 Lease 유지'**
+  String get dhcpPersistLeases;
+
+  /// No description provided for @dhcpPersistLeasesHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'Lease를 파일에 저장해 서비스를 다시 켜면 이어서 씁니다 (범위 밖·만료된 것은 버림)'**
+  String get dhcpPersistLeasesHint;
 }
 
 class _AppLocalizationsDelegate

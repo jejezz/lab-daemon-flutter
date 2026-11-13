@@ -1370,5 +1370,26 @@
   "panelExpandTooltip": "설정 패널 펴기 (Ctrl+B)",
   "panelRailLabel": "설정",
   "settingsTextScale": "화면 글자 크기",
-  "settingsTextScaleReset": "기본 크기로"
+  "settingsTextScaleReset": "기본 크기로",
+  "logDhcpLeasesLoaded": "저장된 Lease {count}개를 되살렸어요 (건너뜀 {skipped}개)",
+  "@logDhcpLeasesLoaded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "logDhcpLeaseFileFailed": "Lease 파일을 읽거나 쓰지 못했어요: {error}",
+  "@logDhcpLeaseFileFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "dhcpPersistLeases": "껐다 켜도 Lease 유지",
+  "dhcpPersistLeasesHint": "Lease를 파일에 저장해 서비스를 다시 켜면 이어서 씁니다 (범위 밖·만료된 것은 버림)"
 }

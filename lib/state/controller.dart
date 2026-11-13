@@ -2,6 +2,7 @@
 // 이 컨트롤러는 목록과 선택만 알린다 (서비스 갱신이 사이드바·다른 화면을 다시 그리지 않게).
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,6 +13,7 @@ import '../core/host.dart';
 import '../core/netcheck.dart';
 import '../core/netutil.dart';
 import '../core/tftp/server.dart';
+import 'app_paths.dart';
 import 'service_model.dart';
 import 'service_models.dart';
 
@@ -32,13 +34,18 @@ class LabDaemonController extends ChangeNotifier {
     final checker = PreStartChecker();
     return LabDaemonController(
       prefs: prefs,
-      dhcp: DhcpModel(host: IsolateHost('dhcp', createDhcpService), prefs: prefs, checker: checker),
+      dhcp: DhcpModel(host: IsolateHost('dhcp', createDhcpService), prefs: prefs, checker: checker, leaseFile: _dataFile('dhcp_leases.json')),
       tftp: TftpModel(host: IsolateHost('tftp', createTftpService), prefs: prefs, checker: checker),
       ftp: FtpModel(host: IsolateHost('ftp', createFtpService), prefs: prefs, checker: checker),
     );
   }
 
   static const _selectedKey = 'ui_selected_service';
+
+  static String? _dataFile(String name) {
+    final dir = appDataDir();
+    return dir == null ? null : '$dir${Platform.pathSeparator}$name';
+  }
 
   final SharedPreferences prefs;
   final DhcpModel dhcp;

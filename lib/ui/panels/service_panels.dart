@@ -89,6 +89,13 @@ class DhcpPanel extends StatelessWidget {
         text(DhcpField.domain, l10n.dhcpFieldDomain, hint: l10n.dhcpHintOptional),
         PanelHeading(l10n.sectionAdvanced),
         SwitchRow(
+          title: l10n.dhcpPersistLeases,
+          subtitle: l10n.dhcpPersistLeasesHint,
+          value: s.persistLeases,
+          enabled: !locked,
+          onChanged: (v) => model.update(model.settings.copyWith(persistLeases: v)),
+        ),
+        SwitchRow(
           title: l10n.dhcpDetectOthers,
           subtitle: l10n.dhcpDetectOthersHint,
           value: s.detectOtherServers,

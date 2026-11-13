@@ -61,7 +61,7 @@ DhcpPacket _client(int type, MacAddress m, {Map<int, Uint8List> options = const 
       options: {DhcpOpt.messageType: DhcpValue.u8(type), ...options},
     );
 
-DhcpConfig _config({bool logPackets = false}) => DhcpConfig(
+DhcpConfig _config({bool logPackets = false, String? leaseFile}) => DhcpConfig(
       serverIp: ip('192.168.50.1'),
       rangeStart: ip('192.168.50.100'),
       rangeEnd: ip('192.168.50.110'),
@@ -69,6 +69,7 @@ DhcpConfig _config({bool logPackets = false}) => DhcpConfig(
       gateway: ip('192.168.50.1'),
       leaseTime: const Duration(minutes: 10),
       logPackets: logPackets,
+      leaseFile: leaseFile,
     );
 
 /// 서비스가 내는 로그를 [bus]에 모은다 (실제 앱에서는 화면 쪽 호스트가 하는 일).
@@ -114,6 +115,94 @@ void main() {
       DhcpOpt.serverId: DhcpValue.ip(ip('192.168.50.1')),
     }));
   }
+
+  group('Lease 영속화', () {
+    late Directory dir;
+    late String file;
+
+    setUp(() {
+      dir = Directory.systemTemp.createTempSync('lease_test_');
+      file = '${dir.path}${Platform.pathSeparator}leases.json';
+    });
+
+    tearDown(() => dir.deleteSync(recursive: true));
+
+    /// 같은 파일을 쓰는 새 서버 (껐다 켠 것)를 만든다.
+    Future<(DhcpServer, _FakeTransport, LogBus)> restart({Duration later = Duration.zero}) async {
+      final t = _FakeTransport();
+      final b = LogBus();
+      final s = _make(b, clock: () => now.add(later), transportFactory: (a, p) async => t);
+      await s.start(_config(leaseFile: file));
+      return (s, t, b);
+    }
+
+    test('멈추면 확정된 Lease가 파일에 저장되고, 다시 켜면 같은 주소가 이어진다', () async {
+      await server.start(_config(leaseFile: file));
+      await dora(mac(1));
+      await dora(mac(2));
+      final first = server.pool!.leaseOfMac(mac(1))!.ip;
+      final second = server.pool!.leaseOfMac(mac(2))!.ip;
+      await server.stop();
+      expect(File(file).existsSync(), isTrue);
+
+      final (s2, t2, b2) = await restart();
+      addTearDown(() async {
+        await s2.dispose();
+        await b2.dispose();
+      });
+      expect(s2.pool!.leaseOfMac(mac(1))!.ip, first);
+      expect(s2.pool!.leaseOfMac(mac(1))!.state, LeaseState.bound);
+      expect(s2.pool!.leaseOfMac(mac(2))!.ip, second);
+      final loaded = b2.history.firstWhere((e) => e.key == 'logDhcpLeasesLoaded');
+      expect(loaded.args, {'count': 2, 'skipped': 0});
+
+      // 되살린 Lease의 클라이언트가 다시 REQUEST하면 같은 주소로 ACK
+      t2.receive(_client(DhcpMessageType.request, mac(1), options: {DhcpOpt.requestedIp: DhcpValue.ip(first)}));
+      expect(t2.sent.last.packet.messageType, DhcpMessageType.ack);
+      expect(t2.sent.last.packet.yiaddr, first);
+    });
+
+    test('다시 켰을 때 이미 만료된 Lease는 버린다', () async {
+      await server.start(_config(leaseFile: file));
+      await dora(mac(1));
+      await server.stop();
+
+      final (s2, t2, b2) = await restart(later: const Duration(minutes: 30)); // Lease Time 10분
+      addTearDown(() async {
+        await s2.dispose();
+        await b2.dispose();
+      });
+      expect(s2.pool!.leases, isEmpty);
+      expect(b2.history.firstWhere((e) => e.key == 'logDhcpLeasesLoaded').args, {'count': 0, 'skipped': 1});
+      expect(t2.sent, isEmpty);
+    });
+
+    test('파일이 깨졌으면 경고만 남기고 빈 표로 시작한다', () async {
+      File(file).writeAsStringSync('이건 JSON이 아니에요');
+      final (s2, _, b2) = await restart();
+      addTearDown(() async {
+        await s2.dispose();
+        await b2.dispose();
+      });
+      expect(s2.state, ServiceState.running);
+      expect(s2.pool!.leases, isEmpty);
+      expect(b2.history.map((e) => e.key), contains('logDhcpLeaseFileFailed'));
+    });
+
+    test('leaseFile이 없으면 파일을 만들지 않는다', () async {
+      await server.start(_config());
+      await dora(mac(1));
+      await server.stop();
+      expect(dir.listSync(), isEmpty);
+    });
+
+    test('저장하는 중에 꺼져도 예전 파일이 온전하다 (임시 파일 뒤 이름 바꾸기)', () async {
+      await server.start(_config(leaseFile: file));
+      await dora(mac(1));
+      await server.stop();
+      expect(File('$file.tmp').existsSync(), isFalse, reason: '임시 파일은 이름을 바꾸고 나서 남지 않는다');
+    });
+  });
 
   test('서버 주소와 포트에 묶고 시작 로그를 남긴다', () async {
     await server.start(_config());
