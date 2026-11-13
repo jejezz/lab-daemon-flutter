@@ -24,6 +24,8 @@ abstract class ServiceModel extends ChangeNotifier {
     required this.checker,
     this.notifyDelay = const Duration(milliseconds: 50),
   }) {
+    final saved = prefs.getInt('${id}_log_capacity');
+    if (saved != null && LogBus.capacityChoices.contains(saved)) logs.capacity = saved;
     _subscription = host.events.listen(_onEvent);
   }
 
@@ -33,8 +35,14 @@ abstract class ServiceModel extends ChangeNotifier {
   final PreStartChecker checker;
   final Duration notifyDelay;
 
-  /// 이 서비스만의 로그 (최근 5000건).
-  final logs = LogBus(capacity: 5000);
+  /// 이 서비스만의 로그. 보관 줄 수는 서비스마다 고른다 (기본 1000줄).
+  final logs = LogBus();
+
+  /// 로그 보관 줄 수를 바꾸고 저장한다.
+  void setLogCapacity(int value) {
+    logs.capacity = value;
+    prefs.setInt('${id}_log_capacity', value);
+  }
 
   late final StreamSubscription<ServiceEvent> _subscription;
   Timer? _notifyTimer;

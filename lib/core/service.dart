@@ -68,9 +68,25 @@ final class StateEvent extends ServiceEvent {
 /// 서비스 하나의 로그를 모아 두는 고정 크기 버퍼. 화면 쪽에서 쓰며, 가득 차면 오래된 것부터 버린다.
 /// 추가는 O(1)이고 구독자가 없으면 스트림 비용도 없다.
 class LogBus {
-  LogBus({this.capacity = 5000});
+  // ignore: prefer_initializing_formals
+  LogBus({int capacity = defaultCapacity}) : _capacity = capacity;
 
-  final int capacity;
+  static const defaultCapacity = 1000;
+
+  /// 고를 수 있는 보관 줄 수.
+  static const capacityChoices = [100, 500, 1000, 5000];
+
+  int _capacity;
+
+  int get capacity => _capacity;
+
+  /// 줄이면 오래된 줄부터 바로 지운다.
+  set capacity(int value) {
+    _capacity = value < 1 ? 1 : value;
+    while (_history.length > _capacity) {
+      _history.removeFirst();
+    }
+  }
   final _history = Queue<LogEvent>();
   final _controller = StreamController<LogEvent>.broadcast(sync: true);
 

@@ -1349,5 +1349,14 @@
   "firewallHelpPolicyNote": "회사 PC는 관리자 정책으로 규칙 추가가 막혀 있을 수 있어요. 그때는 IT 담당자에게 위 프로그램과 포트의 허용을 요청하세요.",
   "commandCopied": "명령을 복사했어요",
   "logCheckFirewallHint": "해결 방법은 서비스 화면 위쪽의 [방화벽 안내]에서 볼 수 있어요",
-  "openRootFolder": "탐색기로 루트 폴더 열기"
+  "openRootFolder": "탐색기로 루트 폴더 열기",
+  "logCapacityTooltip": "보관할 로그 줄 수",
+  "logCapacityLines": "{count}줄",
+  "@logCapacityLines": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

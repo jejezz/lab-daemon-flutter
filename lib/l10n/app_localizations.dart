@@ -2077,6 +2077,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'탐색기로 루트 폴더 열기'**
   String get openRootFolder;
+
+  /// No description provided for @logCapacityTooltip.
+  ///
+  /// In ko, this message translates to:
+  /// **'보관할 로그 줄 수'**
+  String get logCapacityTooltip;
+
+  /// No description provided for @logCapacityLines.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}줄'**
+  String logCapacityLines(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -491,6 +491,25 @@ void main() {
   });
 
   group('로그 패널', () {
+    _testApp('보관 줄 수는 기본 1000줄이고, 고르면 바로 줄어들고 서비스별로 저장된다', (tester, app) async {
+      expect(find.byTooltip('Log lines to keep: 1000 lines'), findsOneWidget);
+      await _startDhcp(tester);
+      for (var i = 0; i < 5; i++) {
+        app.transport.dora(mac(i));
+      }
+      await _settle(tester);
+      expect(app.dhcp.logs.length, greaterThan(10));
+
+      await tester.tap(find.byTooltip('Log lines to keep: 1000 lines'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('100 lines').last);
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('Log lines to keep: 100 lines'), findsOneWidget);
+      expect(app.dhcp.logs.capacity, 100);
+      expect(app.controller.prefs.getInt('dhcp_log_capacity'), 100);
+      expect(app.tftp.logs.capacity, 1000, reason: '다른 서비스는 그대로');
+    });
+
     _testApp('디버그 로그는 기본으로 숨기고, 검색으로 줄이고, 일시정지하면 개수만 알린다', (tester, app) async {
       await _startDhcp(tester);
       app.transport.receive(DhcpPacket(op: DhcpOp.reply, xid: 1, chaddr: Uint8List(16), options: {DhcpOpt.messageType: DhcpValue.u8(DhcpMessageType.offer)}));

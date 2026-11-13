@@ -1222,4 +1222,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get openRootFolder => '탐색기로 루트 폴더 열기';
+
+  @override
+  String get logCapacityTooltip => '보관할 로그 줄 수';
+
+  @override
+  String logCapacityLines(int count) {
+    return '$count줄';
+  }
 }

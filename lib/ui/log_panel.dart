@@ -5,7 +5,7 @@
 //   - 목록은 보이는 줄만 만든다 (ListView.builder, 고정 줄 높이).
 //   - 번역된 문구는 줄마다 한 번만 만들어 캐시한다 (Expando). 필터는 새 줄에만 적용하고(증분), 필터나 검색어를
 //     바꿀 때만 전체를 다시 거른다.
-//   - 화면의 버퍼도 최근 5000줄로 고정이다.
+//   - 화면의 버퍼도 서비스가 보관하는 줄 수(기본 1000줄)로 고정이다.
 
 import 'dart:async';
 import 'dart:collection';
@@ -20,9 +20,12 @@ import 'log_format.dart';
 import 'widgets/error_snackbar.dart';
 
 class LogPanel extends StatefulWidget {
-  const LogPanel({super.key, required this.bus, required this.searchFocus});
+  const LogPanel({super.key, required this.bus, required this.searchFocus, this.onCapacity});
 
   final LogBus bus;
+
+  /// 보관 줄 수를 고르면 부른다 (저장은 부른 쪽 몫). null이면 고르는 메뉴를 숨긴다.
+  final ValueChanged<int>? onCapacity;
   final FocusNode searchFocus;
 
   @override
@@ -103,6 +106,15 @@ class _LogPanelState extends State<LogPanel> {
       for (final e in _all)
         if (_matches(e)) e,
     ];
+  }
+
+  void _setCapacity(int value) {
+    widget.onCapacity?.call(value);
+    widget.bus.capacity = value;
+    while (_all.length > value) {
+      _all.removeFirst();
+    }
+    setState(_refilter);
   }
 
   void _onEvent(LogEvent event) {
@@ -232,6 +244,18 @@ class _LogPanelState extends State<LogPanel> {
                   ),
                 ),
               ),
+              if (widget.onCapacity != null)
+                PopupMenuButton<int>(
+                  tooltip: '${l10n.logCapacityTooltip}: ${l10n.logCapacityLines(widget.bus.capacity)}',
+                  icon: const Icon(Icons.history_rounded, size: 20),
+                  padding: EdgeInsets.zero,
+                  initialValue: widget.bus.capacity,
+                  onSelected: _setCapacity,
+                  itemBuilder: (_) => [
+                    for (final n in LogBus.capacityChoices)
+                      CheckedPopupMenuItem(value: n, checked: n == widget.bus.capacity, child: Text(l10n.logCapacityLines(n))),
+                  ],
+                ),
               const SizedBox(width: AppSpacing.md),
               // 검색 칸은 남는 폭에 맞춰 줄어든다 (좁은 창에서도 머리줄이 넘치지 않게).
               Expanded(

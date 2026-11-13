@@ -1241,4 +1241,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openRootFolder => 'Open root folder in Explorer';
+
+  @override
+  String get logCapacityTooltip => 'Log lines to keep';
+
+  @override
+  String logCapacityLines(int count) {
+    return '$count lines';
+  }
 }

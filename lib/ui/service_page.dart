@@ -114,7 +114,7 @@ class _ServicePageState extends State<ServicePage> {
                             ),
                           ),
                           // 로그 패널은 모델이 아니라 그 서비스의 로그 버퍼를 직접 구독한다 (표 갱신과 따로 그린다).
-                          SizedBox(height: logHeight, child: LogPanel(bus: m.logs, searchFocus: _searchFocus)),
+                          SizedBox(height: logHeight, child: LogPanel(bus: m.logs, searchFocus: _searchFocus, onCapacity: m.setLogCapacity)),
                         ],
                       );
                     }),

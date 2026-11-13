@@ -404,5 +404,7 @@
   "firewallHelpPolicyNote": "On managed PCs, policy may block adding rules. Ask your IT administrator to allow the program and ports above.",
   "commandCopied": "Command copied",
   "logCheckFirewallHint": "See [Firewall help] at the top of the service view for how to fix this",
-  "openRootFolder": "Open root folder in Explorer"
+  "openRootFolder": "Open root folder in Explorer",
+  "logCapacityTooltip": "Log lines to keep",
+  "logCapacityLines": "{count} lines"
 }

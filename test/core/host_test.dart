@@ -159,6 +159,19 @@ void main() {
       bus.clear();
       expect(bus.length, 0);
     });
+
+    test('기본은 1000줄이고, 용량을 줄이면 오래된 줄부터 바로 지운다', () {
+      final bus = LogBus();
+      expect(bus.capacity, 1000);
+      for (var i = 0; i < 300; i++) {
+        bus.add(LogEvent('x', LogLevel.info, 'k$i'));
+      }
+      bus.capacity = 100;
+      expect(bus.length, 100);
+      expect(bus.history.first.key, 'k200');
+      bus.capacity = 500;
+      expect(bus.length, 100, reason: '늘려도 지운 줄은 돌아오지 않는다');
+    });
   });
 
   group('EventBatcher', () {
