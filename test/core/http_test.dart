@@ -147,6 +147,14 @@ void main() {
 
     Future<void> idle() => Future<void>.delayed(const Duration(milliseconds: 120));
 
+    /// [condition]이 참이 될 때까지 기다린다 (바쁜 컴퓨터에서도 고정된 대기 시간 때문에 흔들리지 않게).
+    Future<void> until(bool Function() condition, {Duration timeout = const Duration(seconds: 5)}) async {
+      final end = DateTime.now().add(timeout);
+      while (!condition() && DateTime.now().isBefore(end)) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+    }
+
     group('내려받기', () {
       test('파일을 그대로 내주고 머리를 붙인다 (길이·이어받기 가능·ETag·수정 시각·형식)', () async {
         final data = _bytes(100000);
@@ -402,7 +410,7 @@ void main() {
         await socket.flush();
         await idle();
         socket.destroy();
-        await Future<void>.delayed(const Duration(milliseconds: 300));
+        await until(() => snapshots.isNotEmpty && snapshots.last.failed == 1 && root.listSync().isEmpty);
         expect(File('${root.path}/half.bin').existsSync(), isFalse);
         expect(root.listSync(), isEmpty, reason: '임시 파일도 남지 않는다');
         expect(snapshots.last.failed, 1);
@@ -475,12 +483,12 @@ void main() {
         final req = await http.getUrl(url('/big.bin'));
         final res = await req.close();
         final sub = res.listen((_) {})..pause(); // 안 읽어서 서버가 보내다 막힌다
-        await idle();
+        await until(() => snapshots.isNotEmpty && snapshots.last.requests.any((r) => r.state == HttpRequestState.active));
         final active = snapshots.last.requests.firstWhere((r) => r.state == HttpRequestState.active);
         expect(await server.command('abort', {'id': active.id}), isTrue);
         sub.resume();
         await sub.asFuture<void>().catchError((Object _) {});
-        await Future<void>.delayed(const Duration(milliseconds: 300));
+        await until(() => logs.any((l) => l.key == 'logHttpAborted') && server.activeCount == 0);
         expect(logs.map((l) => l.key), contains('logHttpAborted'));
         expect(snapshots.last.requests.firstWhere((r) => r.id == active.id).failure, 'aborted');
         expect(server.activeCount, 0);
@@ -492,7 +500,7 @@ void main() {
         final req = await http.getUrl(url('/big.bin'));
         final res = await req.close();
         final sub = res.listen((_) {})..pause();
-        await idle();
+        await until(() => server.activeCount == 1);
         final second = await get('/big.bin');
         expect(second.status, 503);
         expect(second.headers['retry-after'], '1');
