@@ -126,12 +126,27 @@ mixin _Ticking<T extends StatefulWidget> on State<T> {
 // ---- DHCP -------------------------------------------------------------------------------------
 
 class LeaseTable extends StatefulWidget {
-  const LeaseTable({super.key, required this.leases, required this.selected, required this.onSelect, required this.onRelease, this.now});
+  const LeaseTable({
+    super.key,
+    required this.leases,
+    required this.selected,
+    required this.onSelect,
+    required this.onRelease,
+    this.onReserve,
+    this.reserved = const {},
+    this.now,
+  });
 
   final List<LeaseInfo> leases;
   final Ipv4? selected;
   final ValueChanged<Ipv4?> onSelect;
   final ValueChanged<Ipv4> onRelease;
+
+  /// 이 Lease의 MAC에 지금 주소를 고정 예약한다 (null이면 메뉴에 넣지 않는다).
+  final ValueChanged<LeaseInfo>? onReserve;
+
+  /// 예약된 MAC. 해당 줄의 IP 앞에 핀 아이콘이 붙는다.
+  final Set<MacAddress> reserved;
   final DateTime Function()? now;
 
   @override
@@ -145,18 +160,20 @@ class _LeaseTableState extends State<LeaseTable> with _Ticking {
   Future<void> _menu(BuildContext context, Offset position, LeaseInfo lease) async {
     final l10n = AppLocalizations.of(context);
     widget.onSelect(lease.ip);
-    final choice = await showMenu<bool>(
+    final choice = await showMenu<String>(
       context: context,
       position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
       items: [
         PopupMenuItem(
-          value: true,
+          value: 'release',
           height: 36,
           child: Row(children: [Expanded(child: Text(l10n.leaseRelease)), Text('Del', style: Theme.of(context).textTheme.labelSmall)]),
         ),
+        if (widget.onReserve != null && !widget.reserved.contains(lease.mac)) PopupMenuItem(value: 'reserve', height: 36, child: Text(l10n.leaseReserve)),
       ],
     );
-    if (choice == true) widget.onRelease(lease.ip);
+    if (choice == 'release') widget.onRelease(lease.ip);
+    if (choice == 'reserve') widget.onReserve?.call(lease);
   }
 
   @override
@@ -188,7 +205,15 @@ class _LeaseTableState extends State<LeaseTable> with _Ticking {
               color: lease.ip == widget.selected ? scheme.primary.withValues(alpha: 0.12) : null,
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Row(children: [
-                _cell(flex[0], Col.left, Text('${lease.ip}', style: mono)),
+                _cell(
+                  flex[0],
+                  Col.left,
+                  Row(mainAxisSize: MainAxisSize.min, children: [
+                    if (widget.reserved.contains(lease.mac))
+                      Tooltip(message: l10n.leaseReservedTooltip, child: Padding(padding: const EdgeInsets.only(right: 4), child: Icon(Icons.push_pin_rounded, size: 14, color: scheme.primary))),
+                    Flexible(child: Text('${lease.ip}', style: mono, overflow: TextOverflow.ellipsis)),
+                  ]),
+                ),
                 _cell(flex[1], Col.left, Text('${lease.mac}', style: mono)),
                 _cell(flex[2], Col.left, Text(lease.hostname ?? '', overflow: TextOverflow.ellipsis, style: AppFonts.userContent)),
                 _cell(flex[3], Col.center, StatusPill(label: bound ? l10n.leaseStateBound : l10n.leaseStateOffered, tone: bound ? PillTone.success : PillTone.warning)),

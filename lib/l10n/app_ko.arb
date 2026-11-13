@@ -1391,5 +1391,35 @@
     }
   },
   "dhcpPersistLeases": "껐다 켜도 Lease 유지",
-  "dhcpPersistLeasesHint": "Lease를 파일에 저장해 서비스를 다시 켜면 이어서 씁니다 (범위 밖·만료된 것은 버림)"
+  "dhcpPersistLeasesHint": "Lease를 파일에 저장해 서비스를 다시 켜면 이어서 씁니다 (범위 밖·만료된 것은 버림)",
+  "fieldErrInvalidMac": "MAC 주소 형식이 아니에요 (예: aa:bb:cc:00:11:22)",
+  "fieldErrDuplicate": "이미 예약한 MAC이거나, 서버·게이트웨이·다른 예약과 같은 주소예요",
+  "dhcpReservations": "고정 주소 예약",
+  "dhcpReservationsHint": "MAC 주소마다 항상 같은 IP를 줍니다. 서비스가 켜져 있어도 추가·삭제할 수 있어요.",
+  "dhcpReserveMac": "MAC 주소",
+  "dhcpReserveIp": "고정 IP",
+  "dhcpReserveAdd": "추가",
+  "dhcpReserveRemove": "예약 삭제",
+  "dhcpReservationNone": "예약한 주소가 없어요",
+  "leaseReserve": "주소 예약",
+  "leaseReservedTooltip": "예약된 주소",
+  "leaseReserveDone": "{mac}에 {ip}를 예약했어요",
+  "@leaseReserveDone": {
+    "placeholders": {
+      "mac": {
+        "type": "String"
+      },
+      "ip": {
+        "type": "String"
+      }
+    }
+  },
+  "reserveFailed": "예약하지 못했어요: {error}",
+  "@reserveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

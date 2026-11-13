@@ -2143,6 +2143,84 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'Lease를 파일에 저장해 서비스를 다시 켜면 이어서 씁니다 (범위 밖·만료된 것은 버림)'**
   String get dhcpPersistLeasesHint;
+
+  /// No description provided for @fieldErrInvalidMac.
+  ///
+  /// In ko, this message translates to:
+  /// **'MAC 주소 형식이 아니에요 (예: aa:bb:cc:00:11:22)'**
+  String get fieldErrInvalidMac;
+
+  /// No description provided for @fieldErrDuplicate.
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 예약한 MAC이거나, 서버·게이트웨이·다른 예약과 같은 주소예요'**
+  String get fieldErrDuplicate;
+
+  /// No description provided for @dhcpReservations.
+  ///
+  /// In ko, this message translates to:
+  /// **'고정 주소 예약'**
+  String get dhcpReservations;
+
+  /// No description provided for @dhcpReservationsHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'MAC 주소마다 항상 같은 IP를 줍니다. 서비스가 켜져 있어도 추가·삭제할 수 있어요.'**
+  String get dhcpReservationsHint;
+
+  /// No description provided for @dhcpReserveMac.
+  ///
+  /// In ko, this message translates to:
+  /// **'MAC 주소'**
+  String get dhcpReserveMac;
+
+  /// No description provided for @dhcpReserveIp.
+  ///
+  /// In ko, this message translates to:
+  /// **'고정 IP'**
+  String get dhcpReserveIp;
+
+  /// No description provided for @dhcpReserveAdd.
+  ///
+  /// In ko, this message translates to:
+  /// **'추가'**
+  String get dhcpReserveAdd;
+
+  /// No description provided for @dhcpReserveRemove.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 삭제'**
+  String get dhcpReserveRemove;
+
+  /// No description provided for @dhcpReservationNone.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약한 주소가 없어요'**
+  String get dhcpReservationNone;
+
+  /// No description provided for @leaseReserve.
+  ///
+  /// In ko, this message translates to:
+  /// **'주소 예약'**
+  String get leaseReserve;
+
+  /// No description provided for @leaseReservedTooltip.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약된 주소'**
+  String get leaseReservedTooltip;
+
+  /// No description provided for @leaseReserveDone.
+  ///
+  /// In ko, this message translates to:
+  /// **'{mac}에 {ip}를 예약했어요'**
+  String leaseReserveDone(String mac, String ip);
+
+  /// No description provided for @reserveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약하지 못했어요: {error}'**
+  String reserveFailed(String error);
 }
 
 class _AppLocalizationsDelegate

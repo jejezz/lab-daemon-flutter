@@ -1264,4 +1264,48 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get dhcpPersistLeasesHint =>
       'Lease를 파일에 저장해 서비스를 다시 켜면 이어서 씁니다 (범위 밖·만료된 것은 버림)';
+
+  @override
+  String get fieldErrInvalidMac => 'MAC 주소 형식이 아니에요 (예: aa:bb:cc:00:11:22)';
+
+  @override
+  String get fieldErrDuplicate => '이미 예약한 MAC이거나, 서버·게이트웨이·다른 예약과 같은 주소예요';
+
+  @override
+  String get dhcpReservations => '고정 주소 예약';
+
+  @override
+  String get dhcpReservationsHint =>
+      'MAC 주소마다 항상 같은 IP를 줍니다. 서비스가 켜져 있어도 추가·삭제할 수 있어요.';
+
+  @override
+  String get dhcpReserveMac => 'MAC 주소';
+
+  @override
+  String get dhcpReserveIp => '고정 IP';
+
+  @override
+  String get dhcpReserveAdd => '추가';
+
+  @override
+  String get dhcpReserveRemove => '예약 삭제';
+
+  @override
+  String get dhcpReservationNone => '예약한 주소가 없어요';
+
+  @override
+  String get leaseReserve => '주소 예약';
+
+  @override
+  String get leaseReservedTooltip => '예약된 주소';
+
+  @override
+  String leaseReserveDone(String mac, String ip) {
+    return '$mac에 $ip를 예약했어요';
+  }
+
+  @override
+  String reserveFailed(String error) {
+    return '예약하지 못했어요: $error';
+  }
 }

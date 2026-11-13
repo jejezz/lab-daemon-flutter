@@ -11,6 +11,7 @@ import '../../state/ftp_settings.dart';
 import '../../state/service_models.dart';
 import '../../state/tftp_settings.dart';
 import '../../theme/app_theme.dart';
+import '../widgets/error_snackbar.dart';
 import '../widgets/fields.dart';
 
 class _LockedNote extends StatelessWidget {
@@ -87,6 +88,8 @@ class DhcpPanel extends StatelessWidget {
         FieldPair(text(DhcpField.tftpServer, l10n.dhcpFieldTftp, hint: l10n.dhcpHintOptional), text(DhcpField.bootFile, l10n.dhcpFieldBootFile, hint: l10n.dhcpHintOptional)),
         fieldGap,
         text(DhcpField.domain, l10n.dhcpFieldDomain, hint: l10n.dhcpHintOptional),
+        PanelHeading(l10n.dhcpReservations),
+        _ReservationsSection(model: model, error: errors[DhcpField.reservations]),
         PanelHeading(l10n.sectionAdvanced),
         SwitchRow(
           title: l10n.dhcpPersistLeases,
@@ -115,6 +118,115 @@ class DhcpPanel extends StatelessWidget {
           enabled: !locked,
           onChanged: (v) => model.update(model.settings.copyWith(logPackets: v)),
         ),
+      ],
+    );
+  }
+}
+
+/// 고정 주소 예약 목록과 추가 칸. 서비스가 켜져 있어도 바꿀 수 있다.
+class _ReservationsSection extends StatefulWidget {
+  const _ReservationsSection({required this.model, required this.error});
+
+  final DhcpModel model;
+  final FieldError? error;
+
+  @override
+  State<_ReservationsSection> createState() => _ReservationsSectionState();
+}
+
+class _ReservationsSectionState extends State<_ReservationsSection> {
+  final _mac = TextEditingController();
+  final _ip = TextEditingController();
+  FieldError? _error;
+
+  @override
+  void dispose() {
+    _mac.dispose();
+    _ip.dispose();
+    super.dispose();
+  }
+
+  Future<void> _add() async {
+    final l10n = AppLocalizations.of(context);
+    final error = widget.model.checkReservation(_mac.text, _ip.text);
+    if (error != null) {
+      setState(() => _error = error);
+      return;
+    }
+    try {
+      await widget.model.addReservation(_mac.text, _ip.text);
+      if (!mounted) return;
+      setState(() => _error = null);
+      _mac.clear();
+      _ip.clear();
+    } catch (e) {
+      if (mounted) showErrorSnackBar(context, l10n.reserveFailed('$e'), copyText: '$e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final reservations = widget.model.settings.reservations;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(l10n.dhcpReservationsHint, style: theme.textTheme.bodySmall),
+        const SizedBox(height: AppSpacing.sm),
+        if (reservations.isEmpty)
+          Text(l10n.dhcpReservationNone, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        for (final (m, ip) in reservations)
+          Row(children: [
+            Expanded(child: Text('$m  →  $ip', style: AppFonts.mono.copyWith(fontSize: 13), overflow: TextOverflow.ellipsis)),
+            IconButton(
+              tooltip: l10n.dhcpReserveRemove,
+              iconSize: 18,
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.close_rounded),
+              onPressed: () {
+                final mac = MacAddress.tryParse(m);
+                if (mac != null) {
+                  widget.model.removeReservation(mac);
+                } else {
+                  widget.model.update(widget.model.settings.copyWith(reservations: [
+                    for (final r in reservations)
+                      if (r.$1 != m || r.$2 != ip) r,
+                  ]));
+                }
+              },
+            ),
+          ]),
+        if (widget.error != null)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.xs),
+            child: Text(fieldErrorText(l10n, widget.error) ?? '', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+          ),
+        const SizedBox(height: AppSpacing.sm),
+        TextField(
+          controller: _mac,
+          decoration: InputDecoration(isDense: true, labelText: l10n.dhcpReserveMac, hintText: 'aa:bb:cc:00:11:22', border: const OutlineInputBorder()),
+          onChanged: (_) => setState(() => _error = null),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(
+            child: TextField(
+              controller: _ip,
+              decoration: InputDecoration(
+                isDense: true,
+                labelText: l10n.dhcpReserveIp,
+                errorText: fieldErrorText(l10n, _error),
+                errorMaxLines: 3,
+                border: const OutlineInputBorder(),
+              ),
+              onChanged: (_) => setState(() => _error = null),
+              onSubmitted: (_) => _add(),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          FilledButton(onPressed: _add, child: Text(l10n.dhcpReserveAdd)),
+        ]),
       ],
     );
   }

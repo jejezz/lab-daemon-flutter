@@ -17,6 +17,8 @@ enum FieldError {
   invalidPort,
   invalidNumber,
   dirMissing,
+  invalidMac,
+  duplicate,
 }
 
 /// 비어 있으면 "모든 NIC"(null). 올바르지 않은 주소면 오류.

@@ -56,6 +56,13 @@ class _ServicePageState extends State<ServicePage> {
     unawaited(model.prefs.setBool('${model.id}_panel_open', _panelOpen));
   }
 
+  void _reserveSelected() {
+    final m = model;
+    if (m is! DhcpModel) return;
+    final lease = m.leases.where((l) => l.ip == _selectedLease).firstOrNull;
+    if (lease != null) unawaited(reserveLeaseWithFeedback(context, m, lease));
+  }
+
   void _releaseSelected() {
     final m = model;
     final ip = _selectedLease;
@@ -165,6 +172,11 @@ class _ServicePageState extends State<ServicePage> {
         return Column(children: [
           _Toolbar(children: [
             TextButton.icon(
+              onPressed: _selectedLease == null ? null : _reserveSelected,
+              icon: const Icon(Icons.push_pin_outlined, size: 18),
+              label: Text(l10n.leaseReserve),
+            ),
+            TextButton.icon(
               onPressed: _selectedLease == null ? null : _releaseSelected,
               icon: const Icon(Icons.link_off_rounded, size: 18),
               label: Text(l10n.leaseRelease),
@@ -181,6 +193,8 @@ class _ServicePageState extends State<ServicePage> {
               selected: _selectedLease,
               onSelect: (ip) => setState(() => _selectedLease = ip),
               onRelease: (ip) => releaseLeaseWithFeedback(context, m, ip),
+              onReserve: (lease) => reserveLeaseWithFeedback(context, m, lease),
+              reserved: {for (final (mac, _) in m.reservations) mac},
             ),
           ),
         ]);
@@ -222,7 +236,8 @@ class _Toolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, 0),
-        child: Row(mainAxisAlignment: MainAxisAlignment.end, children: children),
+        // 좁으면 다음 줄로 내려간다 (단추가 늘어도 넘치지 않게).
+        child: Wrap(alignment: WrapAlignment.end, crossAxisAlignment: WrapCrossAlignment.center, children: children),
       );
 }
 

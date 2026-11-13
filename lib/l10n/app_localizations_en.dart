@@ -1283,4 +1283,50 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dhcpPersistLeasesHint =>
       'Saves leases to a file and reuses them when the service starts again (expired or out-of-range ones are dropped)';
+
+  @override
+  String get fieldErrInvalidMac =>
+      'Not a MAC address (for example aa:bb:cc:00:11:22)';
+
+  @override
+  String get fieldErrDuplicate =>
+      'This MAC is already reserved, or the address matches the server, the gateway or another reservation';
+
+  @override
+  String get dhcpReservations => 'Reserved addresses';
+
+  @override
+  String get dhcpReservationsHint =>
+      'Always gives the same IP to a MAC address. You can add or remove them while the service runs.';
+
+  @override
+  String get dhcpReserveMac => 'MAC address';
+
+  @override
+  String get dhcpReserveIp => 'Reserved IP';
+
+  @override
+  String get dhcpReserveAdd => 'Add';
+
+  @override
+  String get dhcpReserveRemove => 'Remove reservation';
+
+  @override
+  String get dhcpReservationNone => 'No reserved addresses';
+
+  @override
+  String get leaseReserve => 'Reserve address';
+
+  @override
+  String get leaseReservedTooltip => 'Reserved address';
+
+  @override
+  String leaseReserveDone(String mac, String ip) {
+    return 'Reserved $ip for $mac';
+  }
+
+  @override
+  String reserveFailed(String error) {
+    return 'Could not reserve: $error';
+  }
 }

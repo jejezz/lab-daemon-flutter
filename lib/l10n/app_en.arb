@@ -415,5 +415,18 @@
   "logDhcpLeasesLoaded": "Restored {count} saved lease(s) ({skipped} skipped)",
   "logDhcpLeaseFileFailed": "Could not read or write the lease file: {error}",
   "dhcpPersistLeases": "Keep leases across restarts",
-  "dhcpPersistLeasesHint": "Saves leases to a file and reuses them when the service starts again (expired or out-of-range ones are dropped)"
+  "dhcpPersistLeasesHint": "Saves leases to a file and reuses them when the service starts again (expired or out-of-range ones are dropped)",
+  "fieldErrInvalidMac": "Not a MAC address (for example aa:bb:cc:00:11:22)",
+  "fieldErrDuplicate": "This MAC is already reserved, or the address matches the server, the gateway or another reservation",
+  "dhcpReservations": "Reserved addresses",
+  "dhcpReservationsHint": "Always gives the same IP to a MAC address. You can add or remove them while the service runs.",
+  "dhcpReserveMac": "MAC address",
+  "dhcpReserveIp": "Reserved IP",
+  "dhcpReserveAdd": "Add",
+  "dhcpReserveRemove": "Remove reservation",
+  "dhcpReservationNone": "No reserved addresses",
+  "leaseReserve": "Reserve address",
+  "leaseReservedTooltip": "Reserved address",
+  "leaseReserveDone": "Reserved {ip} for {mac}",
+  "reserveFailed": "Could not reserve: {error}"
 }

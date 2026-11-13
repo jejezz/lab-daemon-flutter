@@ -264,6 +264,55 @@ void main() {
       expect(app.tftp.logs.length, 0);
     });
 
+    _testApp('고정 주소 예약을 추가·삭제하고, 켜져 있으면 서버에도 바로 적용한다', (tester, app) async {
+      await _startDhcp(tester);
+      final mac = find.widgetWithText(TextField, 'MAC address');
+      final ipField = find.widgetWithText(TextField, 'Reserved IP');
+      await tester.ensureVisible(mac);
+      await tester.enterText(mac, 'aa:bb:cc:00:99:01');
+      await tester.enterText(ipField, '10.0.0.5');
+      await tester.tap(find.widgetWithText(FilledButton, 'Add'));
+      await tester.pump();
+      expect(find.textContaining('subnet'), findsWidgets, reason: '입력 칸 아래에 이유가 나온다');
+      expect(app.dhcp.reservations, isEmpty, reason: '맞지 않는 예약은 더하지 않는다');
+
+      await tester.enterText(ipField, '192.168.50.20');
+      await tester.runAsync(() async {
+        await app.dhcp.addReservation('aa:bb:cc:00:99:01', '192.168.50.20');
+      });
+      await tester.pumpAndSettle();
+      expect(find.text('aa:bb:cc:00:99:01  →  192.168.50.20'), findsOneWidget);
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+      expect(app.controller.prefs.getString('dhcp_reservations'), contains('192.168.50.20'));
+      final pool = (app.controller.dhcp.host as InProcessHost).service as DhcpServer;
+      expect(pool.pool!.reservations.values.map((ip) => '$ip'), ['192.168.50.20'], reason: '실행 중에도 서버에 바로 적용');
+
+      await tester.ensureVisible(find.byTooltip('Remove reservation'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Remove reservation'));
+      await tester.pumpAndSettle();
+      expect(find.text('aa:bb:cc:00:99:01  →  192.168.50.20'), findsNothing);
+      expect(pool.pool!.reservations, isEmpty);
+    });
+
+    _testApp('Lease 줄에서 그 주소를 예약하면 핀 표시가 붙고, 같은 MAC은 다시 예약하지 않는다', (tester, app) async {
+      await _startDhcp(tester);
+      app.transport.dora(mac(1), hostname: 'rk3568');
+      await _settle(tester);
+      await tester.tap(find.text('aa:bb:cc:00:00:01'));
+      await tester.pump();
+      await tester.tap(find.widgetWithText(TextButton, 'Reserve address'));
+      await tester.pumpAndSettle();
+      expect(find.text('Reserved 192.168.50.100 for aa:bb:cc:00:00:01'), findsOneWidget);
+      expect(app.dhcp.reservations.single.$2, Ipv4.parse('192.168.50.100'));
+      expect(find.byTooltip('Reserved address'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(TextButton, 'Reserve address'));
+      await tester.pumpAndSettle();
+      expect(app.dhcp.reservations, hasLength(1), reason: '이미 예약한 MAC');
+      expect(find.textContaining('Could not reserve'), findsOneWidget);
+    });
+
     _testApp('줄 끝 단추로 해제하고, 전체 해제는 확인을 받는다', (tester, app) async {
       await _startDhcp(tester);
       app.transport.dora(mac(1));

@@ -1,6 +1,8 @@
 // 설정 창의 DHCP 구역이 편집하는 값. 입력 중인 글자 그대로(문자열) 저장해 두고, 서비스를 켤 때
 // [DhcpSettings.toConfig]가 [DhcpConfig]로 바꾼다. 저장 키는 `dhcp_<이름>`이다 (localization.md §5).
 
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/dhcp/config.dart';
@@ -10,7 +12,7 @@ import 'settings_common.dart';
 
 export 'settings_common.dart' show FieldError;
 
-enum DhcpField { serverIp, rangeStart, rangeEnd, mask, gateway, dns, leaseTime, domain, tftpServer, bootFile }
+enum DhcpField { serverIp, rangeStart, rangeEnd, mask, gateway, dns, leaseTime, domain, tftpServer, bootFile, reservations }
 
 
 class DhcpSettings {
@@ -29,6 +31,7 @@ class DhcpSettings {
     this.logPackets = false,
     this.detectOtherServers = true,
     this.persistLeases = true,
+    this.reservations = const [],
   });
 
   final String serverIp;
@@ -52,6 +55,9 @@ class DhcpSettings {
   /// 서비스를 껐다 켜도 Lease를 이어 쓴다 (파일에 저장).
   final bool persistLeases;
 
+  /// 고정 주소 예약 (MAC, IP) — 입력한 글자 그대로.
+  final List<(String, String)> reservations;
+
   static const _keys = {
     DhcpField.serverIp: 'dhcp_server_ip',
     DhcpField.rangeStart: 'dhcp_range_start',
@@ -68,10 +74,19 @@ class DhcpSettings {
   static const _logPacketsKey = 'dhcp_log_packets';
   static const _detectKey = 'dhcp_detect_other_servers';
   static const _persistKey = 'dhcp_persist_leases';
+  static const _reservationsKey = 'dhcp_reservations';
 
   factory DhcpSettings.load(SharedPreferences prefs) {
     const defaults = DhcpSettings();
     String read(DhcpField f) => prefs.getString(_keys[f]!) ?? defaults.valueOf(f);
+    var reservations = <(String, String)>[];
+    try {
+      reservations = [
+        for (final pair in jsonDecode(prefs.getString(_reservationsKey) ?? '[]') as List) ((pair as List)[0] as String, pair[1] as String),
+      ];
+    } catch (_) {
+      // 깨진 저장값은 빈 목록으로 본다.
+    }
     return DhcpSettings(
       serverIp: read(DhcpField.serverIp),
       rangeStart: read(DhcpField.rangeStart),
@@ -87,13 +102,15 @@ class DhcpSettings {
       logPackets: prefs.getBool(_logPacketsKey) ?? false,
       detectOtherServers: prefs.getBool(_detectKey) ?? true,
       persistLeases: prefs.getBool(_persistKey) ?? true,
+      reservations: reservations,
     );
   }
 
   Future<void> save(SharedPreferences prefs) async {
-    for (final f in DhcpField.values) {
-      await prefs.setString(_keys[f]!, valueOf(f));
+    for (final MapEntry(key: f, value: key) in _keys.entries) {
+      await prefs.setString(key, valueOf(f));
     }
+    await prefs.setString(_reservationsKey, jsonEncode([for (final (mac, ip) in reservations) [mac, ip]]));
     await prefs.setBool(_directedKey, directedBroadcast);
     await prefs.setBool(_logPacketsKey, logPackets);
     await prefs.setBool(_detectKey, detectOtherServers);
@@ -111,6 +128,7 @@ class DhcpSettings {
         DhcpField.domain => domain,
         DhcpField.tftpServer => tftpServer,
         DhcpField.bootFile => bootFile,
+        DhcpField.reservations => '',
       };
 
   DhcpSettings withValue(DhcpField f, String value) => copyWith(
@@ -141,6 +159,7 @@ class DhcpSettings {
     bool? logPackets,
     bool? detectOtherServers,
     bool? persistLeases,
+    List<(String, String)>? reservations,
   }) =>
       DhcpSettings(
         serverIp: serverIp ?? this.serverIp,
@@ -157,6 +176,7 @@ class DhcpSettings {
         logPackets: logPackets ?? this.logPackets,
         detectOtherServers: detectOtherServers ?? this.detectOtherServers,
         persistLeases: persistLeases ?? this.persistLeases,
+        reservations: reservations ?? this.reservations,
       );
 
   /// 같은 서브넷(/24)에서 쓸 만한 기본값을 채운다. 비어 있거나 새 서버의 망 밖에 있는 칸만 바꾼다.
@@ -187,6 +207,35 @@ class DhcpSettings {
     }
     return result;
   }
+
+  /// 파싱할 수 있는 예약만 (MAC, IP).
+  List<(MacAddress, Ipv4)> get parsedReservations => [
+        for (final (m, i) in reservations)
+          if (MacAddress.tryParse(m) case final mac? when Ipv4.tryParse(i) != null) (mac, Ipv4.parse(i)),
+      ];
+
+  /// 예약 하나가 지금 설정과 맞는지. [others]는 이미 있는 예약 (중복 검사용).
+  FieldError? _checkReservation(String macText, String ipText, Iterable<(String, String)> others) {
+    if (macText.trim().isEmpty || ipText.trim().isEmpty) return FieldError.required;
+    final mac = MacAddress.tryParse(macText);
+    if (mac == null) return FieldError.invalidMac;
+    final ip = Ipv4.tryParse(ipText);
+    if (ip == null) return FieldError.invalidIp;
+    final maskIp = Ipv4.tryParse(mask);
+    final ref = Ipv4.tryParse(serverIp) ?? Ipv4.tryParse(rangeStart);
+    if (maskIp != null && maskIp.isValidMask && ref != null) {
+      if (!ip.isInSubnet(ref, maskIp)) return FieldError.notInSubnet;
+      if (ip == ip.networkOf(maskIp) || ip == ip.broadcastOf(maskIp)) return FieldError.notHostAddress;
+    }
+    if (ip == Ipv4.tryParse(serverIp) || ip == Ipv4.tryParse(gateway)) return FieldError.duplicate;
+    for (final (m, i) in others) {
+      if (MacAddress.tryParse(m) == mac || Ipv4.tryParse(i) == ip) return FieldError.duplicate;
+    }
+    return null;
+  }
+
+  /// 새로 추가하려는 예약을 검사한다. 올바르면 null.
+  FieldError? checkNewReservation(String mac, String ip) => _checkReservation(mac, ip, reservations);
 
   /// 필드별 오류. 비어 있으면 서비스를 켤 수 있다.
   Map<DhcpField, FieldError> validate() {
@@ -246,6 +295,14 @@ class DhcpSettings {
         }
       }
     }
+    for (var i = 0; i < reservations.length; i++) {
+      final (m, ip) = reservations[i];
+      final error = _checkReservation(m, ip, reservations.take(i));
+      if (error != null) {
+        errors[DhcpField.reservations] = error;
+        break;
+      }
+    }
     if (start != null && end != null && start > end && !errors.containsKey(DhcpField.rangeEnd)) {
       errors[DhcpField.rangeEnd] = FieldError.rangeReversed;
     }
@@ -269,6 +326,7 @@ class DhcpSettings {
       bootFile: bootFile.trim().isEmpty ? null : bootFile.trim(),
       directedBroadcast: directedBroadcast,
       logPackets: logPackets,
+      reservations: {for (final (mac, ip) in parsedReservations) mac: ip},
     );
   }
 }

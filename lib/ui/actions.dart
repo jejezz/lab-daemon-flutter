@@ -2,14 +2,17 @@
 
 import 'package:flutter/material.dart';
 
+import '../core/dhcp/server.dart';
 import '../core/ipv4.dart';
 import '../core/netcheck.dart';
 import '../core/service.dart';
 import '../l10n/app_localizations.dart';
+import '../state/settings_common.dart';
 import '../state/service_model.dart';
 import '../state/service_models.dart';
 import 'firewall_help.dart';
 import 'widgets/error_snackbar.dart';
+import 'widgets/fields.dart';
 import 'widgets/status_pill.dart';
 
 String serviceName(AppLocalizations l10n, String id) => switch (id) {
@@ -173,6 +176,19 @@ Widget _helpButton(BuildContext context, ServiceModel model, AppLocalizations l1
     icon: const Icon(Icons.help_outline_rounded, size: 18),
     label: Text(l10n.firewallHelpButton),
   );
+}
+
+/// 이 Lease의 MAC에 지금 주소를 고정 예약한다. 이미 예약됐거나 맞지 않으면 이유를 알린다.
+Future<void> reserveLeaseWithFeedback(BuildContext context, DhcpModel model, LeaseInfo lease) async {
+  final l10n = AppLocalizations.of(context);
+  try {
+    await model.addReservation('${lease.mac}', '${lease.ip}');
+    if (context.mounted) showInfoSnackBar(context, l10n.leaseReserveDone('${lease.mac}', '${lease.ip}'));
+  } catch (e) {
+    if (!context.mounted) return;
+    final text = e is FormatException ? (fieldErrorText(l10n, FieldError.values.asNameMap()[e.message]) ?? e.message) : '$e';
+    showErrorSnackBar(context, l10n.reserveFailed(text), copyText: text);
+  }
 }
 
 Future<void> releaseLeaseWithFeedback(BuildContext context, DhcpModel model, Ipv4 ip) async {

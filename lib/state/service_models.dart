@@ -103,6 +103,36 @@ class DhcpModel extends ServiceModel {
     notifyNow();
   }
 
+  /// 설정에 있는 예약 (MAC → IP).
+  List<(MacAddress, Ipv4)> get reservations => settings.parsedReservations;
+
+  FieldError? checkReservation(String mac, String ip) => settings.checkNewReservation(mac, ip);
+
+  /// 예약을 더한다. 실행 중이면 서버에도 바로 적용하고, 서버가 거부하면 예외를 던진다(설정은 되돌린다).
+  Future<void> addReservation(String macText, String ipText) async {
+    final error = checkReservation(macText, ipText);
+    if (error != null) throw FormatException(error.name);
+    final mac = MacAddress.parse(macText);
+    final ip = Ipv4.parse(ipText);
+    final before = settings;
+    update(settings.copyWith(reservations: [...settings.reservations, ('$mac', '$ip')]));
+    if (!running) return;
+    try {
+      await command('reserve', {'mac': '$mac', 'ip': '$ip'});
+    } catch (_) {
+      update(before);
+      rethrow;
+    }
+  }
+
+  Future<void> removeReservation(MacAddress mac) async {
+    update(settings.copyWith(reservations: [
+      for (final r in settings.reservations)
+        if (MacAddress.tryParse(r.$1) != mac) r,
+    ]));
+    if (running) await command('unreserve', {'mac': '$mac'});
+  }
+
   Future<bool> releaseLease(Ipv4 ip) async => running && (await command('releaseIp', {'ip': '$ip'})) == true;
 
   Future<int> releaseAll() async => running ? (await command('releaseAll')) as int : 0;

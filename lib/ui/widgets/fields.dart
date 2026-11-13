@@ -21,6 +21,8 @@ String? fieldErrorText(AppLocalizations l10n, FieldError? error) => switch (erro
       FieldError.invalidPort => l10n.fieldErrInvalidPort,
       FieldError.invalidNumber => l10n.fieldErrInvalidNumber,
       FieldError.dirMissing => l10n.fieldErrDirMissing,
+      FieldError.invalidMac => l10n.fieldErrInvalidMac,
+      FieldError.duplicate => l10n.fieldErrDuplicate,
     };
 
 /// 아직 만지지 않은 빈 칸에 "값이 필요해요"를 미리 띄우지 않는다 ([showRequired]는 시작이 거부된 뒤 true).
