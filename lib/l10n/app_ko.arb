@@ -1358,5 +1358,13 @@
         "type": "int"
       }
     }
+  },
+  "fieldPortDefault": "포트 (기본 {port})",
+  "@fieldPortDefault": {
+    "placeholders": {
+      "port": {
+        "type": "int"
+      }
+    }
   }
 }

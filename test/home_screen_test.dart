@@ -294,6 +294,29 @@ void main() {
     });
   });
 
+  group('앱 바 접속 주소', () {
+    _testApp('켜진 서비스만 접속 주소를 보이고, DHCP는 IP만, 기본 포트는 생략한다', (tester, app) async {
+      Finder inAppBar(String text) => find.descendant(of: find.byType(AppBar), matching: find.textContaining(text));
+      expect(inAppBar('192.168.50.1'), findsNothing, reason: '꺼져 있으면 아무것도 보이지 않는다');
+
+      await _startDhcp(tester);
+      expect(app.dhcp.running, isTrue);
+      final appBarText = inAppBar('192.168.50.1');
+      expect(appBarText, findsOneWidget, reason: 'DHCP 서버 IP');
+      expect(tester.widget<Text>(appBarText).textSpan!.toPlainText(), 'DHCP  192.168.50.1');
+
+      final port = (await tester.runAsync(_freePort))!;
+      app.tftp.update(app.tftp.settings.copyWith(bindIp: '127.0.0.1', port: '$port', rootDir: app.root.path));
+      await tester.tap(find.text('TFTP').first);
+      await tester.pumpAndSettle();
+      await tester.runAsync(() async {
+        await app.tftp.start();
+      });
+      await tester.pump();
+      expect(inAppBar('TFTP  127.0.0.1:$port'), findsOneWidget, reason: '기본 포트(69)가 아니면 포트를 쓴다');
+    });
+  });
+
   group('시작 전 점검', () {
     _testApp('방화벽 경고: 취소하면 켜지 않고, 그래도 시작하면 켠다', (tester, app) async {
       app.checker.next = [_firewall()];
@@ -432,7 +455,7 @@ void main() {
     _testApp('직접 입력할 때는 앞뒤 공백을 떼어 저장해도 입력 중인 글자를 덮어쓰지 않는다', (tester, app) async {
       await tester.tap(find.text('TFTP').first);
       await tester.pumpAndSettle();
-      final field = find.widgetWithText(TextField, 'Port');
+      final field = find.widgetWithText(TextField, 'Port (default 69)');
       await tester.enterText(field, ' 6969 ');
       await tester.pump();
       expect(app.tftp.settings.port, '6969');

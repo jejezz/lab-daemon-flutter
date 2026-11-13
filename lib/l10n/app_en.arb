@@ -406,5 +406,6 @@
   "logCheckFirewallHint": "See [Firewall help] at the top of the service view for how to fix this",
   "openRootFolder": "Open root folder in Explorer",
   "logCapacityTooltip": "Log lines to keep",
-  "logCapacityLines": "{count} lines"
+  "logCapacityLines": "{count} lines",
+  "fieldPortDefault": "Port (default {port})"
 }

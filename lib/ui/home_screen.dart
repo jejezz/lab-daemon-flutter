@@ -37,7 +37,11 @@ class HomeScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           flexibleSpace: const FocusTint(),
-          title: const Text(AppIdentity.displayName),
+          title: Row(children: [
+            const Text(AppIdentity.displayName),
+            const SizedBox(width: AppSpacing.lg),
+            Expanded(child: _ActiveEndpoints(controller: controller)),
+          ]),
           actions: [
             IconButton(tooltip: l10n.settingsTooltip, icon: const Icon(Icons.settings_rounded), onPressed: () => showSettingsDialog(context)),
             IconButton(tooltip: l10n.aboutTooltip, icon: const Icon(Icons.info_outline_rounded), onPressed: onAbout),
@@ -65,6 +69,46 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 켜져 있는 서비스마다 클라이언트가 접속할 주소를 앱 바에 보인다 (예: `TFTP 192.168.50.1`, `FTP 192.168.50.1:2121`).
+/// 모든 NIC에 열었으면 첫 주소와 `+N`만 보이고 전체는 툴팁에 있다.
+class _ActiveEndpoints extends StatelessWidget {
+  const _ActiveEndpoints({required this.controller});
+
+  final LabDaemonController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return ListenableBuilder(
+      listenable: Listenable.merge([controller, ...controller.services]),
+      builder: (context, _) {
+        final items = <Widget>[];
+        for (final s in controller.services.where((s) => s.running)) {
+          final all = s.endpoints(controller.nics);
+          if (all.isEmpty) continue;
+          final text = all.length > 1 ? '${all.first} +${all.length - 1}' : all.first;
+          items.add(Tooltip(
+            message: all.join('\n'),
+            child: Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.lg),
+              child: Text.rich(
+                TextSpan(children: [
+                  TextSpan(text: '${serviceName(l10n, s.id)}  ', style: theme.textTheme.labelLarge),
+                  TextSpan(text: text, style: AppFonts.mono.copyWith(fontSize: 13)),
+                ]),
+                maxLines: 1,
+                softWrap: false,
+              ),
+            ),
+          ));
+        }
+        return Align(alignment: Alignment.centerLeft, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: items)));
+      },
     );
   }
 }

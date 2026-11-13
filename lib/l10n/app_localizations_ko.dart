@@ -1230,4 +1230,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String logCapacityLines(int count) {
     return '$count줄';
   }
+
+  @override
+  String fieldPortDefault(int port) {
+    return '포트 (기본 $port)';
+  }
 }

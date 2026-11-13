@@ -6,12 +6,14 @@ import '../core/dhcp/detector.dart';
 import '../core/dhcp/server.dart';
 import '../core/ftp/server.dart';
 import '../core/ipv4.dart';
+import '../core/netutil.dart';
 import '../core/netcheck.dart';
 import '../core/service.dart';
 import '../core/tftp/server.dart';
 import 'dhcp_settings.dart';
 import 'ftp_settings.dart';
 import 'service_model.dart';
+import 'settings_common.dart';
 import 'tftp_settings.dart';
 
 /// 서버를 켜기 전에 [interfaceIp]가 속한 망에 다른 DHCP 서버가 있는지 확인한다. 시험에서 바꿔 끼운다.
@@ -43,6 +45,10 @@ class DhcpModel extends ServiceModel {
 
   @override
   List<PreStartPort> get checkPorts => const [PreStartPort('UDP', 67)];
+
+  /// DHCP는 클라이언트가 서버 주소를 몰라도 방송으로 찾으므로 포트 없이 IP만 보여 준다.
+  @override
+  List<String> endpoints(List<NicInfo> nics) => [settings.serverIp];
 
   @override
   Future<List<PreStartIssue>> extraChecks() async {
@@ -122,6 +128,9 @@ class TftpModel extends ServiceModel {
   List<PreStartPort> get checkPorts => [PreStartPort('UDP', int.tryParse(settings.port) ?? 69)];
 
   @override
+  List<String> endpoints(List<NicInfo> nics) => connectEndpoints(settings.bindIp, settings.port, 69, nics);
+
+  @override
   void handleEvent(ServiceEvent event) {
     if (event is TftpTransfersEvent) transfers = event;
   }
@@ -163,6 +172,9 @@ class FtpModel extends ServiceModel {
 
   @override
   List<PreStartPort> get checkPorts => [PreStartPort('TCP', int.tryParse(settings.port) ?? 21)];
+
+  @override
+  List<String> endpoints(List<NicInfo> nics) => connectEndpoints(settings.bindIp, settings.port, 21, nics);
 
   @override
   (int, int)? get checkTcpRange {

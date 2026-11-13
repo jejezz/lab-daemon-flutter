@@ -1249,4 +1249,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String logCapacityLines(int count) {
     return '$count lines';
   }
+
+  @override
+  String fieldPortDefault(int port) {
+    return 'Port (default $port)';
+  }
 }

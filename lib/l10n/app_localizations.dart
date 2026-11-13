@@ -2089,6 +2089,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{count}줄'**
   String logCapacityLines(int count);
+
+  /// No description provided for @fieldPortDefault.
+  ///
+  /// In ko, this message translates to:
+  /// **'포트 (기본 {port})'**
+  String fieldPortDefault(int port);
 }
 
 class _AppLocalizationsDelegate

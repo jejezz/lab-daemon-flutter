@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/host.dart';
 import '../core/ipv4.dart';
 import '../core/netcheck.dart';
+import '../core/netutil.dart';
 import '../core/service.dart';
 
 enum StartResult { started, invalid, blocked, needsConfirmation, failed }
@@ -71,6 +72,9 @@ abstract class ServiceModel extends ChangeNotifier {
   ServiceState get state => host.state;
 
   bool get running => state == ServiceState.running;
+
+  /// 클라이언트가 접속할 주소(`IP` 또는 `IP:포트`, 프로토콜 기본 포트면 포트는 생략). 모든 NIC에 열었으면 NIC마다 하나씩.
+  List<String> endpoints(List<NicInfo> nics) => const [];
 
   bool get busy => checking || state == ServiceState.starting || state == ServiceState.stopping;
 

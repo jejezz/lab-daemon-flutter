@@ -151,7 +151,7 @@ class TftpPanel extends StatelessWidget {
           onChanged: (ip) => model.update(model.settings.copyWith(bindIp: ip)),
         ),
         fieldGap,
-        text(TftpField.port, l10n.fieldPort),
+        text(TftpField.port, l10n.fieldPortDefault(69)),
         fieldGap,
         FolderField(
           value: s.rootDir,
@@ -227,7 +227,7 @@ class FtpPanel extends StatelessWidget {
           onChanged: (ip) => model.update(model.settings.copyWith(bindIp: ip)),
         ),
         fieldGap,
-        text(FtpField.port, l10n.fieldPort),
+        text(FtpField.port, l10n.fieldPortDefault(21)),
         fieldGap,
         FolderField(
           value: s.rootDir,
