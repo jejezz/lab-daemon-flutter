@@ -347,13 +347,13 @@ class _PanelRail extends StatelessWidget {
         child: InkWell(
           onTap: onToggle,
           child: SizedBox(
-            width: 26,
+            width: 28,
             child: Column(children: [
               const SizedBox(height: AppSpacing.sm),
               Icon(open ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, size: 20, color: theme.colorScheme.onSurfaceVariant),
               if (!open) ...[
                 const SizedBox(height: AppSpacing.md),
-                RotatedBox(quarterTurns: 1, child: Text(l10n.panelRailLabel, style: theme.textTheme.labelMedium)),
+                RotatedBox(quarterTurns: 1, child: Text(l10n.panelRailLabel, style: theme.textTheme.titleSmall)),
               ],
             ]),
           ),
