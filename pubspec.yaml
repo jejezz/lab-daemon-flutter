@@ -2,7 +2,7 @@ name: lab_daemon
 description: "DHCP, TFTP, FTP 같은 랩용 네트워크 서비스를 한 앱에서 켜고 실시간으로 모니터링하는 Windows 데스크톱 앱."
 publish_to: 'none'
 
-version: 0.1.0+4
+version: 0.2.0+5
 
 environment:
   sdk: ^3.13.1
